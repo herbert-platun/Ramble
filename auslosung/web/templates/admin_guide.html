@@ -1,0 +1,59 @@
+<article class="guide">
+  <section class="panel g-card">
+    <h2 class="big">Schnellstart</h2>
+    <ol>
+      <li><b>Starten:</b> <code>python3 auslosung.py</code>. Die Konsole zeigt die Adresse im WLAN.</li>
+      <li><b>Tisch eröffnen:</b> Am Rechner mit dem großen Bildschirm die Startseite öffnen, Frage eintragen.</li>
+      <li><b>Münze einwerfen:</b> einmal klicken, dann laufen Licht, Musik und Ton.</li>
+      <li><b>Mitspielen:</b> Alle scannen den QR-Code, tragen sich ein und setzen Chips. Wer kein Handy hat, wird am Bildschirm eingetragen.</li>
+      <li><b>Ziehen:</b> Leertaste. Sieben Sekunden letzte Einsätze, dann „Nichts geht mehr“, dann dreht es.</li>
+    </ol>
+  </section>
+  <section class="panel g-card">
+    <h2 class="big">Wetten in einem Satz</h2>
+    <p>Treffer bringt <span class="pill blue">Einsatz</span> × <span class="pill red">Namen im Topf</span> × <span class="pill pink">Serie</span>, verlorene Einsätze füllen den <span class="pill gold">Jackpot</span>, den sich die nächsten Treffer teilen. Wer pleite ist, bekommt 200 Chips. Die Ziehung selbst ist fair: Einsätze ändern nichts an den Chancen.</p>
+  </section>
+  <section class="panel g-card">
+    <h2 class="big">Tasten am großen Bildschirm</h2>
+    <dl class="keys">
+      <dt><kbd>Leertaste</kbd></dt><dd>Ziehen</dd>
+      <dt><kbd>Esc</kbd></dt><dd>Ergebnis ausblenden</dd>
+      <dt><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd></dt><dd>Glücksrad, Roulette, Plinko</dd>
+      <dt><kbd>F</kbd></dt><dd>Vollbild</dd>
+      <dt><kbd>M</kbd> <kbd>N</kbd></dt><dd>Ton, Musik</dd>
+    </dl>
+  </section>
+  <section class="panel g-card">
+    <h2 class="big">Verwaltung</h2>
+    <dl class="keys wide">
+      <dt>Übersicht</dt><dd>Größe und Zustand der Datenbank. <b>Sicherung</b> lädt eine vollständige Kopie herunter, auch während gespielt wird. <b>Prüfen</b> sucht nach Schäden, <b>Aufräumen</b> gibt freien Platz zurück. <b>Alte Tische löschen</b> entfernt alles, woran seit X Tagen nichts passiert ist.</dd>
+      <dt>Tische</dt><dd>Suchen, Frage umbenennen, Art der Ziehung, Chips einzelner Spieler korrigieren, Namen ändern oder entfernen, Bank oder Topf zurücksetzen, als JSON exportieren, Tisch löschen. Offene Bildschirme und Handys aktualisieren sich sofort.</dd>
+      <dt>SQL</dt><dd>Eigene Abfragen auf die Datenbank, nur lesend und höchstens drei Sekunden. Strg + Enter führt aus.</dd>
+    </dl>
+    <p class="note">Löschen fragt immer zweimal. Während einer Ziehung sind Änderungen am Tisch gesperrt.</p>
+  </section>
+  <section class="panel g-card">
+    <h2 class="big">Schalter beim Start</h2>
+    <table class="flags">
+      <tr><td><code>--port 8080</code></td><td>anderer Port (Standard 8000)</td></tr>
+      <tr><td><code>--db pfad.db</code></td><td>andere Datenbankdatei (Standard: neben der Datei)</td></tr>
+      <tr><td><code>--url https://…</code></td><td>Adresse im QR-Code, etwa hinter einem Reverse Proxy</td></tr>
+      <tr><td><code>--admin</code></td><td>diese Verwaltung einschalten, nur vom selben Rechner</td></tr>
+      <tr><td><code>--admin-key WORT</code></td><td>fester Schlüssel statt eines neuen bei jedem Start</td></tr>
+      <tr><td><code>--admin-lan</code></td><td>Verwaltung auch von anderen Geräten im Netz</td></tr>
+      <tr><td><code>--test</code></td><td>Selbsttest</td></tr>
+    </table>
+  </section>
+  <section class="panel g-card">
+    <h2 class="big">Umziehen und sichern</h2>
+    <p>Alles steckt in zwei Dateien: <code>auslosung.py</code> und der Datenbank (<code>auslosung.db</code>). Für einen Umzug Server beenden und beide kopieren, oder hier eine Sicherung laden und mit <code>--db</code> starten. Ältere Datenbanken werden beim Start automatisch auf den neuen Stand gebracht.</p>
+  </section>
+  <section class="panel g-card">
+    <h2 class="big">Wenn etwas hakt</h2>
+    <dl class="keys wide">
+      <dt>Handys kommen nicht drauf</dt><dd>Gleiches WLAN? Gäste-WLANs trennen Geräte oft voneinander. Firewall des Rechners für den Port freigeben. Stimmt die Adresse im QR-Code nicht, mit <code>--url</code> festlegen.</dd>
+      <dt>Kein Ton</dt><dd>Browser spielen Ton erst nach einem Klick: „Münze einwerfen“. Dann <kbd>M</kbd> und <kbd>N</kbd> prüfen.</dd>
+      <dt>Bild ruckelt</dt><dd>Im Betriebssystem „Bewegung reduzieren“ einschalten, dann laufen Hintergrund und Effekte ruhiger.</dd>
+    </dl>
+  </section>
+</article>

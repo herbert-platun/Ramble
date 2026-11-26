@@ -1,0 +1,261 @@
+/* ==========================================================================
+   Grundlagen
+   ==========================================================================
+   Auslosung · Grundlagen
+   Vegas nach Mitternacht, durch eine alte Röhre gesehen: dicke dunkle Konturen,
+   satte Farben, Pixelschrift, Glühbirnen, Körnung. Nichts ist glatt, alles
+   reagiert. Rund ist, was rund ist (Rad, Kugel, Chip), sonst kleine Radien. */
+
+
+:root {
+  --void: #09060e;
+  --line: #120a19;          /* Konturen */
+  --ink: #1a1024;
+  --plum: #2b1b3a;
+  --plum-hi: #3e2a52;
+  --plum-lo: #1f1329;
+  --felt: #0f6b55;
+  --felt-deep: #08392f;
+  --red: #ff3d4f;
+  --red-deep: #b0142c;
+  --blue: #3a8dff;
+  --blue-deep: #1a4fb8;
+  --gold: #ffc23d;
+  --gold-hi: #ffe9a3;
+  --gold-lo: #b8701a;
+  --cream: #fff1d6;
+  --mute: #a594bd;
+  --green: #45e07f;
+  --pink: #ff5fae;
+
+  --f-big: "Jersey", "Pixelify", monospace;
+  --f-ui: "Pixelify", system-ui, sans-serif;
+
+  --pop: cubic-bezier(.3, 1.9, .45, 1);
+  --out: cubic-bezier(.2, .9, .3, 1);
+}
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; }
+body {
+  font-family: var(--f-ui);
+  font-weight: 500;
+  color: var(--cream);
+  background: var(--void);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overflow-x: hidden;
+}
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+::selection { background: var(--gold); color: var(--line); }
+
+/* -- Hintergrund und Röhre --------------------------------------------------- */
+#bg {
+  position: fixed; inset: 0; width: 100%; height: 100%; z-index: -2;
+  image-rendering: pixelated;
+}
+/* Fallback ohne WebGL */
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: -3;
+  background: radial-gradient(ellipse at 30% 20%, #5a1530, transparent 60%),
+              radial-gradient(ellipse at 80% 90%, #0d4a44, transparent 60%), var(--void);
+}
+#fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 80; }
+
+.crt { position: fixed; inset: 0; pointer-events: none; z-index: 90; }
+.crt::before {        /* Zeilen und Lochmaske */
+  content: ""; position: absolute; inset: 0;
+  background:
+    repeating-linear-gradient(0deg, rgba(0, 0, 0, .22) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(90deg, rgba(255, 40, 40, .035) 0 1px, rgba(40, 255, 90, .035) 1px 2px, rgba(60, 90, 255, .035) 2px 3px);
+  mix-blend-mode: multiply;
+  animation: roll 9s linear infinite;
+}
+.crt::after {         /* Vignette, Wölbung, Flimmern */
+  content: ""; position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 120% 95% at 50% 50%, transparent 58%, rgba(0, 0, 0, .55) 100%),
+    radial-gradient(ellipse 70% 40% at 50% 0%, rgba(255, 220, 180, .05), transparent 70%);
+  box-shadow: inset 0 0 120px rgba(0, 0, 0, .6);
+  animation: flicker 4.2s steps(1) infinite;
+}
+@keyframes roll { to { background-position: 0 30px, 0 0; } }
+@keyframes flicker {
+  0%, 100% { opacity: 1; } 41% { opacity: .93; } 42% { opacity: 1; } 77% { opacity: .96; } 78% { opacity: 1; }
+}
+/* Körnung: Rauschkachel als SVG, bewegt sich in Sprüngen */
+.grain {
+  position: fixed; inset: -50%; pointer-events: none; z-index: 89; opacity: .13;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1.4 -.35'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: grain .5s steps(4) infinite;
+  mix-blend-mode: overlay;
+}
+@keyframes grain {
+  0% { transform: translate(0, 0); } 25% { transform: translate(-7%, 4%); }
+  50% { transform: translate(5%, -6%); } 75% { transform: translate(-3%, -2%); }
+}
+
+/* -- Schrift ----------------------------------------------------------------- */
+.big { font-family: var(--f-big); font-weight: 400; letter-spacing: .02em; line-height: .9; }
+/* Dicke Kontur plus Schlagschatten, wie gedruckte Spielkarten */
+.ink {
+  text-shadow:
+    -2px -2px 0 var(--line), 2px -2px 0 var(--line), -2px 2px 0 var(--line), 2px 2px 0 var(--line),
+    0 -2px 0 var(--line), 0 2px 0 var(--line), -2px 0 0 var(--line), 2px 0 0 var(--line),
+    0 5px 0 var(--line);
+}
+.neon {
+  color: var(--gold-hi);
+  text-shadow: 0 0 2px #fff6, 0 0 10px var(--gold), 0 0 28px rgba(255, 160, 40, .7), 0 0 60px rgba(255, 90, 40, .45);
+}
+.num { font-family: var(--f-big); font-variant-numeric: tabular-nums; }
+.muted { color: var(--mute); }
+
+/* Kleine Chromverschiebung für Überschriften: die Röhre ist nicht ganz justiert */
+.chroma { position: relative; }
+.chroma::before, .chroma::after {
+  content: attr(data-text); position: absolute; inset: 0; pointer-events: none;
+  mix-blend-mode: screen; text-shadow: none; opacity: .55;
+}
+.chroma::before { color: #ff2a55; transform: translate(-2px, 0); }
+.chroma::after { color: #2ad4ff; transform: translate(2px, 0); }
+
+/* -- Flächen ----------------------------------------------------------------- */
+.panel {
+  position: relative;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .05), transparent 40%),
+    var(--panel-bg, var(--plum));
+  border: 3px solid var(--line);
+  border-radius: 14px;
+  box-shadow: 0 6px 0 var(--line), inset 0 2px 0 rgba(255, 255, 255, .09), inset 0 -3px 0 rgba(0, 0, 0, .25),
+    0 18px 40px rgba(0, 0, 0, .45);
+}
+.panel > h2, .label {
+  margin: 0; font-family: var(--f-big); font-weight: 400; font-size: 1.55rem; letter-spacing: .08em;
+  color: var(--mute); text-transform: uppercase; line-height: 1;
+}
+
+/* -- Knöpfe: klobig, mit Tiefe, federn beim Drücken ---------------------------- */
+.btn {
+  --c: var(--gold); --t: var(--line);
+  position: relative;
+  display: inline-flex; align-items: center; justify-content: center; gap: .4em;
+  border: 3px solid var(--line); border-radius: 12px;
+  padding: .3em 1em .38em;
+  font-family: var(--f-big); font-size: 1.7rem; letter-spacing: .05em; line-height: 1;
+  background: var(--c); color: var(--t);
+  box-shadow: 0 6px 0 var(--line), inset 0 -5px 0 rgba(0, 0, 0, .22), inset 0 3px 0 rgba(255, 255, 255, .4);
+  transition: transform .16s var(--pop), box-shadow .1s, filter .15s;
+  user-select: none;
+}
+.btn:hover:not([disabled]) { transform: translateY(-3px) rotate(-1.2deg) scale(1.04); filter: brightness(1.08); }
+.btn:active:not([disabled]) {
+  transform: translateY(5px) scale(.98); transition-duration: .04s;
+  box-shadow: 0 1px 0 var(--line), inset 0 -2px 0 rgba(0, 0, 0, .22), inset 0 3px 0 rgba(255, 255, 255, .4);
+}
+.btn[disabled] { filter: saturate(.25) brightness(.55); cursor: not-allowed; }
+
+/* Puls im Takt (Werte kommen aus beatLoop). Eigene scale/rotate/translate-Eigenschaften,
+   damit sich der Puls mit den Hover- und Druck-Bewegungen (transform) addiert. */
+:root { --pulse: 0; --swing: 0; }
+:is(.btn, .tool, .modes button, .pchip, .tabs a, .snd, .seg button, .card[aria-checked="true"]) {
+  --pa: .014; --ra: 0deg; --ty: 0px;
+  scale: calc(1 + var(--pulse) * var(--pa));
+  rotate: calc(var(--swing) * var(--ra));
+  translate: 0 calc(var(--pulse) * var(--ty));
+}
+.btn.draw { --pa: .03; }
+:is(.btn, .tool, .modes button, .pchip, .tabs a, .snd, .seg button, .card):hover:not([disabled]) {
+  --pa: .045; --ra: 1.8deg; --ty: -2px;
+}
+.btn.draw:hover:not([disabled]) { --pa: .06; --ra: 1.2deg; }
+:is(.btn, .tool, .modes button, .pchip, .card)[disabled],
+:is(.btn, .tool, .modes button, .pchip, .card):active { --pa: 0; --ra: 0deg; --ty: 0px; }
+.btn.red { --c: var(--red); --t: var(--cream); }
+.btn.blue { --c: var(--blue); --t: var(--cream); }
+.btn.green { --c: var(--green); }
+.btn.dark { --c: var(--plum-hi); --t: var(--cream); }
+.btn.red, .btn.blue, .btn.dark { text-shadow: 0 2px 0 rgba(0, 0, 0, .45); }
+
+.field {
+  width: 100%; min-width: 0;
+  background: var(--ink); color: var(--cream);
+  border: 3px solid var(--line); border-radius: 12px;
+  padding: .55em .7em; font-size: 1.1rem;
+  box-shadow: inset 0 4px 0 rgba(0, 0, 0, .35), 0 2px 0 rgba(255, 255, 255, .06);
+}
+.field::placeholder { color: #7d6d93; }
+.field:focus { outline: none; border-color: var(--gold); }
+
+/* Chipsymbol */
+.chip {
+  display: inline-block; width: 1em; height: 1em; border-radius: 50%; flex: none; vertical-align: -.12em;
+  background:
+    radial-gradient(circle, var(--cc, var(--red)) 0 38%, transparent 39%),
+    repeating-conic-gradient(var(--cream) 0 10deg, var(--cc, var(--red)) 10deg 45deg);
+  box-shadow: 0 0 0 2px var(--line), inset 0 0 0 .12em var(--cc, var(--red));
+}
+
+/* Glühbirnen (Helligkeit setzt lights.js pro Bild) */
+.bulbs { position: absolute; pointer-events: none; z-index: 2; }
+.bulb {
+  position: absolute; width: 11px; height: 11px; margin: -5.5px;
+  border-radius: 3px;
+  background: #3a2414;
+  box-shadow: 0 0 0 2px var(--line);
+}
+.bulb > b {
+  position: absolute; inset: 0; border-radius: 3px; opacity: 0;
+  background: radial-gradient(circle at 40% 35%, #fffdf0, #ffe28a 45%, #ff9d2e 90%);
+  box-shadow: 0 0 6px 2px rgba(255, 200, 90, .95), 0 0 22px 7px rgba(255, 140, 40, .4);
+}
+
+/* Meldung */
+.toast {
+  position: fixed; left: 50%; bottom: 28px; z-index: 95;
+  transform: translate(-50%, 40px) rotate(-2deg) scale(.9);
+  background: var(--cream); color: var(--line);
+  border: 3px solid var(--line); border-radius: 12px; box-shadow: 0 6px 0 var(--line);
+  padding: .6em 1em; font-weight: 600;
+  opacity: 0; pointer-events: none; transition: opacity .2s, transform .35s var(--pop);
+  max-width: calc(100vw - 32px);
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0) rotate(-1deg); }
+
+/* Schwebende Zahlen: +350, −50 … */
+.popnum {
+  position: fixed; z-index: 85; pointer-events: none;
+  font-family: var(--f-big); font-size: var(--s, 2.6rem); line-height: 1; white-space: nowrap;
+  color: var(--pc, var(--gold-hi));
+  transform: translate(-50%, -50%);
+  animation: popnum 1.25s var(--out) forwards;
+}
+@keyframes popnum {
+  0% { transform: translate(-50%, -50%) scale(.2) rotate(-12deg); opacity: 0; }
+  14% { transform: translate(-50%, -70%) scale(1.35) rotate(4deg); opacity: 1; }
+  28% { transform: translate(-50%, -78%) scale(1) rotate(-2deg); }
+  75% { opacity: 1; }
+  100% { transform: translate(-50%, -150%) scale(.9) rotate(0); opacity: 0; }
+}
+
+/* Buchstaben, die einzeln hüpfen (fx.letters) */
+.ltr { display: inline-block; white-space: pre; animation: ltr-in .55s var(--pop) both, ltr-wave 2.4s ease-in-out infinite;
+  animation-delay: calc(var(--i) * 45ms), calc(var(--i) * 90ms + .6s); }
+@keyframes ltr-in { from { transform: translateY(-1.4em) scale(.3) rotate(-20deg); opacity: 0; } }
+@keyframes ltr-wave { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-.06em) rotate(1.5deg); } }
+
+/* Sanftes Schweben für Karten und Tafeln */
+.sway { animation: sway 6s ease-in-out infinite; animation-delay: var(--d, 0s); }
+@keyframes sway { 0%, 100% { transform: rotate(-.35deg) translateY(0); } 50% { transform: rotate(.35deg) translateY(-3px); } }
+
+/* Kurzes Aufzucken bei Änderung */
+.bump { animation: bump .45s var(--pop); }
+@keyframes bump { 0% { transform: scale(1); } 30% { transform: scale(1.22) rotate(-3deg); } 100% { transform: scale(1); } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+}
