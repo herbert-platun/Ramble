@@ -183,7 +183,7 @@ class Admin:
             t0 = time.perf_counter()
             try:
                 cur = conn.execute(sql)
-            except sqlite3.Error as e:
+            except (sqlite3.Error, sqlite3.Warning) as e:     # Warning: mehrere Anweisungen (bis 3.11)
                 raise DrawError(f"SQL: {e}") from None
             cols = [c[0] for c in cur.description or []]
             rows = cur.fetchmany(limit + 1)
