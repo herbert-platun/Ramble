@@ -1,3 +1,3 @@
-"""Auslosung – Las-Vegas-Auslosung mit Wetten. Keine Abhängigkeiten außer Python 3.10+."""
+"""Auslosung – Zufallsziehung im Casino-Stil (frühe Alpha). Nur Python 3.10+, keine Abhängigkeiten."""
 
-__version__ = "4.0"
+__version__ = "0.1.0a1"

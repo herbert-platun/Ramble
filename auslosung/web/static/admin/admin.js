@@ -5,7 +5,7 @@ const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "
 const fmt = (n) => Number(n || 0).toLocaleString("de-DE");
 const when = (ms) => ms ? new Date(ms).toLocaleString("de-DE", { dateStyle: "short", timeStyle: "short" }) : "–";
 const bytes = (n) => n > 1048576 ? `${(n / 1048576).toLocaleString("de-DE", { maximumFractionDigits: 1 })} MB` : `${Math.ceil(n / 1024)} KB`;
-const MODE = { wheel: "Glücksrad", roulette: "Roulette", plinko: "Plinko" };
+const MODE = { wheel: "Glücksrad", plinko: "Plinko", slots: "Slots" };
 const TABS = ["uebersicht", "tische", "sql", "anleitung"];
 const store = { get: (k) => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { localStorage.setItem(k, v); } catch {} } };
 
@@ -85,7 +85,8 @@ async function overview() {
       ${tile("Tische", fmt(o.counts.draws), o.last ? `zuletzt ${when(o.last)}` : "noch keine")}
       ${tile("Namen", fmt(o.counts.entrants), `${fmt(o.phones)} mit Handy`)}
       ${tile("Ziehungen", fmt(o.counts.picks))}
-      ${tile("Chips im Umlauf", fmt(o.chips), `Jackpots zusammen ${fmt(o.jackpots)}`)}
+      ${tile("Chips im Umlauf", fmt(o.chips), o.staked ? `${fmt(o.staked)} gerade gesetzt` : "")}
+      ${tile("Gruppen", fmt(o.counts.groups), `${fmt(o.counts.members)} Namen gespeichert`)}
       ${tile("Datei", bytes(o.size + o.wal), `${fmt(o.free_pages)} von ${fmt(o.pages)} Seiten frei`)}
       ${tile("Schema", `v${o.version}`, o.version === o.latest ? "aktuell" : `neu: v${o.latest}`)}
     </div>
@@ -102,7 +103,19 @@ async function overview() {
       <form class="row" id="purge">Alles, woran seit <input class="field" type="number" id="days" min="1" value="30" style="width:6em"> Tagen nichts passiert ist
         <button class="btn red">Löschen</button></form>
       <p class="out" id="purgeOut"></p>
-    </section>`;
+    </section>
+    <section class="panel adm-card"><h2 class="label">Gruppen</h2><ul class="grp-list" id="groups"></ul></section>`;
+  const { groups } = await api("groups");
+  $("#groups").innerHTML = groups.length ? groups.map((g) => `<li><div class="grp-row"><span class="t"><b>${esc(g.name)}</b>
+      <span class="m">${g.members.length} Namen · ${esc(g.members.slice(0, 10).join(", "))}${g.members.length > 10 ? " …" : ""}</span></span>
+      <button class="btn dark" data-del="${g.id}">Löschen</button></div></li>`).join("")
+    : `<li class="empty">Noch keine Gruppe. Gespeichert wird am großen Bildschirm.</li>`;
+  $("#groups").onclick = async (e) => {
+    const b = e.target.closest("[data-del]");
+    if (!b || !twice(b)) return;
+    try { await api("group/delete", { id: +b.dataset.del }); toast("Gruppe gelöscht"); } catch (err) { toast(err.message); }
+    overview();
+  };
   $("#bk").onclick = async () => {
     const res = await api("backup", undefined, true);
     download(await res.blob(), `auslosung-${stamp()}.db`);
@@ -143,7 +156,7 @@ async function tables(code) {
 async function loadList(sel) {
   const { draws } = await api("draws?q=" + encodeURIComponent(query));
   $("#list").innerHTML = draws.length ? draws.map((d) => `<li><button data-code="${d.code}" aria-current="${d.code === sel}">
-      <span class="c">${d.code}</span><span class="t">${esc(d.title)}</span><span class="j">${d.jackpot ? fmt(d.jackpot) : ""}</span>
+      <span class="c">${d.code}</span><span class="t">${esc(d.title)}</span><span class="j">${d.grp ? esc(d.grp) : ""}</span>
       <span class="m">${d.entrants} Namen · ${d.phones} Handys · ${d.picks} Ziehungen · ${when(d.active_at)}</span></button></li>`).join("")
     : `<li class="empty">Nichts gefunden.</li>`;
   $("#list").onclick = (e) => { const b = e.target.closest("[data-code]"); if (b) location.hash = "tische/" + b.dataset.code; };
@@ -157,7 +170,8 @@ async function detail(code) {
     <form class="titlebar" id="ren"><input class="field" id="title" maxlength="60" value="${esc(d.title)}"><button class="btn">Speichern</button></form>
     <div class="row">
       <span class="seg" id="mode">${Object.entries(MODE).map(([k, v]) => `<button data-mode="${k}" aria-pressed="${k === d.mode}">${v}</button>`).join("")}</span>
-      <span class="muted">Jackpot <b class="num" style="font-size:22px;color:var(--pink)">${fmt(d.jackpot)}</b></span>
+      ${d.mode === "slots" ? `<span class="seg" id="rounds">${[1, 3, 5, 7].map((n) => `<button data-rounds="${n}" aria-pressed="${n === d.rounds}">${n === 1 ? "1 Spin" : `${n} Runden`}</button>`).join("")}</span>` : ""}
+      <span class="muted">${d.group ? `Gruppe <b>${esc(d.group.name)}</b>` : "ohne Gruppe"}</span>
     </div>
     <div class="row" style="margin-top:14px">
       <a class="btn dark" href="/host/${d.code}#${encodeURIComponent(d.host_key)}" target="_blank" rel="noopener">Bildschirm öffnen</a>
@@ -166,19 +180,18 @@ async function detail(code) {
       <button class="btn dark" id="bank">Bank zurück</button>
     </div>
     <h2 class="label" style="margin-top:20px">Namen <span class="muted">${entrants.length}</span></h2>
-    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Name</th><th></th><th class="n">Chips</th><th class="n">Einsatz</th><th>auf</th><th class="n">Serie</th><th></th></tr></thead>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Name</th><th></th><th class="n">Chips</th><th class="n">Gesetzt</th><th>Tipp</th><th></th></tr></thead>
       <tbody id="ents">${entrants.map((e) => `<tr data-id="${e.id}">
         <td><input data-f="name" value="${esc(e.name)}" maxlength="24" aria-label="Name"></td>
-        <td>${e.phone ? `<span class="tag phone">Handy</span>` : `<span class="tag">Bildschirm</span>`}</td>
+        <td>${e.phone ? `<span class="tag phone">Handy</span>` : `<span class="tag">Bildschirm</span>`}${e.member ? ` <span class="tag">Gruppe</span>` : ""}</td>
         <td class="n">${e.phone ? `<input class="num" data-f="chips" type="number" min="0" value="${e.chips}" aria-label="Chips">` : "–"}</td>
-        <td class="n">${e.stake ? fmt(e.stake) : ""}</td><td>${e.stake ? esc(names[e.tip_id] ?? "?") : ""}</td>
-        <td class="n">${e.streak || ""}</td>
-        <td><button class="x" data-kick="${e.id}" aria-label="${esc(e.name)} entfernen">×</button></td></tr>`).join("") || `<tr><td colspan="7" class="empty">Noch niemand.</td></tr>`}</tbody></table></div>
+        <td class="n">${e.staked ? fmt(e.staked) : ""}</td><td>${e.tip_id ? esc(names[e.tip_id] ?? "?") : ""}</td>
+        <td><button class="x" data-kick="${e.id}" aria-label="${esc(e.name)} entfernen">×</button></td></tr>`).join("") || `<tr><td colspan="6" class="empty">Noch niemand.</td></tr>`}</tbody></table></div>
     <h2 class="label" style="margin-top:20px">Ziehungen <span class="muted">${picks.length}</span></h2>
-    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Wann</th><th>Art</th><th>Gezogen</th><th class="n">Wetten</th><th class="n">Gesetzt</th><th class="n">Ausgezahlt</th></tr></thead>
-      <tbody>${picks.map((p) => `<tr><td>${when(p.ends_at)}</td><td>${MODE[p.mode]}</td>
+    <div class="tbl-wrap"><table class="tbl"><thead><tr><th>Wann</th><th>Art</th><th>Gezogen</th><th class="n">Tipps · Einsätze</th><th class="n">Gesetzt</th><th class="n">Ausgezahlt</th></tr></thead>
+      <tbody>${picks.map((p) => `<tr><td>${when(p.ends_at)}</td><td>${MODE[p.mode] ?? p.mode}${p.rounds > 1 ? ` <span class="muted">${p.rounds} R.</span>` : ""}</td>
         <td>${p.locked ? esc(p.winner) : "<i>läuft</i>"} ${p.cleared ? `<span class="tag">zurück im Topf</span>` : ""}</td>
-        <td class="n">${p.bets ? `${p.bets}${p.hits ? ` <span class="tag hit">${p.hits} Treffer</span>` : ""}` : ""}</td>
+        <td class="n">${p.mode === "slots" ? (p.bets || "") : p.tips ? `${p.tips}${p.hits ? ` <span class="tag hit">${p.hits} richtig</span>` : ""}` : ""}</td>
         <td class="n">${p.staked ? fmt(p.staked) : ""}</td><td class="n">${p.paid ? fmt(p.paid) : ""}</td></tr>`).join("") || `<tr><td colspan="6" class="empty">Noch nicht gezogen.</td></tr>`}</tbody></table></div>
     <div class="danger row"><button class="btn red" id="del">Tisch löschen</button><span class="muted">mit allen Namen und Ziehungen</span></div>`;
 
@@ -188,6 +201,7 @@ async function detail(code) {
   };
   $("#ren").onsubmit = (e) => { e.preventDefault(); act("rename", { title: $("#title").value }); };
   $("#mode").onclick = (e) => { const b = e.target.closest("[data-mode]"); if (b) act("mode", { mode: b.dataset.mode }, MODE[b.dataset.mode]); };
+  $("#rounds")?.addEventListener("click", (e) => { const b = e.target.closest("[data-rounds]"); if (b) act("rounds", { rounds: +b.dataset.rounds }, b.textContent); });
   $("#pot").onclick = (e) => { if (twice(e.target)) act("pot", {}, "Alle zurück im Topf"); };
   $("#bank").onclick = (e) => { if (twice(e.target, "Alle auf 1.000?")) act("bank", {}, "Bank zurückgesetzt"); };
   $("#exp").onclick = async () => {

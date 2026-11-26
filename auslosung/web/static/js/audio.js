@@ -17,7 +17,7 @@ import { reduced } from "./fx.js";
 //
 // Die Musik ist eine Szene, die mit dem Spiel mitgeht:
 //   lobby   Casino-Thema in a-Moll, Teil A und B, Echo, Glitzer
-//   calls   Countdown-Groove; das Raster endet exakt auf „Nichts geht mehr“,
+//   calls   Countdown-Groove; das Raster endet exakt auf „Keine Wetten mehr“,
 //           jede Sekunde steigt das Ostinato einen Halbton
 //   spin    folgt dem Rad: treibend → steigender Bass mit Sirene → nur noch
 //           Herzschlag → Stille, bevor das Ergebnis fällt
@@ -50,6 +50,8 @@ const B = [
   [[0, 68, 2], [4, 71, 2], [8, 74, 2], [12, 76, 2]],
 ];
 const LOBBY_MEL = [A1, A2, A3, A4, A1, A2, A7, A8, ...B];
+/** Die ersten vier Takte des Themas (Am – G – F – E7), für die Slots-Variante */
+export const THEME = [A1, A2, A3, A4];
 const LOBBY_ROOT = [45, 43, 41, 40, 45, 43, 41, 45, 38, 45, 38, 40, 41, 43, 45, 40];
 const LOBBY_CHORD = ["m", "M", "M", "7", "m", "M", "M", "m", "m", "m", "m", "7", "M", "M", "m", "7"];
 
@@ -293,6 +295,102 @@ class Chip {
   }
   hat(t, v = 0.03, out) { this.noise(t, { rate: 2.4, vol: v, frames: 2, decay: 2, out }); }
 
+  // -- Weiche Stimmen ---------------------------------------------------------------
+  // Für Slots und die Übergänge: Sinus und Dreieck mit glatten Hüllkurven statt
+  // 8-Bit-Stufen, gefiltertes weißes Rauschen statt Schieberegister. Klingt nach
+  // Glocke, E-Piano und Mechanik statt nach Konsole.
+
+  /** Ein weicher Ton. a = Anschlag, d = Ausklingzeit (Zeitkonstante), dur = Länge. */
+  tone(t, { m, f, type = "sine", vol = 0.1, a = 0.005, d = 0.4, dur = 1, lp = 0, q = 0.7, detune = 0, glide = 0, out, pan = 0 } = {}) {
+    if (!this.ctx) return;
+    const c = this.ctx, o = c.createOscillator(), g = c.createGain();
+    o.type = type;
+    const fr = f ?? mtof(m);
+    o.frequency.setValueAtTime(fr * (glide ? 2 ** (glide / 12) : 1), t);
+    if (glide) o.frequency.exponentialRampToValueAtTime(fr, t + Math.min(0.12, dur * 0.5));
+    o.detune.value = detune;
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(vol, t + a);
+    g.gain.setTargetAtTime(0, t + a, d);
+    let n = o;
+    if (lp) { const fl = c.createBiquadFilter(); fl.type = "lowpass"; fl.frequency.value = lp; fl.Q.value = q; o.connect(fl); n = fl; }
+    n.connect(g);
+    this._connect(g, out, pan);
+    o.start(t); o.stop(t + a + dur + d * 4);
+  }
+
+  /** Glocke / Kalimba: Grundton, leiser Oberton, kurzer Glanz. */
+  bell(t, m, { vol = 0.08, d = 0.6, out, pan = 0, bright = 1 } = {}) {
+    this.tone(t, { m, vol, a: 0.003, d, dur: d * 3, out, pan });
+    this.tone(t, { m: m + 12, vol: vol * 0.28 * bright, a: 0.002, d: d * 0.45, dur: d * 2, out, pan });
+    this.tone(t, { f: mtof(m) * 4.2, vol: vol * 0.08 * bright, a: 0.001, d: 0.05, dur: 0.2, out, pan: -pan });
+  }
+
+  /** E-Piano-Akkord: weich angeschlagen, leicht verstimmt, gefiltert. */
+  keys(t, notes, { vol = 0.05, d = 0.5, lp = 2200, out, spread = 0.35 } = {}) {
+    notes.forEach((m, k) => {
+      const pan = notes.length > 1 ? (k / (notes.length - 1) - 0.5) * spread * 2 : 0;
+      this.tone(t, { m, type: "triangle", vol, a: 0.004, d, dur: d * 2.5, lp, out, pan, detune: k % 2 ? 4 : -4 });
+      this.tone(t, { m: m + 12, vol: vol * 0.18, a: 0.002, d: d * 0.3, dur: d, out, pan });
+    });
+  }
+
+  /** Fläche: langsamer Einsatz, langes Ausklingen. */
+  pad(t, notes, { vol = 0.03, a = 0.3, dur = 2, lp = 1400, out } = {}) {
+    if (!this.ctx) return;
+    const c = this.ctx;
+    for (const [k, m] of notes.entries()) {
+      for (const det of [-7, 7]) {
+        const o = c.createOscillator(), g = c.createGain(), fl = c.createBiquadFilter();
+        o.type = "sawtooth"; o.frequency.value = mtof(m); o.detune.value = det;
+        fl.type = "lowpass"; fl.frequency.value = lp; fl.Q.value = 0.4;
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(vol / notes.length, t + a);
+        g.gain.setValueAtTime(vol / notes.length, t + a + dur);
+        g.gain.setTargetAtTime(0, t + a + dur, 0.35);
+        o.connect(fl).connect(g);
+        this._connect(g, out, (k / Math.max(1, notes.length - 1) - 0.5) * 0.6 * Math.sign(det));
+        o.start(t); o.stop(t + a + dur + 2);
+      }
+    }
+  }
+
+  /** Gefiltertes Rauschen: Klick, Klack, Schaber, Rauschen. */
+  hiss(t, { f = 2000, type = "bandpass", q = 1, vol = 0.05, a = 0.001, d = 0.02, dur, sweepTo, out, pan = 0 } = {}) {
+    if (!this.ctx) return;
+    const c = this.ctx;
+    if (!this.white) {
+      const b = c.createBuffer(1, c.sampleRate * 2, c.sampleRate), x = b.getChannelData(0);
+      for (let i = 0; i < x.length; i++) x[i] = Math.random() * 2 - 1;
+      this.white = b;
+    }
+    const s = c.createBufferSource(), fl = c.createBiquadFilter(), g = c.createGain();
+    s.buffer = this.white; s.loop = true;
+    fl.type = type; fl.frequency.setValueAtTime(f, t); fl.Q.value = q;
+    const len = dur ?? d * 6;
+    if (sweepTo) fl.frequency.exponentialRampToValueAtTime(sweepTo, t + len);
+    g.gain.setValueAtTime(0, t);
+    if (dur) { g.gain.linearRampToValueAtTime(vol, t + a); g.gain.setValueAtTime(vol, t + Math.max(a, dur - d)); g.gain.setTargetAtTime(0, t + Math.max(a, dur - d), d / 3); }
+    else { g.gain.linearRampToValueAtTime(vol, t + a); g.gain.setTargetAtTime(0, t + a, d); }
+    s.connect(fl).connect(g);
+    this._connect(g, out, pan);
+    s.start(t, Math.random() * 1.5); s.stop(t + len + d * 4 + 0.05);
+  }
+
+  /** Weicher Tiefton-Schlag (Filz statt Drumcomputer). */
+  thump(t, { f = 90, vol = 0.3, d = 0.09, out, pan = 0 } = {}) {
+    if (!this.ctx) return;
+    const c = this.ctx, o = c.createOscillator(), g = c.createGain();
+    o.frequency.setValueAtTime(f * 1.8, t);
+    o.frequency.exponentialRampToValueAtTime(f, t + 0.04);
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(vol, t + 0.003);
+    g.gain.setTargetAtTime(0, t + 0.003, d);
+    o.connect(g); this._connect(g, out, pan);
+    o.start(t); o.stop(t + d * 6 + 0.05);
+    this._hit(t, Math.min(1, vol * 2), out);
+  }
+
   // -- Musik --------------------------------------------------------------------
   setScene(name, opts = {}) {
     if (!this.ctx) return;
@@ -325,11 +423,22 @@ class Chip {
 
   applyGains() {
     if (!this.ctx) return;
-    const lobby = this.musicOn && this.scene?.name === "lobby";
+    const lobby = this.musicOn && this.scene?.name === "lobby" && !this.scene.fading;
     // Lobby ist Bett, Spielmusik trägt, Effekte stehen vorn
     this.music.gain.setTargetAtTime(lobby ? 0.42 : 0, this.now, lobby ? 0.6 : 0.12);
     this.game.gain.setTargetAtTime(this.enabled ? 0.78 : 0, this.now, 0.05);
     this.sfx.gain.setTargetAtTime(this.enabled ? 1 : 0, this.now, 0.05);
+  }
+
+  /** Lobby weich ausblenden: spielt noch sec Sekunden im Raster weiter, während eine andere Musik übernimmt. */
+  fadeScene(sec = 1.5) {
+    const sc = this.scene;
+    if (!this.ctx || !sc || sc.fading) return;
+    this.wantLobby = false;
+    sc.fading = true;
+    sc.left = Math.round(sec / (60 / sc.bpm / 4));
+    this.music.gain.cancelScheduledValues(this.now);
+    this.music.gain.setTargetAtTime(0, this.now, sec / 3);
   }
 
   /** Bildschirm wünscht Lobbymusik (Ruhe) oder nicht */
@@ -337,7 +446,7 @@ class Chip {
     this.wantLobby = on;
     if (!this.ctx) return;
     if (on && !this.scene) this.setScene("lobby");
-    else if (!on && this.scene?.name === "lobby") this.setScene(null);
+    else if (!on && this.scene?.name === "lobby" && !this.scene.fading) this.setScene(null);
   }
 
   setMusic(on) {
@@ -451,22 +560,29 @@ class Chip {
   // -- Ablauf -------------------------------------------------------------------------
   /** Sekundenschlag für Geräte ohne Countdown-Musik (Handys) */
   clock(left) {
-    if (!this.ready) return;
-    this.note(this.now, { m: left <= 3 ? 84 + (3 - left) * 2 : 81, wave: "50", vol: left <= 3 ? 0.08 : 0.05, frames: 6, decay: 1.2 });
+    if (!this.ready || left <= 0) return;
+    // Holzblock-Ticken; die letzten drei Sekunden als Glocken, die zum Ende aufsteigen
+    if (left <= 3) this.bell(this.now, [76, 79, 84][3 - left], { vol: 0.05, d: 0.35 });
+    else this.tone(this.now, { m: 84, type: "triangle", vol: 0.04, a: 0.002, d: 0.04, dur: 0.06 });
   }
 
   /** Spannung beim Drehen; 0 = schnell, 1 = steht */
   tension(level) { this.level = level; }
   tensionStop() { this.level = 0; this.climb = 0; }
 
-  /** „Nichts geht mehr“: abfallendes Rauschen, tiefer Schlag, fallende Tonfolge */
-  slam() {
+  /**
+   * „Keine Wetten mehr“: kein Schlag, sondern ein Abschluss. Ein warmer Akkord
+   * schwillt kurz an, darüber drei Glockentöne abwärts, ein leiser Luftzug.
+   * root: Grundton der Tonart (a-Moll fürs Rad, C-Dur für Slots).
+   */
+  slam(root = 57, minor = true) {
     if (!this.ready) return;
-    this.setScene(null);
-    const t = this.now;
-    this.noise(t, { rates: Array.from({ length: 24 }, (_, i) => 1.3 * 0.89 ** i), vol: 0.22, frames: 24, decay: 0.8 });
-    this.note(t, { f: 190, wave: "tri", vol: 0.5, frames: 16, sweep: -3, decay: 0.6 });
-    [76, 72, 69, 64, 57].forEach((m, k) => this.note(t + k * 3 * FR, { m, wave: "25", vol: 0.075, frames: 4, decay: 0.8 }));
+    if (!this.scene?.fading) this.setScene(null);
+    const t = this.now + 0.02, third = minor ? 3 : 4;
+    this.hiss(t, { f: 1800, type: "lowpass", q: 0.5, vol: 0.05, a: 0.12, d: 0.3, dur: 0.5, sweepTo: 400 });
+    this.pad(t, [root, root + 7, root + 12 + third, root + 14], { vol: 0.07, a: 0.08, dur: 0.9, lp: 1600 });
+    this.tone(t, { m: root - 12, type: "triangle", vol: 0.16, a: 0.01, d: 0.6, dur: 1.2 });
+    [root + 24 + 7, root + 24 + third, root + 24].forEach((m, k) => this.bell(t + 0.05 + k * 0.13, m, { vol: 0.055, d: 0.7, pan: (k - 1) * 0.3 }));
   }
 
   /** Ergebnis: Fanfare in A-Dur nach all dem Moll */

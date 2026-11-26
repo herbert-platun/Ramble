@@ -12,13 +12,18 @@
         <button class="btn red">Rein in den Topf</button>
         <p class="error" id="joinError" role="alert"></p>
       </form>
-      <p class="join-note"><i class="chip"></i> Du bekommst <b class="num">1.000</b> Chips. Setz sie auf den Namen, der gezogen wird.</p>
+      <p class="join-note"><i class="chip"></i> Du bekommst <b class="num" id="startChips">1.000</b> Chips. Hat der Bildschirm deinen Namen schon, übernimmst du einfach deinen Platz.</p>
     </section>
     <section class="main" id="main" hidden>
       <div class="banner" id="banner"></div>
       <div class="verdict panel" id="verdict" hidden></div>
       <div class="live" id="live" hidden><canvas id="canvas"></canvas></div>
+      <div class="winbar" id="gain" aria-live="polite" hidden></div>
       <div class="cards" id="cards" role="radiogroup" aria-label="Auf wen setzt du?"></div>
+      <details class="paytable panel" id="paytable" hidden>
+        <summary>Muster und Auszahlung</summary>
+        <div id="paytableBody"></div>
+      </details>
     </section>
   </div>
   <footer class="slip panel" id="slip" hidden>
@@ -29,6 +34,6 @@
       <button class="pchip" data-add="100" style="--cc:var(--blue)"><span>100</span></button>
       <button class="pchip" data-add="500" style="--cc:var(--green)"><span>500</span></button>
       <button class="btn allin" data-all>Alles</button>
-      <button class="btn dark clear" data-clear aria-label="Einsatz zurücknehmen">↺</button>
+      <button class="btn dark clear" data-clear aria-label="Alle Einsätze zurücknehmen">↺</button>
     </div>
   </footer>

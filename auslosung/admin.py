@@ -48,10 +48,11 @@ class Admin:
             "version": v("PRAGMA user_version"), "latest": max(n for n, _ in MIGRATIONS),
             "sqlite": sqlite3.sqlite_version,
             "pages": v("PRAGMA page_count"), "free_pages": v("PRAGMA freelist_count"),
-            "counts": {t: v(f"SELECT COUNT(*) FROM {t}") for t in ("draws", "entrants", "picks")},
+            "counts": {t: v(f"SELECT COUNT(*) FROM {t}") for t in ("draws", "entrants", "picks", "groups", "members")},
             "phones": v("SELECT COUNT(*) FROM entrants WHERE token IS NOT NULL"),
-            "chips": v("SELECT COALESCE(SUM(chips + stake), 0) FROM entrants WHERE token IS NOT NULL"),
-            "jackpots": v("SELECT COALESCE(SUM(jackpot), 0) FROM draws"),
+            "chips": v("SELECT COALESCE(SUM(chips), 0) + (SELECT COALESCE(SUM(stake), 0) FROM wagers)"
+                       " FROM entrants WHERE token IS NOT NULL"),
+            "staked": v("SELECT COALESCE(SUM(stake), 0) FROM wagers"),
             "first": v("SELECT MIN(created_at) FROM draws"),
             "last": v("SELECT MAX(t) FROM (SELECT MAX(created_at) t FROM draws UNION ALL SELECT MAX(ends_at) FROM picks)"),
         }
@@ -81,26 +82,42 @@ class Admin:
     def list_draws(self, q: str = "") -> list[dict]:
         like = f"%{q.strip()}%"
         return self.db.all(
-            "SELECT d.id, d.code, d.title, d.mode, d.jackpot, d.created_at,"
+            "SELECT d.id, d.code, d.title, d.mode, d.created_at, g.name AS grp,"
             " (SELECT COUNT(*) FROM entrants e WHERE e.draw_id = d.id) AS entrants,"
             " (SELECT COUNT(*) FROM entrants e WHERE e.draw_id = d.id AND e.token IS NOT NULL) AS phones,"
             " (SELECT COUNT(*) FROM picks p WHERE p.draw_id = d.id) AS picks,"
             " MAX(d.created_at, COALESCE((SELECT MAX(ends_at) FROM picks p WHERE p.draw_id = d.id), 0)) AS active_at"
-            " FROM draws d WHERE d.code LIKE ? OR d.title LIKE ? ORDER BY active_at DESC LIMIT 500", like, like)
+            " FROM draws d LEFT JOIN groups g ON g.id = d.group_id"
+            " WHERE d.code LIKE ? OR d.title LIKE ? OR g.name LIKE ? ORDER BY active_at DESC LIMIT 500", like, like, like)
 
     def draw(self, code: str) -> dict:
         d = self._get(code)
         picks = []
         for p in self.db.all("SELECT * FROM picks WHERE draw_id = ? ORDER BY id DESC LIMIT 200", d["id"]):
-            bets = json.loads(p["payouts"] or "{}").get("bets", {})
-            picks.append({k: p[k] for k in ("id", "mode", "winner", "started_at", "ends_at", "cleared", "locked")}
-                         | {"bets": len(bets), "staked": sum(b["stake"] for b in bets.values()),
-                            "paid": sum(b["win"] + b["jp"] for b in bets.values()),
-                            "hits": sum(1 for b in bets.values() if b["hit"])})
-        return {"draw": {k: d[k] for k in ("code", "title", "mode", "jackpot", "created_at", "host_key")},
-                "entrants": self.db.all("SELECT id, name, token IS NOT NULL AS phone, chips, stake, tip_id, streak,"
-                                        " created_at FROM entrants WHERE draw_id = ? ORDER BY id", d["id"]),
+            row = {k: p[k] for k in ("id", "mode", "winner", "started_at", "ends_at", "cleared", "locked")}
+            if p["mode"] == "slots":
+                rounds = self.db.all("SELECT payouts FROM rounds WHERE pick_id = ?", p["id"])
+                bets = [b for r in rounds for b in json.loads(r["payouts"]).values()]
+                row |= {"rounds": len(rounds), "bets": len(bets),
+                        "staked": sum(sum(b["stakes"].values()) for b in bets), "paid": sum(b["win"] for b in bets)}
+            else:
+                pay = json.loads(p["payouts"] or "{}")
+                row |= {"tips": len(json.loads(p["tips"] or "{}")), "hits": len(pay.get("hits", []))}
+            picks.append(row)
+        wagers = {}
+        for w in self.db.all("SELECT w.* FROM wagers w JOIN entrants e ON e.id = w.entrant_id WHERE e.draw_id = ?",
+                             d["id"]):
+            wagers[w["entrant_id"]] = wagers.get(w["entrant_id"], 0) + w["stake"]
+        group = d["group_id"] and self.db.one("SELECT id, name FROM groups WHERE id = ?", d["group_id"])
+        return {"draw": {k: d[k] for k in ("code", "title", "mode", "rounds", "created_at", "host_key")}
+                | {"group": group or None},
+                "entrants": [e | {"staked": wagers.get(e["id"], 0)} for e in self.db.all(
+                    "SELECT e.id, e.name, e.token IS NOT NULL AS phone, e.chips, e.tip_id, e.member_id IS NOT NULL"
+                    " AS member, e.created_at FROM entrants e WHERE e.draw_id = ? ORDER BY e.id", d["id"])],
                 "picks": picks}
+
+    def groups(self) -> list[dict]:
+        return self.draws.groups()
 
     def export(self, code: str) -> dict:
         d = self._get(code)
@@ -108,6 +125,9 @@ class Admin:
         entrants = [{k: v for k, v in e.items() if k != "token"} | {"phone": e["token"] is not None}
                     for e in rows("entrants")]
         picks = [p | {k: json.loads(p[k]) for k in ("layout", "tips", "payouts")} for p in rows("picks")]
+        for p in picks:
+            p["rounds"] = [r | {"result": json.loads(r["result"] or "null"), "payouts": json.loads(r["payouts"])}
+                           for r in self.db.all("SELECT * FROM rounds WHERE pick_id = ? ORDER BY n", p["id"])]
         return {"exported_at": now_ms(), "draw": {k: v for k, v in d.items() if k != "host_key"},
                 "entrants": entrants, "picks": picks}
 
@@ -163,7 +183,7 @@ class Admin:
             t0 = time.perf_counter()
             try:
                 cur = conn.execute(sql)
-            except sqlite3.Error as e:
+            except (sqlite3.Error, sqlite3.Warning) as e:     # Warning: mehrere Anweisungen (bis 3.11)
                 raise DrawError(f"SQL: {e}") from None
             cols = [c[0] for c in cur.description or []]
             rows = cur.fetchmany(limit + 1)
@@ -181,6 +201,7 @@ class Admin:
 
 def admin_route(handler: "Handler", method: str, parts: list[str], qs: dict) -> bool:
     """Bearbeitet /admin und /api/admin/…; False, wenn die Anfrage nicht dazugehört."""
+    from .handler import read_json
     is_admin = parts[:1] == ["admin"] or parts[:2] == ["api", "admin"] or parts[:2] == ["static", "admin"]
     if not is_admin:
         return False
@@ -201,12 +222,7 @@ def admin_route(handler: "Handler", method: str, parts: list[str], qs: dict) -> 
     a: Admin = app.admin
     rest = parts[2:]
     try:
-        data = {}
-        if method == "POST":
-            n = int(handler.headers.get("Content-Length") or 0)
-            if n > 100_000:
-                raise DrawError("Anfrage zu groß")
-            data = json.loads(handler.rfile.read(n) or b"{}")
+        data = read_json(handler, 100_000) if method == "POST" else {}
         if method == "GET":
             if rest == ["overview"]:
                 return handler.send_json(a.overview()) or True
@@ -217,6 +233,8 @@ def admin_route(handler: "Handler", method: str, parts: list[str], qs: dict) -> 
             if len(rest) == 3 and rest[0] == "draw" and rest[2] == "export":
                 body = json.dumps(a.export(rest[1]), ensure_ascii=False, indent=1).encode()
                 return handler.send_body(body, "application/json; charset=utf-8") or True
+            if rest == ["groups"]:
+                return handler.send_json({"groups": a.groups()}) or True
             if rest == ["backup"]:
                 return handler.send_body(a.backup(), "application/vnd.sqlite3") or True
         else:
@@ -226,6 +244,9 @@ def admin_route(handler: "Handler", method: str, parts: list[str], qs: dict) -> 
                 return handler.send_json(a.vacuum()) or True
             if rest == ["purge"]:
                 return handler.send_json({"deleted": a.purge(data.get("days", 0))}) or True
+            if rest == ["group", "delete"]:
+                app.draws.delete_group(data.get("id"))
+                return handler.send_json({"ok": True}) or True
             if rest == ["sql"]:
                 return handler.send_json(a.query(data.get("sql", ""))) or True
             if len(rest) == 3 and rest[0] == "draw":
@@ -236,6 +257,8 @@ def admin_route(handler: "Handler", method: str, parts: list[str], qs: dict) -> 
                     a.rename(code, data.get("title", ""))
                 elif action == "mode":
                     app.draws.set_mode(draw, data.get("mode", ""))
+                elif action == "rounds":
+                    app.draws.set_rounds(draw, data.get("rounds"))
                 elif action == "bank":
                     app.draws.reset_bank(draw)
                 elif action == "pot":
@@ -258,6 +281,6 @@ def admin_route(handler: "Handler", method: str, parts: list[str], qs: dict) -> 
         handler.send_json({"error": str(e)}, 400)
     except LookupError as e:
         handler.send_json({"error": str(e)}, 404)
-    except (ValueError, TypeError, json.JSONDecodeError):
+    except (ValueError, TypeError):
         handler.send_json({"error": "Ungültige Anfrage"}, 400)
     return True

@@ -27,6 +27,7 @@ def main(argv=None):
 
     db = Database(args.db)
     db.migrate()
+    Draws(db).purge_unsaved()
     app = App(Draws(db), args.port, args.url)
     if args.admin_key or args.admin_lan:
         args.admin = True

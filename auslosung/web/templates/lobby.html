@@ -1,19 +1,26 @@
   <main class="lobby">
     <section>
       <div class="lobby-sign"><div class="bulbs" aria-hidden="true"></div><h1 class="logo big neon">Auslosung</h1></div>
-      <p class="lede">Wenn jemand dran glauben muss: Namen in den Topf, Chips auf den Tisch, Rad drehen.</p>
+      <p class="lede">Wenn jemand dran glauben muss: Namen in den Topf, Handys raus, Rad, Plinko oder Slots.</p>
       <div class="steps">
         <div class="step panel"><span class="n">1</span><p><b>Scannen</b>Alle scannen den Code am großen Bildschirm und tragen sich ein.</p></div>
-        <div class="step panel"><span class="n">2</span><p><b>Setzen</b>Jeder hat 1.000 Chips und setzt auf den Namen, den es trifft.</p></div>
-        <div class="step panel"><span class="n">3</span><p><b>Ziehen</b>Letzte Einsätze, nichts geht mehr, und dann wird abgerechnet.</p></div>
+        <div class="step panel"><span class="n">2</span><p><b>Tippen</b>Beim Rad und Plinko tippt man kostenlos, bei Slots setzt man Chips auf Symbole.</p></div>
+        <div class="step panel"><span class="n">3</span><p><b>Ziehen</b>Letzte Einsätze, keine Wetten mehr, dann trifft es einen. Bei Slots über mehrere Runden.</p></div>
       </div>
     </section>
     <section>
       <form class="create panel" id="create">
         <label class="label" for="title">Worum geht es?</label>
         <input class="field" id="title" maxlength="60" placeholder="Wer bringt Freitag den Kuchen mit?">
+        <fieldset class="groups" id="groupPick" hidden>
+          <legend>Mit Gruppe starten</legend>
+          <div class="group-opts" id="groupOpts"></div>
+        </fieldset>
         <button class="btn red">Tisch eröffnen</button>
       </form>
-      <div class="recent" id="recent" hidden><p class="label">Zuletzt</p><ul id="recentList"></ul></div>
+      <div class="recent" id="recent" hidden><p class="label">Gespeicherte Tische</p><ul id="recentList"></ul>
+        <p class="hint">Nur Tische, die am großen Bildschirm gespeichert wurden. Alle anderen verfallen.</p></div>
+      <div class="recent saved" id="saved" hidden><p class="label">Gruppen</p><ul id="groupList"></ul>
+        <p class="hint">Gruppen speichert der große Bildschirm unten bei den Werkzeugen.</p></div>
     </section>
   </main>

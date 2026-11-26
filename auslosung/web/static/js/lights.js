@@ -8,7 +8,7 @@ import { reduced } from "./fx.js";
 //
 // Ruhe:     langsames Lauflicht, jede vierte Birne an.
 // Letzte Einsätze: hektisches Wechselblinken, wird zum Ende schneller.
-// Nichts geht mehr: alles aus, dann ein einzelner Blitz.
+// Keine Wetten mehr: alles aus, dann ein einzelner Blitz.
 // Drehung:  Tempo des Lauflichts = Tempo des Rads. Je langsamer es wird,
 //           desto dunkler der Rahmen und desto deutlicher blitzen alle
 //           Birnen bei jedem Feld, das am Zeiger vorbeigeht.

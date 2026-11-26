@@ -1,17 +1,19 @@
 """HTML-Seiten aus den Vorlagen in templates/. Platzhalter heißen {{name}}."""
 from __future__ import annotations
 
-from pathlib import Path
-
+from .. import resources
 from . import assets
 
-TEMPLATES = Path(__file__).resolve().parent / "templates"
 KINDS = ("lobby", "host", "play")
-SHARED_CSS = ("css/fonts.css", "css/base.css", "css/host.css", "css/play.css", "css/lobby.css")
+SHARED_CSS = ("css/fonts.css", "css/base.css", "css/slots.css", "css/host.css", "css/play.css", "css/lobby.css")
+
+
+def _template(name: str) -> str:
+    return resources.text(f"web/templates/{name}")
 
 
 def _render(name: str, **values: str) -> bytes:
-    html = (TEMPLATES / name).read_text(encoding="utf-8")
+    html = _template(name)
     for key, value in values.items():
         html = html.replace("{{" + key + "}}", value)
     return html.encode()
@@ -31,12 +33,14 @@ def page(kind: str) -> bytes:
         raise KeyError(kind)
     viewport = "width=device-width, initial-scale=1" + (", viewport-fit=cover" if kind == "play" else "")
     qr = f'  <script src="{assets.url("vendor/qrcode.js")}"></script>\n' if kind == "host" else ""
-    body = (TEMPLATES / f"{kind}.html").read_text(encoding="utf-8").rstrip("\n")
+    body = _template(f"{kind}.html").rstrip("\n")
+    if kind in ("host", "play"):     # Slot-Symbole als Sprite, damit <use href="#sym-…"> greift
+        body = assets.text("img/symbols.svg").strip() + "\n" + body
     return _render("layout.html", viewport=viewport, kind=kind, body=body, styles=_styles(*SHARED_CSS),
                    scripts=qr + _module("js/main.js"))
 
 
 def admin_page() -> bytes:
-    guide = (TEMPLATES / "admin_guide.html").read_text(encoding="utf-8").rstrip("\n")
+    guide = _template("admin_guide.html").rstrip("\n")
     return _render("admin.html", styles=_styles(*SHARED_CSS, "admin/admin.css"), guide=guide,
                    scripts=_module("js/main.js") + "\n" + _module("admin/admin.js"))
