@@ -1,0 +1,1319 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wie Ramble zieht – technisches Handbuch</title>
+<style>
+  /* Schrift aus der App: Jersey 10, SIL Open Font License 1.1 */
+  @font-face { font-family: "Jersey"; font-weight: 400; font-display: block; src: url(data:font/woff2;base64,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) format("woff2"); }
+
+  :root {
+    --felt: #0f5a47;
+    --felt-deep: #0a3e32;
+    --felt-hi: #146b55;
+    --cream: #f6e9cc;
+    --cream-dim: #b9cdbd;
+    --brass: #f2bd4f;
+    --chip: #ff5a4f;
+    --plum: #22152d;
+    --rule: rgba(246, 233, 204, .26);
+    --display: "Jersey", system-ui, sans-serif;
+    --text: "Avenir Next", "Segoe UI Variable Text", "Segoe UI", "Gill Sans", "Helvetica Neue", system-ui, sans-serif;
+    --code: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 20px; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body {
+    margin: 0; color: var(--cream); font: 17px/1.62 var(--text); -webkit-font-smoothing: antialiased;
+    background-color: var(--felt);
+    /* Filz: feines Rauschen über dem Grün */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .22 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+      radial-gradient(ellipse 90% 60% at 50% 0%, var(--felt-hi), transparent 70%);
+  }
+  a { color: inherit; }
+  :focus-visible { outline: 3px solid var(--brass); outline-offset: 3px; }
+  ::selection { background: var(--brass); color: var(--plum); }
+
+  /* ---------- Kopf mit Plinko ---------- */
+  .hero { max-width: 1360px; margin: 0 auto; padding: 72px 40px 64px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 56px; align-items: center; }
+  .hero h1 {
+    font: 400 clamp(76px, 10vw, 148px)/.82 var(--display); margin: 0 0 28px; letter-spacing: .01em; color: var(--cream);
+    text-shadow: 0 6px 0 var(--felt-deep);
+  }
+  .hero p { margin: 0 0 14px; max-width: 34em; font-size: 19px; color: var(--cream); }
+  .hero .small { font-size: 15px; color: var(--cream-dim); }
+  .board { position: relative; }
+  .board svg { display: block; width: 100%; height: auto; }
+  .board-bar { display: flex; align-items: center; gap: 16px; margin-top: 14px; min-height: 44px; }
+  .result { font: 500 16px/1.4 var(--text); color: var(--cream-dim); }
+  .result b { color: var(--brass); font-weight: 700; }
+  button.pull {
+    font: 400 26px/1 var(--display); letter-spacing: .02em; color: var(--plum); background: var(--brass); border: 0; border-radius: 3px;
+    padding: 10px 22px 11px; cursor: pointer; box-shadow: 0 4px 0 #a9761c; position: relative; top: 0;
+  }
+  button.pull:active { top: 3px; box-shadow: 0 1px 0 #a9761c; }
+  button.pull:disabled { opacity: .55; cursor: default; }
+  button.pull.quiet { background: transparent; color: var(--cream); box-shadow: inset 0 0 0 2px var(--rule); font: 600 14px var(--text); padding: 9px 14px; }
+  button.pull.quiet:active { top: 0; }
+
+  /* ---------- Gerüst ---------- */
+  .wrap { max-width: 1360px; margin: 0 auto; padding: 0 40px; display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 52px; border-top: 2px dashed var(--rule); }
+  nav.index { position: sticky; top: 0; align-self: start; max-height: 100vh; overflow: auto; padding: 40px 0; font-size: 14px; scrollbar-width: thin; }
+  .index ol { list-style: none; margin: 0; padding: 0; }
+  .index > ol > li { margin: 0 0 18px; }
+  .index > ol > li > a { font: 700 15px/1.3 var(--text); text-decoration: none; color: var(--cream); }
+  .index ol ol { margin: 6px 0 0; }
+  .index ol ol a { display: block; padding: 2px 0 2px 12px; text-decoration: none; color: var(--cream-dim); line-height: 1.35; border-left: 2px solid transparent; }
+  .index a:hover { color: var(--brass); }
+  .index ol ol a.on { color: var(--brass); border-left-color: var(--brass); }
+  main { padding: 40px 0 140px; min-width: 0; }
+
+  /* ---------- Kapitel ---------- */
+  section.ch { margin: 0 0 96px; }
+  .ch-head { margin: 0 0 8px; padding-bottom: 26px; }
+  .ch-head h2 { font: 400 clamp(52px, 6vw, 84px)/.9 var(--display); margin: 0 0 14px; color: var(--brass); text-shadow: 0 4px 0 var(--felt-deep); }
+  .ch-head p { margin: 0; max-width: 44em; color: var(--cream-dim); font-size: 18px; }
+
+  /* Einträge wie Zeilen einer Gewinntabelle */
+  .entry { display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 8px 36px; padding: 30px 0 28px; border-top: 2px dashed var(--rule); }
+  .entry > header h3 { font: 400 28px/1.05 var(--display); letter-spacing: .015em; margin: 0 0 10px; color: var(--cream); }
+  .entry > header .src { margin: 0; font-size: 13.5px; color: var(--cream-dim); line-height: 1.4; }
+  .entry .body > :not(pre):not(figure):not(table) { max-width: 68ch; }
+  .entry .body > p:first-child { margin-top: 0; }
+  .entry p { margin: 10px 0; }
+  .entry ul { margin: 10px 0; padding-left: 20px; }
+  .entry li { margin: 4px 0; }
+  .entry li::marker { color: var(--brass); }
+  strong { color: #fff6df; }
+  em { font-style: italic; }
+  code { overflow-wrap: anywhere; font: .86em var(--code); background: rgba(10, 62, 50, .75); padding: 1px 5px; border-radius: 2px; color: #ffe2a0; }
+  pre {
+    font: 12.5px/1.65 var(--code); color: #ffe2a0; background: var(--plum); margin: 16px 0; padding: 14px 18px; overflow-x: auto;
+    border-radius: 2px; box-shadow: 5px 5px 0 var(--felt-deep); tab-size: 4;
+  }
+  .why { margin: 16px 0 4px; padding-left: 16px; border-left: 4px solid var(--chip); }
+  .why b { font: 700 1em var(--text); color: var(--chip); margin-right: 4px; }
+  table { border-collapse: collapse; width: 100%; font-size: 15px; margin: 12px 0; }
+  th, td { text-align: left; padding: 8px 12px 8px 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  th { font: 600 13.5px var(--text); color: var(--cream-dim); }
+  td.num { font-variant-numeric: tabular-nums; text-align: right; padding-right: 0; color: var(--brass); }
+  th:last-child { text-align: inherit; }
+
+  /* Abbildungen direkt auf dem Filz */
+  figure { margin: 18px 0 8px; }
+  figure.fig { padding: 0; }
+  figcaption { font-size: 14px; color: var(--cream-dim); margin-top: 10px; display: flex; justify-content: space-between; gap: 14px; align-items: center; flex-wrap: wrap; }
+  svg { display: block; width: 100%; height: auto; }
+  .shapes { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 18px 14px; }
+  .shape { font: 500 14px/1.3 var(--text); color: var(--cream); }
+  .shape .g { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3px; margin-bottom: 7px; }
+  .shape .g i { aspect-ratio: 1; background: var(--felt-deep); }
+  .shape .g i.on { background: var(--brass); }
+  .shape b { color: var(--brass); font-weight: 700; font-variant-numeric: tabular-nums; }
+
+  .timeline { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; margin: 14px 0 6px; font-size: 14.5px; position: relative; }
+  .timeline div { padding: 18px 14px 4px 0; position: relative; border-top: 3px solid var(--cream); }
+  .timeline div::before { content: ""; position: absolute; top: -9px; left: 0; width: 15px; height: 15px; border-radius: 50%; background: var(--brass); box-shadow: 0 0 0 3px var(--felt); }
+  .timeline div:nth-child(2)::before { background: var(--chip); }
+  .timeline code { display: block; background: none; padding: 0; margin-bottom: 4px; color: var(--brass); font-size: 14px; }
+
+  .arch { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; align-items: stretch; gap: 12px; font-size: 15px; }
+  .arch .box { padding: 2px 0 2px 14px; border-left: 3px solid var(--brass); }
+  .arch .box b { display: block; font: 700 16px var(--text); margin-bottom: 4px; }
+  .arch .arr { align-self: center; color: var(--brass); font: 600 13px/1.3 var(--text); text-align: center; }
+
+  footer { border-top: 2px dashed var(--rule); color: var(--cream-dim); font-size: 14px; }
+  footer .in { max-width: 1360px; margin: 0 auto; padding: 28px 40px 56px; }
+
+  @media (max-width: 1000px) {
+    .hero { grid-template-columns: 1fr; padding: 48px 22px 40px; gap: 32px; }
+    .wrap { grid-template-columns: 1fr; gap: 0; padding: 0 22px; }
+    nav.index { position: static; max-height: none; padding: 28px 0 8px; }
+    .index ol ol { display: none; }
+    .index > ol { display: flex; flex-wrap: wrap; gap: 6px 18px; }
+    .index > ol > li { margin: 0; }
+    .entry { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+    .hero > * { min-width: 0; }
+    .board-bar { flex-wrap: wrap; }
+    .arch { grid-template-columns: 1fr; }
+    .arch .arr { text-align: left; padding-left: 14px; }
+    .timeline { grid-template-columns: 1fr 1fr; row-gap: 22px; }
+    footer .in { padding: 24px 22px 48px; }
+  }
+  @media print {
+    body { background: #fff; color: #111; }
+    nav.index, .board-bar { display: none; }
+    .wrap { grid-template-columns: 1fr; }
+    .entry { break-inside: avoid; }
+    pre { box-shadow: none; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div>
+    <h1>Wie Ramble zieht</h1>
+    <p>Ein technisches Handbuch zur Auslosung. Es erklärt, wie der Server fair zieht, wie alle Bildschirme im Raum dasselbe zeigen und wie Glücksrad, Plinko, Slots, Klang und Musik berechnet werden.</p>
+    <p class="small">Jede Formel und jede Konstante stammt aus dem Quellcode. Die Erklärungen sind kurz gehalten, damit man das Verfahren dahinter auf einen Blick versteht.</p>
+  </div>
+  <figure class="board" aria-label="Plinko-Vorführung">
+    <svg id="hero" viewBox="0 0 600 392"></svg>
+    <div class="board-bar">
+      <button class="pull" id="pull" type="button">Ziehen</button>
+      <span class="result" id="result" aria-live="polite">Erst wird gelost, dann wird ein Weg gebaut, der genau dort endet.</span>
+    </div>
+  </figure>
+</header>
+
+<div class="wrap">
+<nav class="index" aria-label="Inhalt">
+<ol>
+    <li><a href="#k0">Überblick</a>
+      <ol><li><a href="#a0-1">Architektur</a></li><li><a href="#a0-2">Ablauf einer Ziehung</a></li></ol></li>
+    <li><a href="#k1">Fairness &amp; Zufall</a>
+      <ol><li><a href="#a1-1">Spätes Ziehen</a></li><li><a href="#a1-2">Verzögerte Sichtbarkeit</a></li><li><a href="#a1-3">Plinko-Brettform</a></li><li><a href="#a1-4">Plinko-Zufallspfad</a></li><li><a href="#a1-5">Rad-Landepunkt</a></li><li><a href="#n-tests">Fairness-Tests</a></li></ol></li>
+    <li><a href="#k2">Slot-Engine</a>
+      <ol><li><a href="#a2-1">Zellgewichte</a></li><li><a href="#a2-2">Klebrige Walzen</a></li><li><a href="#a2-3">Glücks-Spin</a></li><li><a href="#a2-4">Läufe mit Jokern</a></li><li><a href="#a2-5">Feste Formen</a></li><li><a href="#a2-6">Wertung</a></li><li><a href="#a2-7">Stufe &amp; Tease</a></li><li><a href="#a2-8">Monte-Carlo-Quote</a></li><li><a href="#a2-9">Wetten</a></li><li><a href="#n-backers">Unterstützer</a></li><li><a href="#a2-10">Finale</a></li><li><a href="#a2-11">Symbolvergabe</a></li><li><a href="#a2-12">Leerlauf-Raster</a></li></ol></li>
+    <li><a href="#k3">Zeit &amp; Synchronisation</a>
+      <ol><li><a href="#a3-1">Uhrabgleich</a></li><li><a href="#a3-2">Wakeup-Planung</a></li><li><a href="#n-rounds">Rundenverkettung</a></li><li><a href="#a3-3">Regie-Zeitplan</a></li><li><a href="#n-plinkodur">Plinko-Dauer</a></li><li><a href="#a3-4">Event-Replay</a></li><li><a href="#a3-5">Event-Stream</a></li></ol></li>
+    <li><a href="#k4">Animation &amp; Kinematik</a>
+      <ol><li><a href="#a4-1">Raddrehung</a></li><li><a href="#a4-2">Zeiger &amp; Stifte</a></li><li><a href="#a4-3">Kamerazoom</a></li><li><a href="#a4-4">Plinko-Bahn</a></li><li><a href="#n-plinkolayout">Plinko-Layout</a></li><li><a href="#a4-5">Walzen-Scroll</a></li><li><a href="#n-slotsize">Slot-Größe</a></li><li><a href="#n-wheelfont">Schrift im Rad</a></li><li><a href="#a4-6">Text einpassen</a></li><li><a href="#n-count">Hochzählen</a></li></ol></li>
+    <li><a href="#k5">Klangsynthese</a>
+      <ol><li><a href="#a5-1">Pulswellen</a></li><li><a href="#a5-2">4-Bit-Dreieck</a></li><li><a href="#a5-3">LFSR-Rauschen</a></li><li><a href="#a5-4">Frame-Hüllkurven</a></li><li><a href="#n-soft">Weiche Stimmen</a></li><li><a href="#a5-8">Karplus-Strong</a></li><li><a href="#a5-9">Modalsynthese</a></li><li><a href="#n-marimba">Marimba & Schlag</a></li><li><a href="#a5-10">Glocke</a></li><li><a href="#a5-11">Hall &amp; Rauschen</a></li><li><a href="#n-rattle">Rattern & Münzen</a></li><li><a href="#n-chan">Kanäle & Kugel</a></li></ol></li>
+    <li><a href="#k5m">Musik</a>
+      <ol><li><a href="#n-tonsystem">Tonmaterial</a></li><li><a href="#a5-5">Scheduler &amp; Raster</a></li><li><a href="#n-lobby">Lobby-Thema</a></li><li><a href="#n-countdown">Countdown</a></li><li><a href="#n-spinscene">Musik zum Rad</a></li><li><a href="#n-ticks">Klick-Leitern</a></li><li><a href="#n-cadences">Kadenzen</a></li><li><a href="#n-slotmusic">Slot-Musik</a></li><li><a href="#a5-7">Energie-Modell</a></li><li><a href="#n-chordtones">Treffer im Akkord</a></li><li><a href="#n-ladder">Abrechnungs-Leiter</a></li><li><a href="#n-jackpot">Jackpot-Jingle</a></li><li><a href="#n-endings">Wendungen</a></li><li><a href="#a5-12">Groove-Puls</a></li></ol></li>
+    <li><a href="#k6">Grafik &amp; Effekte</a>
+      <ol><li><a href="#a6-1">Shader-Strudel</a></li><li><a href="#a6-2">Partikel</a></li><li><a href="#a6-3">Trauma-Wackeln</a></li><li><a href="#a6-4">Lauflicht</a></li><li><a href="#a6-5">Birnen-Verteilung</a></li><li><a href="#a6-6">Radfarben</a></li><li><a href="#a6-7">HiDPI-Leinwand</a></li></ol></li>
+    <li><a href="#k7">Infrastruktur</a>
+      <ol><li><a href="#a7-1">Bundle-Importer</a></li><li><a href="#a7-2">Migrationen</a></li><li><a href="#a7-3">Transaktionen</a></li><li><a href="#a7-4">Caching</a></li><li><a href="#a7-5">Pfadschutz</a></li></ol></li>
+  </ol>
+</nav>
+<main>
+<section class="ch" id="k0">
+  <header class="ch-head"><h2>Überblick</h2><p>Das Gesamtbild: Wer entscheidet was, und wann?</p></header>
+
+  <div class="entry" id="a0-1">
+    <header><h3>Architektur: Der Server entscheidet, die Geräte spielen ab</h3><p class="src">handler.py, app.py</p></header>
+    <div class="body">
+    <p>Die gesamte Spiellogik läuft auf dem Server, auch Zufall, Abrechnung und das Timing jeder Animation. Die Geräte bekommen per Server-Sent Events einen Zustand mit Zeitstempeln und berechnen jedes Bild daraus. Kein Client trifft eine Entscheidung.</p>
+    <figure class="fig">
+      <div class="arch">
+        <div class="box"><b>Spiellogik</b>Ziehen mit <code>secrets</code>, Slot-Simulation, Abrechnung in SQLite-Transaktionen</div>
+        <div class="arr">JSON →<br>SSE</div>
+        <div class="box"><b>Öffentlicher Zustand</b>einmal berechnet, pro Client um <code>me</code> ergänzt, mit <code>now</code></div>
+        <div class="arr">t →<br>Bild</div>
+        <div class="box"><b>Bühnen</b>Rad, Plinko, Slots, Licht und Ton als Funktion der Serverzeit</div>
+      </div>
+    </figure>
+    </div>
+  </div>
+
+  <div class="entry" id="a0-2">
+    <header><h3>Ablauf einer Ziehung</h3><p class="src">game/draws.py</p></header>
+    <div class="body">
+    <p>Jede Ziehung hat vier Zeitpunkte in Server-Millisekunden. Das ganze System baut auf ihnen auf:</p>
+    <div class="timeline">
+      <div><code>pick()</code>Topf einfrieren. Der Gewinner steht <em>noch nicht</em> fest.</div>
+      <div><code>locks_at</code>„Nichts geht mehr“: ziehen und abrechnen.</div>
+      <div><code>started_at</code>Die Animation startet (+1.700 ms).</div>
+      <div><code>ends_at</code>Ergebnis sichtbar. Beim Rad sind es 9,5 s Drehung.</div>
+    </div>
+    <p>Die Einsatzphase dauert 7 s, bei Slots 10 s. Sie gibt es nur, wenn mindestens ein Handy mitspielt. Ohne Handys wird sofort gezogen.</p>
+    </div>
+  </div>
+</section>
+
+<section class="ch" id="k1">
+  <header class="ch-head"><h2>Fairness &amp; Zufall</h2><p>Zufall muss ehrlich sein. Er darf nicht vorzeitig durchsickern und muss trotzdem genau dort landen, wo der Server gezogen hat.</p></header>
+
+  <div class="entry" id="a1-1">
+    <header><h3>Spätes Ziehen</h3><p class="src">draws.py, settle()</p></header>
+    <div class="body">
+    <p>Der Gewinner wird erst bei <code>locks_at</code> gezogen. Dann sind keine Tipps und Einsätze mehr möglich, und alle Namen im Topf haben exakt dieselbe Chance.</p>
+<pre>winner_id = secrets.choice(slots)        # kryptografischer Zufall
+slot      = slots.index(winner_id)
+# Tipp-Treffer: +200 Chips, alles in einer Transaktion</pre>
+    <p><code>settle()</code> ist <strong>idempotent</strong>: Es sucht nur nach noch nicht abgerechneten Ziehungen. Ein zweiter Aufruf ändert also nichts.</p>
+    <p class="why"><b>Warum:</b>Bis <code>locks_at</code> existiert der Name nirgends, auch nicht im Netzwerkverkehr. Wer den Datenverkehr mitschneidet, erfährt nichts.</p>
+    </div>
+  </div>
+
+  <div class="entry" id="a1-2">
+    <header><h3>Verzögerte Sichtbarkeit (Rückrechnung)</h3><p class="src">app.py, public()</p></header>
+    <div class="body">
+    <p>Abgerechnet wird sofort, die Anzeige soll das Ergebnis aber erst zum Ende der Animation zeigen. Deshalb rechnet <code>public()</code> den Zustand für jede Auslieferung zurück, solange <code>t &lt; ends_at</code>:</p>
+<pre>für jede abgerechnete, noch laufende Runde:
+    chips[b] −= gewinn[b] + nachschuss[b]
+    wetten[b] = einsätze_vor_der_runde[b]</pre>
+    <p>Bis zum Ergebnis enthält die Ziehung im Layout nur die Namen, aber nicht den Weg der Plinko-Kugel und nicht den Gewinner.</p>
+    </div>
+  </div>
+
+  <div class="entry" id="a1-3">
+    <header><h3>Plinko-Brettform</h3><p class="src">game/plinko.py</p></header>
+    <div class="body">
+    <p>Bei wenigen Namen werden die Fächer breiter, bei vielen Namen kommen Reihen dazu:</p>
+<pre>per  = ⌈8 / n⌉                              Spalten je Name
+rows = clamp(round(n · per · 0,6) + 4, 8, 16)
+rows = rows − (rows mod 2)                   immer gerade</pre>
+    <p>Jede Reihe verschiebt die Kugel um ±½ Spalte. Nach einer ungeraden Zahl von Reihen stünde sie also auf einer halben Position zwischen zwei Fächern. Die gerade Reihenzahl schließt das aus.</p>
+    </div>
+  </div>
+
+  <div class="entry" id="a1-4">
+    <header><h3>Plinko-Zufallspfad mit Erreichbarkeits-Bedingung</h3><p class="src">plinko.py, plinko_path()</p></header>
+    <div class="body">
+    <p>Der Weg soll zufällig wirken und trotzdem garantiert im gezogenen Fach enden. Darum wird er Schritt für Schritt erzeugt, aber nur aus Schritten, nach denen das Ziel noch erreichbar ist:</p>
+<pre>ziel  = fach · per + randbelow(per)
+start ∈ { c : |c − ziel| ≤ rows/2 }                 zufällig
+für übrig = rows … 1:
+    optionen = { d ∈ {−½, +½} : im Brett  ∧  |ziel − (pos+d)| ≤ (übrig−1)/2 }
+    pos += choice(optionen)
+assert pos == ziel</pre>
+    <figure class="fig">
+      <svg id="figPlinko" viewBox="0 0 640 300" role="img" aria-label="Zufällige Plinko-Pfade zum Zielfach"></svg>
+      <figcaption><span>Fünf Pfade, alle mit demselben Zielfach (messingfarben). Die dunkle Fläche ist der Bereich, aus dem das Ziel noch erreichbar ist.</span><button class="pull quiet" id="btnPlinko" type="button">Neue Pfade</button></figcaption>
+    </figure>
+    <p class="why"><b>Kniff:</b>Es braucht kein Verwerfen und keine Neuversuche: Jeder Schritt ist zulässig, und das Ende ist garantiert. Die Einschränkung wirkt erst gegen Ende, deshalb sieht die Bahn natürlich aus.</p>
+    </div>
+  </div>
+
+  <div class="entry" id="a1-5">
+    <header><h3>Deterministischer Landepunkt des Rads</h3><p class="src">stages/stage.js, hashRand()</p></header>
+    <div class="body">
+    <p>Das Rad soll nicht immer genau in der Feldmitte stehen bleiben. Trotzdem müssen alle Geräte dieselbe Stelle zeigen. Die Abweichung wird deshalb aus einem Hash der Ziehungs-ID berechnet und nicht übertragen:</p>
+<pre>x = (id · 2654435761) &gt;&gt;&gt; 0          Knuth-Multiplikation
+x ^= x &gt;&gt;&gt; 15;  x = imul(x, 2246822519);  x ^= x &gt;&gt;&gt; 13
+jitter = x / 2³² − 0,5
+ziel   = −(slot + 0,5 + 0,7 · jitter) · seg      (±35 % eines Feldes)
+ende   = ziel + k · 2π,   k so, dass mindestens 7 volle Umdrehungen</pre>
+    </div>
+  </div>
+
+  <div class="entry" id="n-tests">
+    <header><h3>Statistische Fairness-Tests</h3><p class="src">tests/test_game.py</p></header>
+    <div class="body">
+<p>Die Gleichverteilung wird nicht nur behauptet, sondern bei jedem Build geprüft. Die Grenzen sind so gewählt, dass ein fairer Zufall sie praktisch nie verletzt, eine grobe Verzerrung aber sofort auffällt:</p>
+<pre>test_fair         3 Namen, 900 Ziehungen     erwartet 300 je Name
+                  σ = √(900 · ⅓ · ⅔) ≈ 14,1   Grenze 220–380  (±5,7 σ)
+test_slots_fair   3 Namen, 600 Sessions       erwartet 200 je Name
+                  σ = √(600 · ⅓ · ⅔) ≈ 11,5   Grenze 140–260  (±5,2 σ)
+test_deterministic_and_paying
+                  gleicher Seed → identische Runde
+                  3.000 Spins, 100 Chips auf 1 von 5 Namen
+                  Auszahlung / Einsatz ∈ [0,75; 1,2]   (Soll 0,96)</pre>
+<p>Dazu kommen Tests, die für viele Zielfächer prüfen, ob der Plinko-Pfad wirklich dort endet, und ob die Kugel einer echten Ziehung im Fach des Gewinners landet.</p>
+    </div>
+  </div>
+</section>
+
+<section class="ch" id="k2">
+  <header class="ch-head"><h2>Die Slot-Engine</h2><p>Ein 5×3-Automat, in dem jeder Name ein Symbol ist. Alles ist eine reine Funktion des übergebenen Zufallsgenerators: <code>SystemRandom</code> im Spiel, ein fester Seed in Tests und bei der Kalibrierung.</p></header>
+
+  <div class="entry" id="a2-1">
+    <header><h3>Zellgewichte</h3><p class="src">game/slots.py, roll_grid()</p></header>
+    <div class="body">
+    <p>Jede der 15 Zellen wird einzeln gewürfelt:</p>
+    <table>
+      <tr><th>Zelle</th><th>Wirkung</th><th>Anteil</th></tr>
+      <tr><td>Joker <code>W</code></td><td>ersetzt jeden Namen in einem Muster</td><td class="num">4,5 %</td></tr>
+      <tr><td>Niete <code>N</code></td><td>blockiert; ab drei Nieten ist der Spin „Pleite“</td><td class="num">5,0 %</td></tr>
+      <tr><td>Faktor <code>×2/×3/×5</code></td><td>Gewicht 70 : 24 : 6, multipliziert den ganzen Spin</td><td class="num">4,0 %</td></tr>
+      <tr><td>Name</td><td>alle Namen gleich wahrscheinlich</td><td class="num">86,5 %</td></tr>
+    </table>
+    </div>
+  </div>
+
+  <div class="entry" id="a2-2">
+    <header><h3>Klebrige Walzen</h3><p class="src">slots.py, stickiness()</p></header>
+    <div class="body">
+    <p>Auf echten Walzenstreifen sind Symbole gestapelt. Das bildet das Spiel nach: Eine Namenszelle übernimmt mit Wahrscheinlichkeit <code>h</code> ihren linken und mit <code>0,55·h</code> ihren oberen Nachbarn. Je mehr Namen am Tisch sind, desto stärker kleben sie:</p>
+<pre>h(n) = max(0, 0,42 · (1 − e^(−(n − 2,5) / 2)))</pre>
+    <figure class="fig">
+      <svg id="figSticky" viewBox="0 0 640 230" role="img" aria-label="Klebrigkeit in Abhängigkeit von der Zahl der Namen"></svg>
+      <figcaption><span>Wie stark Symbole an ihrem Nachbarn kleben, abhängig von der Zahl der Namen</span></figcaption>
+    </figure>
+    <p class="why"><b>Warum:</b>Ohne diesen Effekt gäbe es an Tischen mit 30 Namen fast nie drei gleiche Symbole nebeneinander. Weil die Klebrigkeit für alle Namen gleich wirkt, bleibt die Chance für jeden gleich.</p>
+    </div>
+  </div>
+
+  <div class="entry" id="a2-3">
+    <header><h3>Glücks-Spin als Wachstumsprozess</h3><p class="src">slots.py, apply_luck()</p></header>
+    <div class="body">
+    <p>Bei 20 % der Spins wächst ein Name, der im Bild steht, wie bei einem schrittweisen Flood-Fill:</p>
+<pre>ziel = choice(namen im bild);   k = randint(3, 5)
+k-mal:
+    rand = orthogonale Nachbarn aller ziel-Zellen − eigene Zellen
+    rand = rand ohne Joker und Faktoren          (die bleiben stehen)
+    eine zufällige Randzelle → ziel</pre>
+    <p>Die Walzen halten am Bild <em>vor</em> dem Glück an. Danach wird jede Umwandlung einzeln animiert (720 ms).</p>
+    </div>
+  </div>
+
+  <div class="entry" id="a2-4">
+    <header><h3>Waagerechte Läufe mit Jokern</h3><p class="src">slots.py, find_patterns()</p></header>
+    <div class="body">
+    <p>Für jede Reihe und jeden Namen darin wird der längste zusammenhängende Lauf aus eigenen Zellen und Jokern gesucht:</p>
+<pre>für jede reihe, für jeden namen darin:
+    scanne links → rechts; zelle ∈ {name, W} verlängert den lauf
+    lauf ≥ 3 ∧ mindestens eine echte namenszelle  →  row3 / row4 / row5</pre>
+    <p>Ein Joker kann so zu den Läufen mehrerer Namen gehören. Doppelte Treffer werden über den Schlüssel <code>(besitzer, sortierte Zellen)</code> entfernt.</p>
+    </div>
+  </div>
+
+  <div class="entry" id="a2-5">
+    <header><h3>Feste Formen</h3><p class="src">slots.py, SHAPES, _owner()</p></header>
+    <div class="body">
+    <p>Eine Form gehört einem Namen, wenn darin <strong>genau ein</strong> Name vorkommt und alle übrigen Zellen Joker sind. Gefundene Muster werden nach Wert aufsteigend sortiert, damit die Auflösung von klein nach groß eskaliert.</p>
+    <figure class="fig"><div class="shapes" id="figShapes"></div>
+      <figcaption><span>Alle Musterarten mit ihrem Punktwert; die Läufe sind am Beispiel der mittleren Reihe gezeigt.</span></figcaption></figure>
+    </div>
+  </div>
+
+  <div class="entry" id="a2-6">
+    <header><h3>Wertung: Faktoren und Pleite</h3><p class="src">slots.py, play_spin()</p></header>
+    <div class="body">
+<pre>pleite  = (#Nieten ≥ 3)                → keine Muster
+faktor  = min(∏ Faktorzellen, 20),  nur wenn mindestens ein Muster existiert
+punkte[name] = Σ musterwert(name) · faktor</pre>
+    </div>
+  </div>
+
+  <div class="entry" id="a2-7">
+    <header><h3>Sensations-Stufe und Tease</h3><p class="src">slots.py, tier_of(), tease()</p></header>
+    <div class="body">
+    <p>Eine Stufe von 0 bis 4 steuert Licht, Ton, Wackeln und Banner:</p>
+<pre>4  wenn Volles Haus  oder Punkte ≥ 60
+3  wenn bestes Muster ≥ 10  oder Punkte ≥ 24
+2  wenn bestes Muster ≥ 3   oder Punkte ≥ 10
+1  sonst (Treffer)      0  ohne Punkte</pre>
+    <p><strong>Tease:</strong> Steht in den Spalten 2–4 einer Reihe schon dreimal derselbe Name, stoppt die letzte Walze 2.300 ms später und läuft dabei sichtbar langsamer (siehe <a href="#a4-5">Walzen-Scroll</a>).</p>
+    </div>
+  </div>
+
+  <div class="entry" id="a2-8">
+    <header><h3>Monte-Carlo-Kalibrierung der Quote</h3><p class="src">slots.py, quote()</p></header>
+    <div class="body">
+    <p>An großen Tischen trifft ein einzelner Name seltener. Damit eine Wette trotzdem im Mittel 96 % zurückbringt, wird die Quote für jede Tischgröße simuliert:</p>
+<pre>rng   = Random(7919 · n)                  fester Seed je Tischgröße
+E     = Σ punkte über 2.400 Spins / 2.400 / n
+quote = 0,96 / E                          (RTP)
+auszahlung = round(Σ einsatz[name] · punkte[name] · quote)</pre>
+    <p class="why"><b>Kniff:</b>Wegen des festen Seeds ergibt die gleiche Tischgröße auf jedem Rechner dieselbe Quote. <code>lru_cache</code> speichert sie. Ändert sich eine Wahrscheinlichkeit im Code, passt sich die Quote automatisch an.</p>
+    </div>
+  </div>
+
+  <div class="entry" id="a2-9">
+    <header><h3>Wetten als atomarer Austausch</h3><p class="src">draws.py, wager()</p></header>
+    <div class="body">
+    <p>Ein Spieler schickt immer <em>alle</em> seine Einsätze auf einmal. Der Server rechnet mit dem Gesamtguthaben inklusive der schon gesetzten Chips:</p>
+<pre>verfügbar = chips + Σ bisherige einsätze
+prüfe Σ neue einsätze ≤ verfügbar
+alte einsätze löschen, neue einfügen, chips = verfügbar − Σ neu     (eine Transaktion)</pre>
+    <p>Entfernt der Host einen Namen oder wechselt er den Modus, werden die betroffenen Einsätze zurückerstattet. Wer nach einer Runde bei 0 steht, bekommt 200 Chips nachgeschossen.</p>
+    </div>
+  </div>
+
+  <div class="entry" id="n-backers">
+    <header><h3>Unterstützer pro Name</h3><p class="src">app.py, public()</p></header>
+    <div class="body">
+<p>Neben jedem Namen zeigt die App, wie viele Leute auf ihn tippen oder setzen und wie viele Chips darauf liegen:</p>
+<pre>für jeden Tipp auf name:           unterstützer[name] += 1
+für jeden Einsatz (wetter → name): unterstützer[name] += 1
+                                   chips_darauf[name] += einsatz</pre>
+<p>Die Zählung läuft auf dem zurückgerechneten Stand (siehe <a href="#a1-2">Verzögerte Sichtbarkeit</a>). Während die Walzen laufen, sieht man also noch die Einsätze vor der Abrechnung.</p>
+    </div>
+  </div>
+
+  <div class="entry" id="a2-10">
+    <header><h3>Session-Finale ohne Unentschieden</h3><p class="src">slots.py, play_round()</p></header>
+    <div class="body">
+    <p>Eine Session hat 1, 3, 5 oder 7 Runden. Gezogen ist, wer über alle Runden die meisten Punkte hat. In der letzten Runde:</p>
+<pre>wiederhole Spin:
+    genau ein Führender        → fertig
+    Gleichstand / niemand vorn → „Nochmal!“
+    nach 5 Spins               → das Los entscheidet unter den Führenden (+1 Punkt)</pre>
+    <p>Weil jeder Name dieselbe Punkteverteilung hat, ist die Gewinnchance für alle gleich. <code>test_slots_fair</code> prüft das statistisch.</p>
+    </div>
+  </div>
+
+  <div class="entry" id="a2-11">
+    <header><h3>Symbolvergabe: 64 eindeutige Kombinationen</h3><p class="src">slots.py, skin_of(), assign_skins()</p></header>
+    <div class="body">
+<pre>skin(k) = ( SYMBOL[k mod 8],  (BASISFARBE[k mod 8] + ⌊k / 8⌋) mod 8 )</pre>
+    <p>Jede Runde durch alle 8 Bilder verschiebt die Farbe um eins. Die ersten 64 Kombinationen sind deshalb paarweise verschieden. Gespeicherte Kombinationen aus einer Gruppe werden zuerst vergeben, solange sie eindeutig sind. So behalten Stammspieler ihr Symbol.</p>
+    </div>
+  </div>
+
+  <div class="entry" id="a2-12">
+    <header><h3>Leerlauf-Raster mit teilerfremder Schrittweite</h3><p class="src">stages/slots.js, idleGrid()</p></header>
+    <div class="body">
+    <p>Vor dem ersten Spin soll jeder sein Symbol sehen, und Nachbarn sollen sich unterscheiden:</p>
+<pre>step = erstes k ∈ [7, 5, 4, 3, 2, 1] mit ggT(k, n) = 1
+zelle(c, r) = namen[ (r · 5 + c) · step  mod n ]</pre>
+    <p>Weil <code>step</code> teilerfremd zu <code>n</code> ist, ist die Abbildung eine Permutation. Bei höchstens 15 Namen kommt jeder vor, und waagerechte Nachbarn sind nie gleich.</p>
+    </div>
+  </div>
+</section>
+
+<section class="ch" id="k3">
+  <header class="ch-head"><h2>Zeit &amp; Synchronisation</h2><p>Fernseher und Handys zeigen dasselbe Bild, ohne Video-Stream. Möglich wird das durch eine gemeinsame Uhr und Zeitpläne, die der Server vorab festlegt.</p></header>
+
+  <div class="entry" id="a3-1">
+    <header><h3>Uhrabgleich mit Maximum-Filter</h3><p class="src">core.js, syncClock()</p></header>
+    <div class="body">
+<pre>sample = server_ms − Date.now()
+offset = sample                                    (erste Probe)
+offset = max(sample, 0,8 · offset + 0,2 · sample)  (danach)
+serverNow() = Date.now() + offset</pre>
+    <p class="why"><b>Kniff:</b>Netzwerkverzögerung macht eine Probe immer nur <em>kleiner</em>, weil die Serverzeit veraltet ankommt. Das Maximum hält die Probe mit der geringsten Verzögerung fest. Die Glättung lässt den Wert langsam nachgeben, falls eine Uhr driftet.</p>
+    </div>
+  </div>
+
+  <div class="entry" id="a3-2">
+    <header><h3>Ereignisgesteuerte Wakeup-Planung</h3><p class="src">app.py, schedule(), draws.py, wakeups()</p></header>
+    <div class="body">
+    <p>Kein Polling: <code>wakeups()</code> liefert alle künftigen Zeitpunkte, an denen sich der Zustand ändert, also <code>locks_at</code>, <code>calls_at</code> und <code>ends_at</code> aller Runden. Ein einziger <code>threading.Timer</code> pro Tisch schläft bis zum frühesten davon (+80 ms Puffer), sendet dann den Zustand und plant sich neu.</p>
+    <p>Als Sicherheitsnetz ruft jede Zustandsberechnung zusätzlich <code>settle()</code> auf. Da es idempotent ist, wird ein verpasster Timer, etwa nach einem Neustart, beim nächsten Zugriff nachgeholt.</p>
+    </div>
+  </div>
+
+  <div class="entry" id="n-rounds">
+    <header><h3>Verkettung der Slot-Runden</h3><p class="src">draws.py, _settle_slots()</p></header>
+    <div class="body">
+<p>Eine Slot-Session besteht aus mehreren Runden, deren Zeitpunkte erst feststehen, wenn die vorige Runde gedreht ist. Jede Runde wird bei ihrem <code>locks_at</code> gedreht, und dabei entsteht sofort die nächste:</p>
+<pre>ende          = started_at + dauer(zeitplan)
+nächste Runde:
+  calls_at    = ende                        Einsätze öffnen
+  locks_at    = ende + 14.000 ms            (0, wenn kein Handy mitspielt)
+  started_at  = locks_at + 1.700 ms
+session.ends_at = jetzt + 6 h               Platzhalter bis zur letzten Runde</pre>
+<p>Das Drehen läuft in einer Schleife: Sind nach einem Neustart mehrere Runden fällig, werden alle nacheinander nachgeholt. Die Wakeup-Planung ignoriert Zeitpunkte, die mehr als 3 Stunden entfernt sind, damit der Platzhalter keinen Timer auslöst.</p>
+    </div>
+  </div>
+
+  <div class="entry" id="a3-3">
+    <header><h3>Der Regie-Zeitplan</h3><p class="src">slots.py, timeline()</p></header>
+    <div class="body">
+    <p>Der Server rechnet jeden Spin vorab auf die Millisekunde durch und schreibt die Zeitpunkte in das Ergebnis:</p>
+<pre>stopp[c]   = 450 + 1.850 + 430 · c        (+2.300 auf der letzten Walze bei Tease)
+nach Stopp : 900 Stille
+Glück      : 720 je Umwandlung
+Muster k   : min(1.500, 850 · 1,2^k)       jedes weitere Muster lässt länger warten
+Faktor k   : 1.300 + 350 · k
+Hochzählen : 1.500 + 650 · stufe  (+1.600 ab Stufe 3)
+Pleite 2.700 · leer 1.900 · „Nochmal“ 2.100 · Los 3.300</pre>
+    <p>Die Abstände wachsen geometrisch, und so steigt die Spannung von selbst. Zwischen zwei Runden liegen 14 s Pause für Rückblick und neue Einsätze.</p>
+    </div>
+  </div>
+
+  <div class="entry" id="n-plinkodur">
+    <header><h3>Dauer einer Plinko-Ziehung</h3><p class="src">plinko.py, plinko_duration()</p></header>
+    <div class="body">
+<p>Der Server muss <code>ends_at</code> kennen, bevor die Kugel fällt. Er rechnet die Dauer aus denselben Konstanten wie die Animation:</p>
+<pre>dauer = 400 (Start) + 600 (Fall) + Σ_{k=0}^{rows−2} (520 − 14k) + 450 (Landung) + 400 (Halten)
+
+rows = 8:   Σ = 7 · 520 − 14 · 21 = 3.346   →   dauer = 5.196 ms
+rows = 16:  Σ = 15 · 520 − 14 · 105 = 6.330 →   dauer = 8.180 ms</pre>
+<p>Beim Glücksrad ist die Dauer fest (9,5 s), bei Slots ergibt sie sich aus dem <a href="#a3-3">Regie-Zeitplan</a>.</p>
+    </div>
+  </div>
+
+  <div class="entry" id="a3-4">
+    <header><h3>Event-Replay mit stillem Aufholen</h3><p class="src">stages/slots.js, buildEvents(), replay()</p></header>
+    <div class="body">
+    <p>Aus dem Zeitplan baut der Client eine sortierte Ereignisliste (Spin, Stopp, Umwandlung, Muster, Faktor, Hochzählen …) und arbeitet sie in jedem Frame ab:</p>
+<pre>solange events[i].at ≤ jetzt:
+    apply(events[i], live = (jetzt − events[i].at &lt; LIVE))
+    i++</pre>
+    <p>Wer die Seite mitten in einer Runde neu lädt, bekommt alle vergangenen Ereignisse <em>still</em> nachgespielt, ohne Ton und Effekte. Ab dem aktuellen Moment läuft alles live weiter. Das Prinzip entspricht Event Sourcing.</p>
+    </div>
+  </div>
+
+  <div class="entry" id="a3-5">
+    <header><h3>Event-Stream mit Backpressure und Backoff</h3><p class="src">handler.py, stream(), core.js, live()</p></header>
+    <div class="body">
+    <ul>
+      <li>Jeder Client hat eine eigene Queue mit höchstens 16 Einträgen. Ist sie voll, wird die Nachricht verworfen. Das ist unkritisch, weil jede Nachricht den <em>vollständigen</em> Zustand enthält.</li>
+      <li>Der Zustand wird einmal berechnet und nur pro Client um dessen eigene Daten ergänzt.</li>
+      <li>Ein Kommentar-Ping alle 15 s hält die Verbindung offen. Bei Abbruch verbindet der Client nach <code>min(8 s, 0,8 s · 2^versuch)</code> neu.</li>
+    </ul>
+    </div>
+  </div>
+</section>
+
+<section class="ch" id="k4">
+  <header class="ch-head"><h2>Animation &amp; Kinematik</h2><p>Keine Bühne speichert ihren Fortschritt. Jedes Bild ist eine Funktion von <code>serverNow() − started_at</code>.</p></header>
+
+  <div class="entry" id="a4-1">
+    <header><h3>Raddrehung: Kurve und ihre Ableitung</h3><p class="src">stages/wheel.js, angleAt()</p></header>
+    <div class="body">
+<pre>θ(p)   = start + Δ · easeOutQuart(p)        easeOutQuart(p) = 1 − (1 − p)⁴
+v(p)   = 4 · (1 − p)³                       genau die Ableitung
+anlauf = −0,25 · sin(π · min(1, t/350))     kurz zurückziehen, dann losschnellen</pre>
+    <figure class="fig">
+      <svg id="figWheel" viewBox="0 0 640 220" role="img" aria-label="Winkel und Geschwindigkeit des Glücksrads über die Zeit"></svg>
+      <figcaption><span>Winkel und Geschwindigkeit über die Drehdauer. Die Geschwindigkeit steuert Licht, Klicks und Zoom.</span></figcaption>
+    </figure>
+    </div>
+  </div>
+
+  <div class="entry" id="a4-2">
+    <header><h3>Zeiger und Stift-Erkennung</h3><p class="src">wheel.js, frame()</p></header>
+    <div class="body">
+    <p>Pro Name gibt es <code>⌈24/n⌉</code> Stifte. Ein Klick fällt, wenn sich der Stift unter dem Zeiger ändert:</p>
+<pre>unter = ⌊ ((−θ mod 2π) + 2π) mod 2π / stiftabstand ⌋
+unter ≠ vorher  →  klick(lautstärke = 0,55 + 0,45 · (1 − p))
+zunge += (stoß − zunge) · 0,45              exponentielle Glättung</pre>
+    </div>
+  </div>
+
+  <div class="entry" id="a4-3">
+    <header><h3>Kamerazoom auf den Zeiger</h3><p class="src">wheel.js</p></header>
+    <div class="body">
+<pre>smooth(a, b, x) = u² · (3 − 2u),   u = clamp((x − a)/(b − a))
+zoom = 1 + 0,16 · smooth(0,6; 0,97; p)      um den Zeiger als Fixpunkt</pre>
+    <p>Gegen Ende rückt die Kamera näher an den Zeiger. Nach dem Ergebnis zoomt sie über 900 ms wieder heraus.</p>
+    </div>
+  </div>
+
+  <div class="entry" id="a4-4">
+    <header><h3>Analytische Plinko-Bahn</h3><p class="src">stages/plinko.js, ballAt()</p></header>
+    <div class="body">
+    <p>Es gibt keine Physik-Engine. Jedes Teilstück zwischen zwei Stiften ist eine geschlossene Formel:</p>
+<pre>dauer(k) = 520 − 14 · k  ms                 jeder Hop kürzer → wirkt wie Beschleunigung
+x(u) = x₀ + (x₁ − x₀) · (1 − (1 − u)^1,7)
+y(u) = y₀ + (y₁ − y₀) · u² − 0,35 · dy · sin(πu) · (1 − u)     Fall plus Hüpfer</pre>
+    <p>Server und Client verwenden dieselben Konstanten, damit <code>ends_at</code> exakt zur Landung passt.</p>
+    </div>
+  </div>
+
+  <div class="entry" id="n-plinkolayout">
+    <header><h3>Geometrie des Plinko-Bretts</h3><p class="src">stages/plinko.js, layout()</p></header>
+    <div class="body">
+<p>Das Brett füllt jede Bildschirmgröße und bleibt dabei lesbar. Zuerst wird entschieden, ob die Namen waagerecht in die Fächer passen:</p>
+<pre>dxW   = 0,9 · breite / spalten
+fH    = min(dxW · per · 0,2;  26 px)
+flach = fH ≥ 13  ∧  längster Name ≤ 0,84 · fachbreite
+binH  = flach ? 2,8 · fH : min(0,3 · höhe;  max(3,2 · dxW;  90))
+
+dx    = min(dxW;  (0,9 · höhe − binH) / (1,4 + (rows − 1) · 0,9 + 0,9))
+dy    = 0,9 · dx                     Reihenabstand
+pegR  = clamp(0,08 · dx;  2,5;  9)    ballR = min(0,21 · dx;  20)</pre>
+<p>Passen die Namen nicht waagerecht, werden sie um 90° gedreht und senkrecht in die Fächer gesetzt.</p>
+    </div>
+  </div>
+
+  <div class="entry" id="a4-5">
+    <header><h3>Walzen-Scroll</h3><p class="src">stages/slots.js, animateReels()</p></header>
+    <div class="body">
+<pre>pos[c] += dt · zelle · 0,028      (Tease: 0,011 – man sieht die Namen vorbeiziehen)
+y = pos[c] mod (zelle · 1,08 · 9)             endloser Streifen aus 9 Füllzellen
+ausholen: y = −0,12 · zelle · sin(π · (1 + t/450))</pre>
+    <p>Die Füllzellen entstehen aus Zahlenfolgen wie <code>(c·31 + k·17 + i·7) mod 23</code>. Jede Walze sieht anders aus, aber auf allen Geräten gleich.</p>
+    </div>
+  </div>
+
+  <div class="entry" id="n-slotsize">
+    <header><h3>Größe des Slot-Automaten</h3><p class="src">stages/slots.js, layout()</p></header>
+    <div class="body">
+<pre>zelle = max(28;  min(0,94 · breite / 5,9;  0,95 · höhe / 5,3;  170)) px</pre>
+<p>Der Automat ist etwa 5,9 Zellen breit (5 Walzen plus Rahmen) und mit Laufschrift und Zähler 5,3 Zellen hoch. Die Zellgröße wird als CSS-Variable gesetzt, alle anderen Maße leiten sich daraus ab.</p>
+    </div>
+  </div>
+
+  <div class="entry" id="n-wheelfont">
+    <header><h3>Schriftgröße im Glücksrad</h3><p class="src">stage.js, labelFont()</p></header>
+    <div class="body">
+<p>Die Namen stehen radial in den Segmenten. Ihre Größe richtet sich nach der Bogenlänge, die das Segment auf Höhe des Textes hat:</p>
+<pre>bogen = segmentwinkel · r_text
+cap   = R · (0,12 bei n ≤ 3 · 0,10 bei n ≤ 6 · 0,08 bei n ≤ 12 · sonst 0,064)
+größe = max(8 px;  min(cap;  0,6 · bogen))</pre>
+    </div>
+  </div>
+
+  <div class="entry" id="a4-6">
+    <header><h3>Text in Felder einpassen</h3><p class="src">stage.js, fitLabel()</p></header>
+    <div class="body">
+<pre>f = max(0,6 · soll, 8 px, soll · platz / breite)      erst proportional verkleinern
+danach zeichenweise kürzen, bis „text…“ passt</pre>
+    <p>Bei Plinko entscheidet die Messung außerdem, ob die Namen waagerecht oder senkrecht in den Fächern stehen.</p>
+    </div>
+  </div>
+
+  <div class="entry" id="n-count">
+    <header><h3>Hochzählen von Punkten und Chips</h3><p class="src">fx.js, countTo()</p></header>
+    <div class="body">
+<pre>wert(u) = von + (bis − von) · (1 − (1 − u)³)        u = vergangene Zeit / Dauer
+schritt = ⌊18 · u⌋   → bei jedem neuen Schritt ein Ton</pre>
+<p>Die Zahl läuft schnell an und bremst am Ende ab. Weil die Töne an den 18 Zeitschritten hängen und nicht am Zahlenwert, kommen sie gleichmäßig, egal ob von 0 auf 12 oder auf 12.000 gezählt wird. Die Dauer wächst mit der <a href="#a2-7">Sensations-Stufe</a>.</p>
+    </div>
+  </div>
+</section>
+
+<section class="ch" id="k5">
+  <header class="ch-head"><h2>Klangsynthese</h2><p>Wie die einzelnen Klänge entstehen. Es gibt keine einzige Audiodatei: Alles wird live mit der Web-Audio-API erzeugt oder einmal Sample für Sample berechnet und dann nur noch abgespielt.</p></header>
+
+  <div class="entry" id="a5-1">
+    <header><h3>Bandbegrenzte Pulswellen</h3><p class="src">audio.js, pulse()</p></header>
+    <div class="body">
+    <p>Pulswellen mit 12,5 / 25 / 50 % Tastgrad wie bei alten Konsolen, als Fourier-Reihe mit 40 Obertönen:</p>
+<pre>a_k = 2/(kπ) · sin(kπ · tastgrad) · σ_k
+σ_k = sin(x)/x,   x = πk/41                 Lanczos-Gewichtung</pre>
+    <p class="why"><b>Warum:</b>Eine abgeschnittene Fourier-Reihe schwingt an den Kanten über (Gibbs-Phänomen). Das klingt schrill. Das σ-Fenster dämpft die hohen Obertöne weich ab.</p>
+    </div>
+  </div>
+
+  <div class="entry" id="a5-2">
+    <header><h3>4-Bit-Dreieck per DFT</h3><p class="src">audio.js, tri4()</p></header>
+    <div class="body">
+    <p>Das Original-Dreieck des Chips hat nur 16 Stufen. Eine Treppe aus 32 Werten wird per diskreter Fourier-Transformation in 24 Obertöne zerlegt und als <code>PeriodicWave</code> abgespielt. Die typische Körnigkeit im Bass bleibt erhalten.</p>
+<pre>re_k = (2/32) · Σ v_i · cos(2πki/32),   im_k = (2/32) · Σ v_i · sin(2πki/32)</pre>
+    </div>
+  </div>
+
+  <div class="entry" id="a5-3">
+    <header><h3>Rauschen aus einem 15-Bit-LFSR</h3><p class="src">audio.js, lfsr()</p></header>
+    <div class="body">
+<pre>bit = (reg ⊕ (reg &gt;&gt; tap)) &amp; 1          tap = 1 (lang) oder 6 (kurz, metallisch)
+reg = (reg &gt;&gt; 1) | (bit &lt;&lt; 14)
+sample = reg &amp; 1 ? +0,7 : −0,7          jeder Wert 4 Samples lang</pre>
+    <p>Die lange Folge (32.767 Schritte) klingt wie Zischen, die kurze Folge tonal-metallisch. Daraus entstehen Snare, Hi-Hat und Wirbel.</p>
+    </div>
+  </div>
+
+  <div class="entry" id="a5-4">
+    <header><h3>Hüllkurven in 1/60-Sekunden-Schritten</h3><p class="src">audio.js, note(), _volume()</p></header>
+    <div class="body">
+<pre>pegel(i)    = vol · (1 − i/frames)^decay,  gesetzt bei t + i/60
+frequenz(i) = f · 2^((arp[i] + sweep · i + vibrato(i)) / 12)
+vibrato(i)  = vib · sin(0,85 · (i − vibAt))   erst ab Frame vibAt
+jede Stufe per setTargetAtTime(τ = 2,5 ms)    ohne Knacksen</pre>
+<p>Schlagzeug entsteht aus denselben Bausteinen. Die Kick ist ein Dreieck, das bei 170 Hz beginnt und pro Frame um 4,5 Halbtöne fällt, plus ein Rauschstoß. Die Snare ist 7 Frames Rauschen mit einem kurzen Puls bei 230 Hz, der um 3 Halbtöne pro Frame fällt.</p>
+    <p>Lautstärke und Tonhöhe springen wie früher im Takt der Bildwiederholung. Der kleine Glättungswert verhindert Klicks an den Stufen.</p>
+    </div>
+  </div>
+
+  <div class="entry" id="n-soft">
+    <header><h3>Weiche Stimmen für die Slot-Musik</h3><p class="src">audio.js, tone() bell() keys() pad(), slot-sfx.js, strings() strum()</p></header>
+    <div class="body">
+<p>Die Slots klingen nicht nach Konsole, sondern warm. Die Stimmen sind einfache additive Synthese mit Verstimmung:</p>
+<table>
+  <tr><th>Stimme</th><th>Aufbau</th></tr>
+  <tr><td>Ton</td><td>linearer Anschlag in <code>a</code>, exponentielles Ausklingen mit Zeitkonstante <code>d</code>, optional ein Gleiten von oben in höchstens 120 ms</td></tr>
+  <tr><td>Glocke</td><td>Grundton + Oktave (0,28) + kurzer Glanz bei 4,2 · f (0,08, 50 ms)</td></tr>
+  <tr><td>E-Piano</td><td>Dreieck, abwechselnd ±4 Cent verstimmt, dazu eine leise Oktave</td></tr>
+  <tr><td>Fläche</td><td>zwei Sägezähne je Ton, ±7 Cent, gegenläufig im Stereobild, Tiefpass</td></tr>
+  <tr><td>Streicher</td><td>drei Sägezähne je Ton bei −11, +1 und +12 Cent, ein LFO mit 5,2 Hz moduliert alle um ±7 Cent</td></tr>
+</table>
+<pre>pegel_streicher = vol / √(3 · töne)       pegel_zupfen = 1,6 · vol / √(töne)</pre>
+<p>Die Wurzel sorgt dafür, dass ein Akkord mit sechs Tönen nicht doppelt so laut ist wie einer mit drei: Unkorrelierte Stimmen addieren sich in der Leistung, nicht in der Amplitude. Beim Zupfen erklingen die Töne 7 ms versetzt von unten nach oben und werden über das Stereobild verteilt.</p>
+    </div>
+  </div>
+
+  <div class="entry" id="a5-8">
+    <header><h3>Gezupfte Saiten nach Karplus-Strong</h3><p class="src">slot-sfx.js, pluckBuf()</p></header>
+    <div class="body">
+<pre>N = round(sr / f − 0,5)                 Länge der Verzögerungsleitung
+q = tiefpass(rauschen)                  weicher Anschlag „mit dem Daumen“
+y[i] = q[k];   q[k] = g · ½ · (q[k] + q[k+1])
+g = 10^(−3 / (T60 · sr / (N + 0,5)))     Abklingen um 60 dB in T60
+rate = f · (N + 0,5) / sr               Stimmkorrektur über die Abspielrate</pre>
+    <p>Die Saiten werden im Leerlauf nach und nach vorberechnet (3 Töne alle 40 ms), damit die Auszahlungsmusik später nie hakt.</p>
+    </div>
+  </div>
+
+  <div class="entry" id="a5-9">
+    <header><h3>Modalsynthese mit Resonatorbank</h3><p class="src">slot-real.js, bank(), dense()</p></header>
+    <div class="body">
+    <p>Ein Körper schwingt in vielen Moden. Jede Mode ist ein Zwei-Pol-IIR-Resonator:</p>
+<pre>r = e^(−1/(τ · sr)),  ω = 2πf/sr
+y[n] = 2r·cos ω · y[n−1] − r² · y[n−2] + g·sin ω · x[n]
+
+dense(n, lo, hi):  f = lo · (hi/lo)^U,   g = (f/lo)^(−tilt) · U(0,3; 1)</pre>
+    <p>Die Frequenzen sind logarithmisch zufällig verteilt, eine Spektralneigung macht hohe Moden leiser. Angeregt wird mit gefiltertem Rauschen oder einem Halbsinus-Impuls. Ein Walzen-Stopp besteht aus sechs Schichten: Gewicht (48–100 Hz), Holz, Klopfen, Sperrklinke, Metallring und Nachfedern. Die Ratsche hat 16 Varianten aus je etwa 40 Resonanzen.</p>
+    </div>
+  </div>
+
+  <div class="entry" id="n-marimba">
+    <header><h3>Marimba und dumpfer Schlag als Sinus-Summe</h3><p class="src">slot-sfx.js, modal(), mallet(), THUD</p></header>
+    <div class="body">
+<p>Eine zweite, einfachere Form der Modalsynthese: Statt Filter anzuregen, werden abklingende Sinusse direkt addiert, plus ein kurzer Rauschklick als Anschlag:</p>
+<pre>s(t) = klick · e^(−t/τ_k) · rauschen  +  Σ a_i · e^(−t/τ_i) · sin(2π f_i t)
+
+marimba(f):  [f; 0,30 s; 1]  [3,93 f; 0,05; 0,32]  [9,2 f; 0,012; 0,1]  [2 f; 0,12; 0,06]
+schlag:      56, 88, 150, 400, 900 Hz mit 100 … 5 ms Abklingzeit</pre>
+<p>Die Teiltöne 3,93 und 9,2 entsprechen ungefähr denen eines echten Klangstabs. Für das Rauschen nutzt die Funktion einen kleinen Zufallsgenerator mit festem Startwert (<code>x = (9301 · x + 49297) mod 233280</code>), damit jeder Ton bei jedem Anschlag identisch klingt. Jede Note wird einmal berechnet und zwischengespeichert, die Saiten und Marimbatöne werden im Leerlauf vorbereitet.</p>
+    </div>
+  </div>
+
+  <div class="entry" id="a5-10">
+    <header><h3>Glocke mit unharmonischen Teiltönen</h3><p class="src">slot-real.js, bellArr()</p></header>
+    <div class="body">
+<pre>f = 1.180 Hz · [1 ; 2,76 ; 5,40 ; 8,93 ; 13,34]
+τ = [0,90 ; 0,45 ; 0,25 ; 0,12 ; 0,07] s</pre>
+    <p>Echte Glocken haben keine ganzzahligen Obertöne. Genau diese Verhältnisse machen den Klang metallisch statt orgelhaft.</p>
+    </div>
+  </div>
+
+  <div class="entry" id="a5-11">
+    <header><h3>Hall-Impulsantworten und Rauschfarben</h3><p class="src">audio.js, room(), slot-real.js, ir(), loopNoise()</p></header>
+    <div class="body">
+<pre>raum:  y += 0,35 · (rauschen − y);   h[i] = y · e^(−5t)          gefiltert, abklingend
+braun: b = (b + 0,02 · x) / 1,02                                 leckender Integrator</pre>
+    <p>Die Impulsantworten werden per <code>ConvolverNode</code> gefaltet: ein kurzer Gehäuseklang (0,3 s) für die Mechanik und ein Saal (2,4 s) für den Jackpot.</p>
+    </div>
+  </div>
+
+  <div class="entry" id="n-rattle">
+    <header><h3>Rattern der Walzen und Münzregen</h3><p class="src">slot-real.js, rateOf(), pump(), coinRain()</p></header>
+    <div class="body">
+<p>Jede laufende Walze erzeugt Rastgeräusche, deren Takt einer kleinen Mechanik folgt:</p>
+<pre>anlauf:  rate = 6 + 12 · min(1; (t − start) / 0,35 s)          6 → 18 Zähne/s
+auslauf: rate = 18 − 13 · min(1; (t − langsam_ab) / 2,3 s)^0,7  nur Spannungs-Walze
+nächster zahn += (1 / rate) · U(0,88; 1,12)                    ±12 % Unruhe</pre>
+<p>Jeder Zahn wählt eine von 16 vorberechneten Varianten, mit zufälliger Lautstärke und ±5 % Tonhöhe. Geplant wird alle 25 ms für die nächsten 120 ms. Darunter liegt ein Schnurren aus gefiltertem Rauschen, das ein LFO mit 15 Hz flattern lässt wie die vorbeiziehenden Bänder.</p>
+<p>Beim Jackpot fallen 45 Münzen in 2,2 s. 70 % ihrer Zeitpunkte folgen <code>u^1,6</code> und häufen sich deshalb am Anfang, wie bei einem echten Schwall. Die Lautstärke fällt dabei linear auf die Hälfte.</p>
+    </div>
+  </div>
+
+  <div class="entry" id="n-chan">
+    <header><h3>Klangkanäle ohne Überlappung</h3><p class="src">slot-sfx.js, chan(), audio.js, roll()</p></header>
+    <div class="body">
+<p>Jede Klangart hat einen eigenen Kanal (Ergebnis, Feld, Zählen, Gewinn). Ein neuer Klang auf demselben Kanal blendet den vorigen mit einer Zeitkonstante von 70 ms aus, statt sich darüberzulegen. Folgen viele Ereignisse schnell aufeinander, bleibt der Klang so sauber.</p>
+<p>Das Rollen der Plinko-Kugel ist eine Rauschschleife, deren Abspielrate und Lautstärke der Geschwindigkeit folgen: <code>rate = 0,08 + 0,3 · v</code>, <code>pegel = 0,008 + 0,03 · v</code>.</p>
+    </div>
+  </div>
+</section>
+
+<section class="ch" id="k5m">
+  <header class="ch-head"><h2>Musik</h2><p>Die Musik ist komponiert und reagiert trotzdem auf das Spiel. Alles steht in a-Moll, jedes Ereignis spielt Töne des Akkords, der gerade klingt, und jede Spannung löst sich an einem vorher berechneten Zeitpunkt auf.</p></header>
+
+  <div class="entry" id="n-tonsystem">
+    <header><h3>Tonmaterial: a-Moll und Pentatonik</h3><p class="src">audio.js</p></header>
+    <div class="body">
+<p>Alle Töne sind MIDI-Nummern und werden gleichstufig umgerechnet:</p>
+<pre>f(m) = 440 Hz · 2^((m − 69) / 12)          m = 69 → A4,  m = 57 → A3
+
+PENTA       = [0, 2, 4, 7, 9, 12, 14, 16, 19, 21, 24, 26, 28]   Dur-Pentatonik, 2½ Oktaven
+MINOR_PENTA = [0, 3, 5, 7, 10]                                  Moll-Pentatonik</pre>
+<p>Die gesamte Musik steht in a-Moll. Für schnelle Effektklänge (Chips, Stifte, Zählen) dient die Pentatonik: Sie hat keine Halbtonschritte, also klingt jede Kombination ihrer Töne konsonant, auch wenn viele gleichzeitig erklingen.</p>
+    </div>
+  </div>
+
+  <div class="entry" id="a5-5">
+    <header><h3>Look-ahead-Scheduler und Serverzeit → Audiozeit</h3><p class="src">audio.js, at(), slot-sfx.js, pump()</p></header>
+    <div class="body">
+<p>Alle Musik und alle Klänge laufen über diesen Mechanismus:</p>
+<pre>alle 25 ms:
+    solange nächster_schritt &lt; jetzt + 150 ms:
+        spiele schritt(nächster_schritt + swing)      swing = 16tel · 0,16 auf Offbeats
+        nächster_schritt += 16tel
+audio_t(server_ms) = ctx.currentTime + (server_ms − serverNow()) / 1000
+
+raster auf ziel legen (Countdown):
+    k = ⌊(ziel − jetzt) / 16tel⌋;   erster_schritt = ziel − k · 16tel
+nächste achtel(t): ab dem Raster in Achteln vorrücken, bis ≥ t</pre>
+<p>Für den Countdown wird das Raster rückwärts vom Ziel aus angelegt, sodass der letzte Schritt exakt auf „Keine Wetten mehr“ fällt. Treffer, Rundenende und Schlussakkorde werden auf die nächste Achtel gelegt und sitzen damit im Takt. Ist der Tab im Hintergrund, holt der Scheduler verpasste Schritte nicht nach, sondern setzt neu an.</p>
+    <p class="why"><b>Warum:</b>JavaScript-Timer sind ungenau, die Audio-Uhr nicht. Töne werden im Voraus auf der Audio-Zeitachse geplant und sitzen deshalb sample-genau auf den Ereignissen, die der Server vorgegeben hat.</p>
+    </div>
+  </div>
+
+  <div class="entry" id="n-lobby">
+    <header><h3>Das Lobby-Thema</h3><p class="src">audio.js, SCENES.lobby</p></header>
+    <div class="body">
+<p>Ein 16-taktiges Thema in a-Moll bei 112 bpm mit 16 % Swing. Teil A beruht auf der absteigenden Folge Am – G – F – E7 (der „andalusischen Kadenz“), Teil B weicht in die Subdominante aus:</p>
+<pre>A:  Am  G   F   E7 │ Am  G   F→E7  Am
+B:  Dm  Am  Dm  E7 │ F   G   Am    E7</pre>
+<ul>
+  <li><strong>Bass</strong> (Dreieck) auf den Sechzehnteln 0, 3, 6, 8, 11 und 14: Grundton, Oktave, Quinte, Grundton, Oktave, dann ein Halbton zum nächsten Grundton hin. Dieser chromatische Leitton zieht jeden Takt in den nächsten.</li>
+  <li><strong>Melodie</strong> (25 %-Puls) mit leichtem Vibrato ab Frame 12. Ein Echo drei Sechzehntel später spielt sie leiser auf 12,5 %-Puls und nach rechts versetzt.</li>
+  <li><strong>Schlagzeug:</strong> Kick auf 1 und auf der „und“ der 3 (Sechzehntel 10), Snare auf 2 und 4, Hi-Hat auf Achteln mit Betonung der Viertel. Vor jeder Wiederholung (Takt 8 und 16) ein ansteigender Snare-Wirbel.</li>
+  <li><strong>Glitzer:</strong> In den Takten 13–15 laufen sehr leise Akkordtöne drei Oktaven über dem Grundton.</li>
+</ul>
+<p>Die ersten vier Takte des Themas kehren später in der Slot-Musik wieder.</p>
+    </div>
+  </div>
+
+  <div class="entry" id="n-countdown">
+    <header><h3>Countdown: ein Halbton pro Sekunde</h3><p class="src">audio.js, SCENES.calls</p></header>
+    <div class="body">
+<p>Während der letzten Einsätze läuft ein Groove bei 120 bpm. Eine Sechzehntel ist dann genau 125 ms lang, acht Sechzehntel sind eine Sekunde. Das macht die Rechnung einfach:</p>
+<pre>übrig     = verbleibende Sechzehntel bis „Keine Wetten mehr“
+anstieg   = ⌊(gesamt − übrig) / 8⌋          Halbtöne, einer pro Sekunde
+bass      = 33 + anstieg (+12 im Wechsel)
+ostinato  = 69 + anstieg + [0, 7, 12, 7]   Grundton, Quinte, Oktave, Quinte
+sekunde   = Ton 81, die letzten drei: 84, 86, 88, lauter und länger</pre>
+<p>In den letzten zwei Sekunden kommt ein Rauschwirbel dazu, der bis zum Schluss anschwillt. Auf Handys, die keine Musik spielen, ersetzt ein Holzblock-Ticken den Countdown. Die letzten drei Sekunden sind dort Glocken auf E, G und C.</p>
+    </div>
+  </div>
+
+  <div class="entry" id="n-spinscene">
+    <header><h3>Musik, die dem Rad folgt</h3><p class="src">audio.js, SCENES.spin, tick()</p></header>
+    <div class="body">
+<p>Während das Rad dreht, bestimmt sein Fortschritt <code>L</code> (0 = schnell, 1 = steht), was die Musik spielt. Sie läuft bei 150 bpm:</p>
+<table>
+  <tr><th>Bereich</th><th>Musik</th></tr>
+  <tr><td><code>L &lt; 0,45</code></td><td>treibend: Kick, Snare, Bass in Oktaven, Arpeggio. Alle zwei Takte Wechsel zwischen a-Moll und F-Dur (Grundton −4 Halbtöne).</td></tr>
+  <tr><td><code>0,45 – 0,8</code></td><td>Alles steigt: Bass und Arpeggio rücken alle 8 Sechzehntel einen Halbton höher (höchstens 8), darüber eine lang gehaltene „Sirene“ mit Vibrato.</td></tr>
+  <tr><td><code>0,8 – 0,995</code></td><td>nur noch ein Herzschlag (zwei Kicks pro halben Takt) und ein leiser hoher Wechselton</td></tr>
+  <tr><td><code>≥ 0,995</code></td><td>Stille vor dem Ergebnis</td></tr>
+</table>
+<p>Die Klicks am Zeiger durchlaufen bei schnellem Rad reihum die Moll-Pentatonik (<code>81 + [0, 3, 5, 7, 10]</code>). Ab <code>L = 0,8</code> steigen sie stattdessen chromatisch, Halbton für Halbton (<code>69 + k</code>, bis zu zwei Oktaven), und werden lauter. Klicks, die weniger als 22 ms auseinanderliegen, werden verworfen.</p>
+    </div>
+  </div>
+
+  <div class="entry" id="n-ticks">
+    <header><h3>Tonleitern für Chips, Stifte und Zählen</h3><p class="src">audio.js, chip() ping() score() coins()</p></header>
+    <div class="body">
+<pre>chip      79 + PENTA[combo], 2 Frames später +5 (Quarte)
+          combo +1 je Chip, zurück auf 0 nach 0,8 s Pause
+ping      72 + PENTA[reihe mod 13]   Echo nach 120 ms auf der anderen Seite
+zählen    76 + PENTA[schritt]
+münzen    91 + PENTA[0 … 5],  zeitpunkt = U^1,5 · streuung</pre>
+<p>Wer schnell hintereinander Chips setzt, hört eine aufsteigende Tonleiter. Die Plinko-Kugel spielt bei jeder Reihe den nächsten Pentatonik-Ton und steigt hörbar, während sie fällt.</p>
+    </div>
+  </div>
+
+  <div class="entry" id="n-cadences">
+    <header><h3>Kadenzen der Ziehung</h3><p class="src">audio.js, slam() reveal() lose() kaching() powerOn()</p></header>
+    <div class="body">
+<p>Die Schlüsselmomente sind kleine Schlusswendungen, harmonisch geplant:</p>
+<ul>
+  <li><strong>„Keine Wetten mehr“:</strong> Eine Fläche auf A – E – C – H, also a-Moll mit hinzugefügter None, und ein tiefes A. Darüber fallen drei Glocken E – C – A, der Akkord rückwärts gebrochen. Danach ist es still, bis das Rad startet.</li>
+  <li><strong>Ergebnis:</strong> Nach der ganzen Musik in Moll endet die Ziehung in A-Dur, das Prinzip der „picardischen Terz“. Ein Arpeggio A – Cis – E – A, dann E, A und ein langes Cis mit Vibrato. Der Bass spielt A – E – A, also Tonika – Dominante – Tonika.</li>
+  <li><strong>Gewinn eingestrichen:</strong> E → A (Quarte aufwärts), bei großem Gewinn zusätzlich ein schnelles A-Dur-Arpeggio (A – Cis – E – A – Cis) und Münzen.</li>
+  <li><strong>Die Bank gewinnt:</strong> Eine „traurige Posaune“: E – Es – D – Des chromatisch abwärts, der letzte Ton lang mit Vibrato. Der Bass geht parallel A – As – G – Ges.</li>
+  <li><strong>Einschalten:</strong> Rauschen, dessen Tonhöhe pro Frame um den Faktor 1,17 steigt, dann ein Sprung über A – E – A – E – A – E (abwechselnd Quinte und Quarte) und ein Münzklang.</li>
+</ul>
+    </div>
+  </div>
+
+  <div class="entry" id="n-slotmusic">
+    <header><h3>Slot-Musik als durchgehendes Stück</h3><p class="src">slot-sfx.js, Bed, betting() lock() tease()</p></header>
+    <div class="body">
+<p>Eine Slot-Session ist ein einziges Musikstück, eine Variante des Lobby-Themas: gleiches Tempo (112 bpm), gleicher Swing, gleiche Akkordfolge Am – G – F – E. Es gibt keine Pausen, nur die Dichte ändert sich.</p>
+<ul>
+  <li><strong>Nahtloser Übergang:</strong> Läuft gerade die Lobby-Musik, übernimmt die Slot-Musik deren Raster: gleiche Sechzehntel, gleicher Takt, gleicher Akkord. Die Lobby wird über 1,6 s ausgeblendet.</li>
+  <li><strong>Letzte Einsätze:</strong> Drei, zwei und eine Sekunde vor Schluss erklingen Glocken auf E, Gis und H, der Dur-Dreiklang der Dominante. „Keine Wetten mehr“ löst ihn nach a-Moll auf.</li>
+  <li><strong>Nach dem Lock:</strong> zwei Holzschläge, dann ein E-Dur-Akkord und Streicher auf E7. Die Dominante verlangt nach Fortsetzung, und die kommt mit dem Hebel.</li>
+  <li><strong>Tease:</strong> Die Harmonie bleibt auf E stehen (Orgelpunkt), der Bass spielt nur noch Viertel, dazu ein Herzschlag aus zwei tiefen Schlägen, die Hi-Hats werden mit jedem Schlag lauter, eine Glocke klettert durch die Akkordtöne. Die Spannung löst sich erst mit dem Ergebnis.</li>
+</ul>
+<p>Jeder Modus hat einen eigenen Tiefpass und Pegel. Während die Walzen laufen, ist die Musik leise (Pegel 0,22, Filter 1.500 Hz), damit die Mechanik vorn steht. In der Pause zwischen den Runden ist sie offen und warm (0,55, 2.800 Hz).</p>
+    </div>
+  </div>
+
+  <div class="entry" id="a5-7">
+    <header><h3>Energie-Modell der Slot-Musik</h3><p class="src">slot-sfx.js, Bed</p></header>
+    <div class="body">
+    <p>Ein einzelner Wert <code>E ∈ [0, 1]</code> bestimmt, wie dicht die Musik ist:</p>
+<pre>ereignis:   E = min(max, E + Δ)                 jede Walze, jeder Treffer legt nach
+countdown:  E = max(E, 0,35 + 0,6 · u)          baut bis „Keine Wetten mehr“ auf
+sonst:      E = max(boden, E − 0,0035)          sinkt pro 16tel langsam ab</pre>
+    <p>Die Energie entscheidet, welche Instrumente spielen:</p>
+<table>
+  <tr><th>Energie</th><th>Arrangement</th></tr>
+  <tr><td>immer</td><td>Fläche zu jedem Takt (Pegel und Filter wachsen mit E), Sechzehntel-Hats, Bass im Lobby-Muster mit chromatischem Übergang, Sägezahn mit Filter 500 + 700·E Hz plus Suboktave</td></tr>
+  <tr><td>außer beim Drehen</td><td>Akkordstöße auf der „und“ (Sechzehntel 6 und 14)</td></tr>
+  <tr><td><code>E &gt; 0,3</code></td><td>Clap auf 2 und 4</td></tr>
+  <tr><td><code>E &gt; 0,45</code></td><td>Kick auf jedem Viertel statt nur auf 1 und 3</td></tr>
+  <tr><td><code>E &gt; 0,5</code></td><td>offene Hat auf dem Offbeat, Arpeggio in Achteln (Muster 0-1-2-3-4-3-2-1 durch die Akkordtöne)</td></tr>
+  <tr><td><code>E &gt; 0,65</code></td><td>Das Lobby-Thema kommt obenauf, als Glocke und gefilterte Rechteckwelle.</td></tr>
+  <tr><td><code>E &gt; 0,8</code></td><td>Arpeggio in Sechzehnteln</td></tr>
+</table>
+<p>Jeder Modus hat einen eigenen Boden, Tiefpass und Pegel: Einsätze, Lock, Spin, Tease, Zählen, Pause. Pleite oder ein leerer Spin lassen die Musik kurz abtauchen (Pegel und Filter fallen, kommen exponentiell zurück), statt sie abzuschneiden. Beim Hochzählen steigen geplante Akkordstöße Stufe für Stufe und landen genau mit dem Zählerstand auf a-Moll. Dort setzt das Raster neu an (<code>landAt</code>).</p>
+    </div>
+  </div>
+
+  <div class="entry" id="n-chordtones">
+    <header><h3>Jeder Treffer spielt den nächsten Akkordton</h3><p class="src">slot-sfx.js, Bed.tone(), pattern() multiplier()</p></header>
+    <div class="body">
+<p>Alles, was auf dem Automaten passiert, ist Teil der Musik. Ereignisse spielen Töne des Akkords, der gerade klingt, und zählen dabei aufwärts:</p>
+<pre>töne = Akkordtöne, jeweils um Oktaven über basis gehoben, sortiert
+ton(k) = töne[k mod 5] + 12 · ⌊k / 5⌋
+
+umkehrung(akkord, n) = n-mal den tiefsten Ton eine Oktave höher legen</pre>
+<ul>
+  <li><strong>Muster k:</strong> Glocke auf <code>ton(k + 1)</code> plus Oktave darunter, dazu der Akkord gezupft in der Umkehrung <code>k mod 3</code>. Ab Musterwert 5 laufen drei weitere Glocken nach oben.</li>
+  <li><strong>Faktor k:</strong> ein kurzer Luftzug, dann ein voller Schlag auf F, G, E oder Am (reihum) in Umkehrung <code>k</code>. Jeder weitere Faktor klingt höher.</li>
+  <li><strong>Glücks-Umwandlung k</strong> und <strong>Feld-Anzählen:</strong> Glocke bzw. Marimba auf <code>ton(k + 2)</code> bzw. <code>ton(feld + schritt)</code>.</li>
+</ul>
+<p>Weil die Töne immer aus dem laufenden Akkord kommen, entsteht keine Dissonanz, egal wie viele Treffer zusammenkommen.</p>
+    </div>
+  </div>
+
+  <div class="entry" id="n-ladder">
+    <header><h3>Abrechnung: eine Akkordleiter mit Stimmführung</h3><p class="src">slot-sfx.js, payoff(), fanfare()</p></header>
+    <div class="body">
+<p>Beim Hochzählen der Punkte erklingt eine Akkordfolge, die genau mit dem Zählerstand auf a-Moll landet. Zuerst wird die Zahl der Akkorde aus der Dauer bestimmt und die Folge so gedreht, dass sie immer auf der Dominante E endet:</p>
+<pre>n       = max(3; round(dauer / achtel))
+akkord k = [Am, F, G, E][(k + 4 − n mod 4) mod 4]        letzter immer E
+u       = k / (n − 1)
+umkehrung = min(2; ⌊3u⌋)       streicher: pegel 0,04 + 0,08u,  filter 1.300 + 1.600u Hz</pre>
+<p>Die Marimba-Oberstimme wird <strong>rückwärts</strong> gebaut, vom Zielton aus:</p>
+<pre>ton[n−1] = 80 (Gis5, Leitton zu A)
+ton[k]   = höchster Akkordton von akkord k, der unter ton[k+1] liegt
+           und höchstens eine große Terz (4 Halbtöne) entfernt ist
+           (gibt es keinen, der nächste Akkordton darunter)</pre>
+<p>So steigt die Melodie in kleinen Schritten zum Gis. Die Landung auf a-Moll wählt dann die Lage, die zur letzten Umkehrung passt, damit sich alle Stimmen nur um einen Schritt bewegen: Gis geht nach A. Je nach Sensations-Stufe kommen Schichten dazu (Oktave, volle Akkorde, Marimba-Lauf). Danach setzt der Groove einen Schlag später genau auf a-Moll neu ein.</p>
+    </div>
+  </div>
+
+  <div class="entry" id="n-jackpot">
+    <header><h3>Jackpot-Jingle, rückwärts getaktet</h3><p class="src">slot-real.js, jackpot()</p></header>
+    <div class="body">
+<p>Ab Stufe 4 schweigt die normale Musik, und ein eigener Automaten-Jingle übernimmt. Sein Tempo wird aus der Zieldauer berechnet:</p>
+<pre>spanne = max(1,4 s; ende − start)
+n      = clamp(round(spanne / 0,4 s); 4; 8)   Schläge Anlauf  (≈ 150 bpm)
+schlag = spanne / n,   shuffle = ⅔ · schlag    Triolen-Feeling
+start  = ende − n · schlag
+akkord k = [F, G, Am, E7][(k + 4 − n mod 4) mod 4]          letzter immer E7</pre>
+<p>Auf dem Schlag spielt der Bass, auf dem Shuffle-Nachschlag der Akkord. Eine Marimba spielt „ding-da“ auf zwei Akkordtönen, in den letzten vier Schlägen eine Oktave höher. Am Ziel: a-Moll, ein Riff A – E – G – A – C – A, zwei Glocken, der Münzregen und nach drei Schlägen ein voller Schlussakkord.</p>
+    </div>
+  </div>
+
+  <div class="entry" id="n-endings">
+    <header><h3>Pleite, Nochmal, Rundenende, Finale</h3><p class="src">slot-sfx.js</p></header>
+    <div class="body">
+<ul>
+  <li><strong>Zwei Nieten im Bild:</strong> tief E – H (reine Quinte), dann E – B (Tritonus). Die Dissonanz warnt, ohne laut zu sein.</li>
+  <li><strong>Pleite:</strong> drei Marimbatöne chromatisch abwärts (E – Es – D), dann d-Moll. Die Musik fällt auf 20 % und Filter 400 Hz und kommt über 2,6 s zurück.</li>
+  <li><strong>Kein Muster:</strong> E → C (große Terz abwärts), die Musik taucht auf 50 % ab.</li>
+  <li><strong>Nochmal:</strong> ein Luftzug, dann E7. Die Dominante sagt „es geht weiter“.</li>
+  <li><strong>Das Los:</strong> 26 Rauschschläge im Abstand von 50 ms, jeder lauter, dann eine Glocke auf A mit a-Moll.</li>
+  <li><strong>Rundenende:</strong> E7 → Am, die Grundkadenz Dominante → Tonika, auf die nächste Achtel im Raster gelegt.</li>
+  <li><strong>Finale:</strong> ein großes a-Moll mit hinzugefügter None (A – E – A – C – E – H – C), sechs Glocken aufwärts, dann blendet die Musik über 3 s aus.</li>
+</ul>
+    </div>
+  </div>
+
+  <div class="entry" id="a5-12">
+    <header><h3>Groove-Puls: Die Oberfläche atmet im Takt</h3><p class="src">audio.js, groove(), beatLoop()</p></header>
+    <div class="body">
+    <p>Jeder Kick und jede Snare wird mit Zeit und Stärke protokolliert. Die Knöpfe pulsieren genau zu dem Schlag, der gerade <em>hörbar</em> ist. Dabei wird die Ausgabelatenz des Geräts abgezogen:</p>
+<pre>jetzt = ctx.currentTime − outputLatency
+puls  = stärke · e^(−7 · (jetzt − t_schlag))
+pendel = ±cos(π · (jetzt − t_schlag) / abstand)     wechselt von Schlag zu Schlag</pre>
+    <p>Beide Werte landen als CSS-Variablen <code>--pulse</code> und <code>--swing</code> auf <code>&lt;html&gt;</code>. Geschrieben wird nur, wenn sich ein auf 1/100 gerundeter Wert ändert.</p>
+    </div>
+  </div>
+</section>
+
+<section class="ch" id="k6">
+  <header class="ch-head"><h2>Grafik &amp; Effekte</h2><p>Alles hier ist Dekoration. Ohne WebGL oder mit „weniger Bewegung“ läuft die Seite genauso, nur ruhiger.</p></header>
+
+  <div class="entry" id="a6-1">
+    <header><h3>Shader-Strudel durch Domain Warping</h3><p class="src">fx.js, FRAG</p></header>
+    <div class="body">
+<pre>a = atan(uv) + (0,9 + 3·energy) · e^(−1,3r) · 2,2 + t · (0,03 + 0,35·energy)   Drall
+p = (cos a, sin a) · r · 3,2
+für i = 1…5:  p.x += 0,6/i · sin(i·p.y + …);  p.y += 0,55/i · cos(i·p.x − …)
+v = ½ + ½ · sin(1,15·p.x + 0,85·p.y + 0,6·noise(1,5p))
+band = ⌊6v⌋ / 5,   kante = smoothstep(0; 0,07; fract) · (1 − smoothstep(0,93; 1; fract))</pre>
+    <p>Zum Ergebnis hin mischt der Wert <code>gold</code> warme Töne ein. Energie und Gold folgen ihrem Zielwert exponentiell (<code>x += (ziel − x) · dt · 2,2</code>), dadurch wirken Sprünge weich.</p>
+    </div>
+  </div>
+
+  <div class="entry" id="a6-2">
+    <header><h3>Partikel unabhängig von der Bildrate</h3><p class="src">fx.js, Particles</p></header>
+    <div class="body">
+<pre>dt = Δt · 60                              in „Frames“ normiert
+vx *= drag^dt;  vy = vy · drag^dt + g · dt  (Konfetti 0,975 / 0,32 · Funken 0,9 / 0,15)
+chip: scaleY(max(0,15; |cos(flip)|))       vorgetäuschte 3D-Drehung
+höchstens 400 Partikel</pre>
+    </div>
+  </div>
+
+  <div class="entry" id="a6-3">
+    <header><h3>Bildschirm-Wackeln nach dem Trauma-Modell</h3><p class="src">fx.js, Shaker</p></header>
+    <div class="body">
+<pre>trauma = min(1, trauma + stoß);   trauma −= 1,6 · dt
+s = trauma²                                 kleine Treffer dezent, große knallen
+n(k) = 0,6 · sin(47t + k) + 0,4 · sin(83t + 2,3k)     glatte Pseudo-Zufallsbewegung
+translate(18s · n(1), 14s · n(4))  rotate(1,4° · s · n(7))</pre>
+    </div>
+  </div>
+
+  <div class="entry" id="a6-4">
+    <header><h3>Lauflicht, gekoppelt an die Raddrehung</h3><p class="src">lights.js, frame()</p></header>
+    <div class="body">
+    <table>
+      <tr><th>Phase</th><th>Verhalten</th></tr>
+      <tr><td>Einsätze</td><td>Wechselblinken mit <code>3 + 1,2·t</code> Hz, wird immer schneller</td></tr>
+      <tr><td>Lock</td><td>Blitz für 120 ms, dann <code>0,9 · e^(−3t)</code></td></tr>
+      <tr><td>Drehung</td><td>Tempo <code>2 + 70·s²</code> Birnen/s · Grundhelligkeit <code>0,06 + 0,3·s</code> · Blitz je Stift <code>(1 − s)^1,5</code></td></tr>
+      <tr><td>Ergebnis</td><td>12 Hz Stroboskop für 2,4 s, danach ruhiges, volles Licht</td></tr>
+    </table>
+    <p>Je langsamer das Rad wird, desto dunkler der Rahmen und desto heller jeder Feldwechsel. Die Helligkeit wird auf 1/20 gerundet und nur bei Änderung ins DOM geschrieben.</p>
+    </div>
+  </div>
+
+  <div class="entry" id="a6-5">
+    <header><h3>Birnen gleichmäßig um ein Rechteck verteilen</h3><p class="src">lights.js, build()</p></header>
+    <div class="body">
+<pre>umfang = 2 · (W + H);   n = max(8, round(umfang / 26 px))
+s = i/n · umfang  →  oben (s &lt; W) · rechts · unten · links       Umfang-Parametrisierung</pre>
+    <p>Ein <code>ResizeObserver</code> baut die Kette neu, sobald sich die Größe oder die Schrift eines Schildes ändert.</p>
+    </div>
+  </div>
+
+  <div class="entry" id="a6-6">
+    <header><h3>Radfarben ohne Kollision am Übergang</h3><p class="src">core.js, colorFor()</p></header>
+    <div class="body">
+<pre>k = erstes aus [6, 5, 4] mit  n ≤ k  ∨  n mod k ≠ 1
+farbe(i) = PALETTE[i mod k]</pre>
+    <p>Auf dem Rad liegen der letzte und der erste Name nebeneinander. Mit <code>n mod k = 1</code> bekämen beide dieselbe Farbe. Die Palettenlänge wird deshalb passend gewählt.</p>
+    </div>
+  </div>
+
+  <div class="entry" id="a6-7">
+    <header><h3>Scharfe Leinwand auf jedem Bildschirm</h3><p class="src">core.js, fitCanvas(), wheel.js, render()</p></header>
+    <div class="body">
+    <p>Die Pixelgröße der Leinwand ist <code>CSS-Größe · min(2, devicePixelRatio)</code>, gezeichnet wird über <code>setTransform</code> in CSS-Pixeln. Das Rad mit Verläufen, Beschriftung und Stiften wird einmal in eine Offscreen-Leinwand gerendert und pro Frame nur noch gedreht.</p>
+    </div>
+  </div>
+</section>
+
+<section class="ch" id="k7">
+  <header class="ch-head"><h2>Infrastruktur</h2><p>Das Programm verteilt sich als eine einzige Datei, und eine Datenbank, die jahrelang mitwachsen kann.</p></header>
+
+  <div class="entry" id="a7-1">
+    <header><h3>Einzeldatei mit eigenem Importer</h3><p class="src">tools/bundle.py</p></header>
+    <div class="body">
+    <p>Code, Vorlagen, CSS/JS, Schriften und Migrationen werden als ZIP (Kompressionsstufe 9) gepackt, Base64-kodiert und in eine <code>.py</code>-Datei eingebettet. Beim Start hängt sich ein <code>MetaPathFinder</code> + <code>Loader</code> in <code>sys.meta_path</code>:</p>
+<pre>find_spec("auslosung.x")  → pfad im ZIP-Speicher suchen (.py oder /__init__.py)
+exec_module(m)            → compile(quelle, "&lt;bundle&gt;/…") und exec
+auslosung._bundle.FILES   → alle Nicht-Python-Dateien als {pfad: bytes}</pre>
+    <p>Alle Einträge im ZIP haben den festen Zeitstempel 2020-01-01. Gleicher Code ergibt so immer eine Datei mit identischen Bytes.</p>
+    </div>
+  </div>
+
+  <div class="entry" id="a7-2">
+    <header><h3>Migrationen in <code>PRAGMA user_version</code></h3><p class="src">db.py, migrate()</p></header>
+    <div class="body">
+<pre>für jede datei NNNN_name.sql mit NNNN &gt; user_version:
+    PRAGMA foreign_keys = OFF
+    BEGIN; &lt;sql&gt;; PRAGMA user_version = NNNN; COMMIT;
+    fehler = PRAGMA foreign_key_check
+    PRAGMA foreign_keys = ON;  fehler → abbrechen</pre>
+    <p class="why"><b>Warum:</b>SQLite kann Spalten nur begrenzt ändern. Tabellen werden deshalb kopiert und neu angelegt. Mit aktiven Fremdschlüsseln würde <code>ON DELETE CASCADE</code> dabei abhängige Zeilen löschen. Die nachträgliche Prüfung stellt sicher, dass trotzdem alles konsistent ist.</p>
+    </div>
+  </div>
+
+  <div class="entry" id="a7-3">
+    <header><h3>Verschachtelte Transaktionen</h3><p class="src">db.py, transaction()</p></header>
+    <div class="body">
+<pre>tiefe 0:  BEGIN IMMEDIATE … COMMIT / ROLLBACK
+tiefe n:  SAVEPOINT spN … RELEASE spN / ROLLBACK TO spN</pre>
+    <p>Jeder Thread hat eine eigene Verbindung (<code>threading.local</code>), die Datenbank läuft im WAL-Modus. Schreibzugriffe laufen über ein <code>RLock</code>. <code>IMMEDIATE</code> holt die Schreibsperre sofort und vermeidet damit Deadlocks, wenn mehrere Transaktionen gleichzeitig vom Lesen zum Schreiben wechseln wollen.</p>
+    </div>
+  </div>
+
+  <div class="entry" id="a7-4">
+    <header><h3>Content-Hash-Caching</h3><p class="src">web/assets.py</p></header>
+    <div class="body">
+<pre>version = sha1(alle pfade + inhalte)[:10]   → /static/…?v=version
+etag    = sha1(datei)[:16]
+mit ?v  → Cache-Control: max-age=1 Jahr, immutable
+ohne ?v → no-cache + If-None-Match → 304</pre>
+    </div>
+  </div>
+
+  <div class="entry" id="a7-5">
+    <header><h3>Pfadschutz für beide Fassungen</h3><p class="src">resources.py, _clean(), read()</p></header>
+    <div class="body">
+<pre>rel = normpath(rel mit "/" statt "\").lstrip("/")
+rel ∈ {"", ".", ".."} oder beginnt mit "../"  → abgelehnt
+dateisystem: (ROOT / rel).resolve() muss unter ROOT liegen</pre>
+    <p>Dieselbe Funktion liest aus dem Dateisystem oder aus dem Bundle-Speicher. Der Rest des Programms muss nicht wissen, in welcher Fassung er läuft.</p>
+    </div>
+  </div>
+</section>
+</main>
+</div>
+
+<footer><div class="in">Ramble Auslosung, Version 0.1.0a1, frühe Alpha. Das Handbuch beschreibt den Stand des hochgeladenen Quellcodes. Schrift: Jersey 10, SIL Open Font License.</div></footer>
+
+<script>
+(() => {
+  const NS = "http://www.w3.org/2000/svg";
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const C = { cream: "#f6e9cc", dim: "#b9cdbd", brass: "#f2bd4f", chip: "#ff5a4f", plum: "#22152d", deep: "#0a3e32", rule: "rgba(246,233,204,.26)" };
+  const el = (tag, attrs = {}, parent) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent && parent.append(e); return e; };
+  const rnd = (n) => { const a = new Uint32Array(1); crypto.getRandomValues(a); return a[0] % n; };   // wie secrets.randbelow
+  const pick = (arr) => arr[rnd(arr.length)];
+
+  // Gleicher Algorithmus wie plinko.py: plinko_path()
+  function plinkoPath(columns, target, rows) {
+    const starts = []; for (let c = 0; c < columns; c++) if (Math.abs(c - target) <= rows / 2) starts.push(c);
+    let pos = pick(starts); const start = pos, path = [];
+    for (let left = rows; left > 0; left--) {
+      const d = pick([-0.5, 0.5].filter((d) => pos + d >= 0 && pos + d <= columns - 1 && Math.abs(target - (pos + d)) <= (left - 1) / 2));
+      path.push(d > 0 ? 1 : 0); pos += d;
+    }
+    return { start, path };
+  }
+
+  // ---------- Plinko im Kopf ----------
+  const NAMES = ["Ada", "Bo", "Cem", "Dana", "Emil", "Finn"];
+  const PER = Math.max(1, Math.ceil(8 / NAMES.length));                 // plinko_shape
+  let ROWS = Math.max(8, Math.min(16, Math.round(NAMES.length * PER * 0.6) + 4)); ROWS -= ROWS % 2;
+  const COLS = NAMES.length * PER;
+  const hero = document.getElementById("hero"), W = 600, H = 392, PADX = 34;
+  const dx = (W - 2 * PADX) / COLS, dy = 26, TOP = 48, BIN = TOP + (ROWS - 1) * dy + 30;
+  const X = (c) => PADX + (c + 0.5) * dx, PY = (r) => TOP + r * dy;
+  const binW = dx * PER, ballR = 9;
+  const pegs = [], bins = [];
+  const pegLayer = el("g", {}, hero), binLayer = el("g", {}, hero);
+  for (let r = 0; r < ROWS; r++) for (let c = r % 2 ? 0.5 : 0; c <= COLS - 1 + 1e-9; c += 1) pegs.push({ r, c, e: el("circle", { cx: X(c), cy: PY(r), r: 4, fill: C.cream, opacity: .75 }, pegLayer) });
+  NAMES.forEach((n, i) => {
+    const x = PADX + i * binW, g = el("g", {}, binLayer);
+    const rect = el("rect", { x: x + 3, y: BIN, width: binW - 6, height: 66, rx: 2, fill: C.deep }, g);
+    const t = el("text", { x: x + binW / 2, y: BIN + 52, "text-anchor": "middle", "font-family": "Jersey, sans-serif", "font-weight": 400, "font-size": 24, fill: C.cream }, g);
+    t.textContent = n; bins.push({ rect, t });
+  });
+  const trail = el("polyline", { fill: "none", stroke: C.brass, "stroke-width": 2, opacity: .45, "stroke-linejoin": "round", "stroke-dasharray": "4 5" }, hero);
+  const ball = el("circle", { cx: X(COLS / 2 - 0.5), cy: TOP - 28, r: ballR, fill: C.cream, stroke: C.plum, "stroke-width": 3 }, hero);
+
+  const DROP = 600, LAND = 450, hop = (k) => 520 - k * 14;            // wie plinko.js
+  function ballAt(t, start, path) {
+    const contact = (k) => PY(k) - 4 - ballR;
+    if (t < DROP) { const u = t / DROP; return { x: X(start), y: contact(0) - 30 * (1 - u * u), seg: -1 }; }
+    t -= DROP; let pos = start;
+    for (let k = 0; k < path.length; k++) {
+      const next = pos + (path[k] ? 0.5 : -0.5), last = k === path.length - 1, d = last ? LAND : hop(k);
+      if (t < d) {
+        const u = t / d, y0 = contact(k), y1 = last ? BIN + 16 : contact(k + 1);
+        return { x: X(pos) + (X(next) - X(pos)) * (1 - (1 - u) ** 1.7), y: y0 + (y1 - y0) * u * u - dy * 0.35 * Math.sin(Math.PI * u) * (1 - u), seg: k, pos };
+      }
+      t -= d; pos = next;
+    }
+    return { x: X(pos), y: BIN + 16, seg: path.length, landed: true };
+  }
+
+  const btn = document.getElementById("pull"), out = document.getElementById("result");
+  let running = false;
+  function draw() {
+    if (running) return;
+    running = true; btn.disabled = true;
+    bins.forEach((b) => { b.rect.setAttribute("fill", C.deep); b.t.setAttribute("fill", C.cream); });
+    pegs.forEach((p) => { p.e.setAttribute("fill", C.cream); p.e.setAttribute("r", 4); });
+    const slot = rnd(NAMES.length);                                   // 1. ziehen
+    const target = slot * PER + rnd(PER);
+    const { start, path } = plinkoPath(COLS, target, ROWS);           // 2. Weg bauen
+    out.innerHTML = `Gezogen: <b>${NAMES[slot]}</b>. Die Kugel weiß es schon.`;
+    const pts = [];
+    const t0 = performance.now();
+    let seg = -2;
+    const frame = (now) => {
+      const b = ballAt(reduced ? 1e9 : now - t0, start, path);
+      ball.setAttribute("cx", b.x); ball.setAttribute("cy", b.y);
+      pts.push(`${b.x.toFixed(1)},${b.y.toFixed(1)}`); trail.setAttribute("points", pts.join(" "));
+      if (b.seg !== seg && b.seg >= 0 && b.seg < ROWS) {
+        const p = pegs.find((p) => p.r === b.seg && Math.abs(p.c - b.pos) < 1e-6);
+        if (p) { p.e.setAttribute("fill", C.brass); p.e.setAttribute("r", 5.5); }
+      }
+      seg = b.seg;
+      if (!b.landed) return requestAnimationFrame(frame);
+      bins[slot].rect.setAttribute("fill", C.brass); bins[slot].t.setAttribute("fill", C.plum);
+      out.innerHTML = `<b>${NAMES[slot]}</b> ist gezogen. Weg: ${path.map((d) => (d ? "R" : "L")).join("")}`;
+      running = false; btn.disabled = false; btn.textContent = "Nochmal ziehen";
+    };
+    requestAnimationFrame(frame);
+  }
+  btn.addEventListener("click", draw);
+
+  // ---------- Abbildungen im Text ----------
+  const axisText = (svg, x, y, s, anchor = "middle", fill = C.dim) => { const t = el("text", { x, y, "text-anchor": anchor, "font-size": 13, fill, "font-family": getComputedStyle(document.body).fontFamily }, svg); t.textContent = s; return t; };
+
+  function drawPlinkoFan() {
+    const svg = document.getElementById("figPlinko"); svg.innerHTML = "";
+    const cols = 16, rows = 12, target = 10, W = 640, H = 300, L = 30, T = 22;
+    const dx = (W - 2 * L) / (cols - 1), dy = (H - 2 * T - 20) / rows;
+    const X = (c) => L + c * dx, Y = (r) => T + r * dy;
+    const cone = [];
+    for (let r = 0; r <= rows; r++) cone.push([X(Math.max(0, target - (rows - r) / 2)), Y(r)]);
+    for (let r = rows; r >= 0; r--) cone.push([X(Math.min(cols - 1, target + (rows - r) / 2)), Y(r)]);
+    el("polygon", { points: cone.map((p) => p.join(",")).join(" "), fill: C.deep, opacity: .75 }, svg);
+    for (let r = 0; r < rows; r++) for (let c = r % 2 ? 0.5 : 0; c <= cols - 1; c += 1) el("circle", { cx: X(c), cy: Y(r) + dy / 2, r: 2.2, fill: C.cream, opacity: .45 }, svg);
+    for (let c = 0; c < cols; c++) el("rect", { x: X(c) - dx / 2 + 2, y: H - T - 14, width: dx - 4, height: 16, rx: 1, fill: c === target ? C.brass : C.deep }, svg);
+    const hues = [C.cream, C.chip, C.brass, "#8fd6b4", "#c9a7e8"];
+    for (let k = 0; k < 5; k++) {
+      const { start, path } = plinkoPath(cols, target, rows);
+      let pos = start; const pts = [[X(pos), Y(0)]];
+      path.forEach((d, r) => { pos += d ? 0.5 : -0.5; pts.push([X(pos), Y(r + 1)]); });
+      el("polyline", { points: pts.map((p) => p.join(",")).join(" "), fill: "none", stroke: hues[k], "stroke-width": 2.2, "stroke-linejoin": "round" }, svg);
+      el("circle", { cx: X(start), cy: Y(0), r: 4.5, fill: hues[k] }, svg);
+    }
+  }
+
+  function drawSticky() {
+    const svg = document.getElementById("figSticky");
+    const W = 640, H = 230, L = 46, R = 16, T = 14, B = 34, nMax = 40, yMax = 0.45;
+    const X = (n) => L + (n - 2) / (nMax - 2) * (W - L - R), Y = (v) => T + (1 - v / yMax) * (H - T - B);
+    const h = (n) => Math.max(0, 0.42 * (1 - Math.exp(-(n - 2.5) / 2)));
+    for (const v of [0, 0.1, 0.2, 0.3, 0.4]) {
+      el("line", { x1: L, x2: W - R, y1: Y(v), y2: Y(v), stroke: C.rule, "stroke-dasharray": v ? "3 5" : "" }, svg);
+      axisText(svg, L - 8, Y(v) + 4, v.toFixed(1).replace(".", ","), "end");
+    }
+    for (const n of [2, 5, 10, 20, 30, 40]) axisText(svg, X(n), H - 10, n);
+    const line = (f, color) => { let d = ""; for (let n = 2; n <= nMax; n += 0.25) d += (d ? "L" : "M") + X(n).toFixed(1) + "," + Y(f(n)).toFixed(1); el("path", { d, fill: "none", stroke: color, "stroke-width": 3 }, svg); };
+    line(h, C.brass); line((n) => h(n) * 0.55, C.cream);
+    axisText(svg, X(40), Y(0.42) - 10, "nach links: h(n)", "end", C.brass);
+    axisText(svg, X(40), Y(0.231) - 10, "nach oben: 0,55 · h(n)", "end", C.cream);
+  }
+
+  function drawWheel() {
+    const svg = document.getElementById("figWheel");
+    const W = 640, H = 220, L = 20, R = 20, T = 16, B = 30;
+    const X = (p) => L + p * (W - L - R), Y = (v) => T + (1 - v) * (H - T - B);
+    el("rect", { x: X(0.6), y: T, width: X(0.97) - X(0.6), height: H - T - B, fill: C.deep, opacity: .8 }, svg);
+    axisText(svg, X(0.785), T + 16, "Kamerazoom", "middle", C.dim);
+    el("line", { x1: L, x2: W - R, y1: Y(0), y2: Y(0), stroke: C.rule }, svg);
+    for (const p of [0, 0.25, 0.5, 0.75, 1]) axisText(svg, X(p), H - 8, `${Math.round(p * 100)} %`);
+    const path = (f, color) => { let d = ""; for (let i = 0; i <= 200; i++) { const p = i / 200; d += (d ? "L" : "M") + X(p).toFixed(1) + "," + Y(f(p)).toFixed(1); } el("path", { d, fill: "none", stroke: color, "stroke-width": 3 }, svg); };
+    path((p) => 1 - (1 - p) ** 4, C.brass);
+    path((p) => (1 - p) ** 3, C.cream);
+    axisText(svg, X(0.785), Y(0.36), "Winkel θ(p)", "middle", C.brass);
+    axisText(svg, X(0.785), Y(0.22), "Geschwindigkeit v(p)", "middle", C.cream);
+  }
+
+  function drawShapes() {
+    const box = document.getElementById("figShapes");
+    const S = [
+      ["Dreier", 1, [[0,1],[1,1],[2,1]]], ["Säule", 2, [[2,0],[2,1],[2,2]]], ["Schräge", 2, [[0,0],[1,1],[2,2]]],
+      ["Vierer", 3, [[0,1],[1,1],[2,1],[3,1]]], ["Tal", 5, [[0,0],[1,1],[2,2],[3,1],[4,0]]], ["Gipfel", 5, [[0,2],[1,1],[2,0],[3,1],[4,2]]],
+      ["Fünfer", 8, [[0,1],[1,1],[2,1],[3,1],[4,1]]], ["Auge", 10, [[1,0],[2,0],[3,0],[1,1],[3,1],[1,2],[2,2],[3,2]]],
+      ["Volles Haus", 30, Array.from({ length: 15 }, (_, i) => [i % 5, Math.floor(i / 5)])],
+    ];
+    box.innerHTML = S.map(([name, v, cells]) => {
+      const on = new Set(cells.map(([c, r]) => `${c},${r}`));
+      let g = "";
+      for (let r = 0; r < 3; r++) for (let c = 0; c < 5; c++) g += `<i class="${on.has(`${c},${r}`) ? "on" : ""}"></i>`;
+      return `<div class="shape"><div class="g">${g}</div>${name}: <b>${v}</b></div>`;
+    }).join("");
+  }
+
+  const ready = () => {
+    drawPlinkoFan(); drawSticky(); drawWheel(); drawShapes();
+    document.getElementById("btnPlinko").addEventListener("click", drawPlinkoFan);
+    draw();                                  // einmal zu Beginn
+  };
+  (document.fonts?.ready ?? Promise.resolve()).then(ready);
+
+  // ---------- Register: aktuellen Eintrag markieren ----------
+  const links = new Map([...document.querySelectorAll(".index ol ol a")].map((a) => [a.getAttribute("href").slice(1), a]));
+  const io = new IntersectionObserver((entries) => {
+    for (const e of entries) if (e.isIntersecting) {
+      links.forEach((a) => a.classList.remove("on"));
+      links.get(e.target.id)?.classList.add("on");
+    }
+  }, { rootMargin: "-20% 0px -70% 0px" });
+  document.querySelectorAll(".entry").forEach((a) => io.observe(a));
+})();
+</script>
+</body>
+</html>
