@@ -1,0 +1,6 @@
+/* Schriften: Jersey 10 und Pixelify Sans, SIL Open Font License 1.1 (woff2, Latin) */
+@font-face { font-family: "Jersey"; font-weight: 400; font-display: block; src: url(../fonts/jersey-400.woff2) format("woff2"); }
+@font-face { font-family: "Pixelify"; font-weight: 400; font-display: block; src: url(../fonts/pixelify-400.woff2) format("woff2"); }
+@font-face { font-family: "Pixelify"; font-weight: 500; font-display: block; src: url(../fonts/pixelify-500.woff2) format("woff2"); }
+@font-face { font-family: "Pixelify"; font-weight: 600; font-display: block; src: url(../fonts/pixelify-600.woff2) format("woff2"); }
+@font-face { font-family: "Pixelify"; font-weight: 700; font-display: block; src: url(../fonts/pixelify-700.woff2) format("woff2"); }

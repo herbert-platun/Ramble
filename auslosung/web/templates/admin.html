@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#09060e">
+  <meta name="robots" content="noindex">
+  <title>Verwaltung · Auslosung</title>
+  <link rel="icon" href="/favicon.ico" type="image/svg+xml">
+{{styles}}
+</head>
+<body class="admin" data-page="admin">
+  <canvas id="bg"></canvas>
+  <div class="adm">
+    <header class="adm-head">
+      <div class="lobby-sign adm-sign"><div class="bulbs" aria-hidden="true"></div><h1 class="logo big neon">Verwaltung</h1></div>
+      <nav class="tabs" id="tabs" aria-label="Bereiche">
+        <a href="#uebersicht">Übersicht</a><a href="#tische">Tische</a><a href="#sql">SQL</a><a href="#anleitung">Anleitung</a>
+      </nav>
+    </header>
+    <main id="view" aria-live="polite"></main>
+  </div>
+  <template id="guide">{{guide}}</template>
+  <div class="grain" aria-hidden="true"></div>
+  <div class="crt" aria-hidden="true"></div>
+{{scripts}}
+</body>
+</html>

@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "auslosung"
+version = "4.0"
+description = "Las-Vegas-Auslosung mit Wetten: Namen in den Topf, Chips auf den Tisch, Rad drehen"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+dependencies = []          # nur Standardbibliothek
+
+[project.scripts]
+auslosung = "auslosung.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["auslosung*"]
+
+[tool.setuptools.package-data]
+auslosung = [
+    "migrations/*.sql",
+    "web/templates/*.html",
+    "web/static/**/*",
+]

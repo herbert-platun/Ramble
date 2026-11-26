@@ -1,0 +1,34 @@
+  <div class="app" id="app">
+    <header class="hud" id="hud" hidden>
+      <div class="purse"><i class="chip"></i><span class="num big ink" id="chips">0</span></div>
+      <div class="me"><span class="me-name" id="who"></span><span class="me-meta" id="rank"></span></div>
+      <button class="snd" id="sndBtn" aria-pressed="false" aria-label="Ton"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h4l5-4v14l-5-4H4z"/><path class="w" d="M16 9c1.2 1.6 1.2 4.4 0 6M18.5 6.5c2.6 3 2.6 8 0 11"/></svg></button>
+    </header>
+    <h1 class="draw-title big ink" id="drawTitle"></h1>
+    <section class="joinbox panel" id="join" hidden>
+      <form id="joinForm" autocomplete="off">
+        <label class="label" for="name">Dein Name</label>
+        <input class="field" id="name" maxlength="24" required autocapitalize="words" enterkeyhint="go">
+        <button class="btn red">Rein in den Topf</button>
+        <p class="error" id="joinError" role="alert"></p>
+      </form>
+      <p class="join-note"><i class="chip"></i> Du bekommst <b class="num">1.000</b> Chips. Setz sie auf den Namen, der gezogen wird.</p>
+    </section>
+    <section class="main" id="main" hidden>
+      <div class="banner" id="banner"></div>
+      <div class="verdict panel" id="verdict" hidden></div>
+      <div class="live" id="live" hidden><canvas id="canvas"></canvas></div>
+      <div class="cards" id="cards" role="radiogroup" aria-label="Auf wen setzt du?"></div>
+    </section>
+  </div>
+  <footer class="slip panel" id="slip" hidden>
+    <div class="slip-line" id="slipLine"></div>
+    <div class="slip-chips" id="slipChips">
+      <button class="pchip" data-add="10" style="--cc:var(--cream)"><span>10</span></button>
+      <button class="pchip" data-add="50" style="--cc:var(--red)"><span>50</span></button>
+      <button class="pchip" data-add="100" style="--cc:var(--blue)"><span>100</span></button>
+      <button class="pchip" data-add="500" style="--cc:var(--green)"><span>500</span></button>
+      <button class="btn allin" data-all>Alles</button>
+      <button class="btn dark clear" data-clear aria-label="Einsatz zurücknehmen">↺</button>
+    </div>
+  </footer>
