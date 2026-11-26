@@ -1,12 +1,12 @@
-// Bühnen: gemeinsame Zeichenhelfer und Basisklasse für Glücksrad, Roulette und Plinko
+// Bühnen: gemeinsame Zeichenhelfer und Basisklasse für Glücksrad, Plinko und Slots
 import { sound } from "../audio.js";
 import { clamp, colorFor, fitCanvas, serverNow } from "../core.js";
 import { TAU, reduced } from "../fx.js";
 
 // =============================================================================
-// Bühnen: Glücksrad, Roulette, Plinko
+// Bühnen: Glücksrad, Plinko, Slots
 // =============================================================================
-// Die drei Arten zu ziehen, jeweils mit den Namen aus dem Lostopf.
+// Die Arten zu ziehen, jeweils mit den Namen aus dem Lostopf.
 // Jede Animation ist eine reine Funktion der Serverzeit seit `started_at`:
 // Fernseher und Handys zeigen dasselbe Bild, ein Neuladen steigt an der
 // richtigen Stelle wieder ein. Wo sie landet, hat der Server vorher entschieden.

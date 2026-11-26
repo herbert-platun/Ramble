@@ -1,0 +1,254 @@
+/* ==========================================================================
+   Slots: Walzen, Symbole, Muster, Stufen (nach rea/blueprint/slot-tokens.css)
+   ==========================================================================
+   Gilt für Bildschirm und Handy. Größen hängen an --slot-cell, das die Bühne
+   aus dem verfügbaren Platz setzt. */
+:root {
+  /* Symbole im Sprite lesen diese Farben */
+  --sym-line: var(--line);   --sym-ink: var(--ink);
+  --sym-red: var(--red);     --sym-red-deep: var(--red-deep);
+  --sym-gold: var(--gold);   --sym-gold-hi: var(--gold-hi); --sym-gold-lo: var(--gold-lo);
+  --sym-green: var(--green); --sym-felt: var(--felt);
+  --sym-blue: var(--blue);   --sym-blue-deep: var(--blue-deep);
+  --sym-cream: var(--cream); --sym-pink: var(--pink);       --sym-mute: var(--mute);
+
+  /* Akzentfarben der Namen: Rahmen, Schild, Musterlinie (Reihenfolge wie game/slots.py) */
+  --acc-0: #ff3d4f; --acc-1: #ffc23d; --acc-2: #45e07f; --acc-3: #3a8dff;
+  --acc-4: #ff5fae; --acc-5: #fff1d6; --acc-6: #ff8a3d; --acc-7: #a77bff;
+
+  --slot-cell: 96px;
+  --slot-gap: calc(var(--slot-cell) * .08);
+  --e-reel: cubic-bezier(.15, .7, .25, 1.08);
+
+  --tier-1: var(--cream); --tier-2: var(--gold); --tier-3: var(--pink); --tier-4: var(--gold-hi);
+  --glow-2: 0 0 14px color-mix(in srgb, var(--gold) 75%, transparent);
+  --glow-3: 0 0 22px var(--pink), 0 0 6px var(--gold-hi);
+}
+.acc-0 { --acc: var(--acc-0); } .acc-1 { --acc: var(--acc-1); } .acc-2 { --acc: var(--acc-2); } .acc-3 { --acc: var(--acc-3); }
+.acc-4 { --acc: var(--acc-4); } .acc-5 { --acc: var(--acc-5); } .acc-6 { --acc: var(--acc-6); } .acc-7 { --acc: var(--acc-7); }
+.sym { display: block; overflow: visible; }
+
+/* -- Ein Symbol mit Namensschild (Walze, Handy, Listen) ------------------------- */
+.skin {
+  --acc: var(--mute);
+  position: relative; display: grid; place-items: center;
+  border-radius: calc(var(--slot-cell) * .1);
+  background:
+    radial-gradient(circle at 50% 38%, color-mix(in srgb, var(--acc) 30%, transparent), transparent 70%),
+    var(--ink);
+  box-shadow: inset 0 0 0 calc(var(--slot-cell) * .035) color-mix(in srgb, var(--acc) 80%, var(--line));
+}
+.skin .sym { width: 70%; height: auto; aspect-ratio: 1; margin-top: -14%; filter: drop-shadow(0 calc(var(--slot-cell) * .03) 0 rgba(0, 0, 0, .45)); }
+.skin .tag {
+  position: absolute; left: 6%; right: 6%; bottom: 6%;
+  font: 600 calc(var(--slot-cell) * .15)/1.15 var(--f-ui);
+  text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  padding: .08em .3em .12em; border-radius: .35em;
+  background: var(--acc); color: var(--line);
+  box-shadow: 0 .12em 0 var(--line);
+}
+.skin.wild { --acc: var(--gold); }
+.skin.bust { --acc: var(--red-deep); }
+.skin.mult { --acc: var(--pink); }
+.skin.mult .x {
+  position: absolute; inset: 0 0 18% 0; display: grid; place-items: center;
+  font: calc(var(--slot-cell) * .3)/1 var(--f-big); color: var(--line);
+}
+/* Kleines Symbol mit Akzentring für Listen (Bildschirm und Handy) */
+.badge {
+  --acc: var(--mute);
+  display: inline-grid; place-items: center; justify-content: center; align-items: center; flex: none;
+  width: 1.9em; height: 1.9em; border-radius: .45em;
+  background: radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--acc) 35%, transparent), transparent 75%), var(--ink);
+  box-shadow: inset 0 0 0 .14em var(--acc), 0 .1em 0 var(--line);
+}
+.badge .sym { width: 1.45em; height: 1.45em; }
+.skin.special .tag { background: var(--line); color: var(--acc); box-shadow: 0 .12em 0 rgba(0, 0, 0, .5); }
+
+/* -- Automat ---------------------------------------------------------------------- */
+.slots-stage {
+  position: absolute; inset: 0; z-index: 1;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: calc(var(--slot-cell) * .16);
+  pointer-events: none;
+}
+.slots-stage .marquee {
+  position: relative; display: flex; align-items: center; justify-content: center; gap: .8em;
+  min-width: calc(var(--slot-cell) * 4); padding: .12em 1em .2em;
+  font: calc(var(--slot-cell) * .3)/1 var(--f-big); letter-spacing: .08em; text-transform: uppercase;
+  color: var(--gold); background: var(--void);
+  border: calc(var(--slot-cell) * .03) solid var(--line); border-radius: calc(var(--slot-cell) * .1);
+  box-shadow: inset 0 0 0 2px var(--plum-hi), 0 calc(var(--slot-cell) * .05) 0 var(--line);
+  /* LED-Raster über der Schrift */
+  background-image: radial-gradient(circle, transparent 55%, rgba(9, 6, 14, .55) 56%);
+  background-size: 4px 4px;
+  text-shadow: 0 0 10px color-mix(in srgb, var(--gold) 70%, transparent);
+}
+.slots-stage .marquee .dot { width: .35em; height: .35em; border-radius: 50%; background: currentColor; opacity: .3; }
+.slots-stage .marquee .dot.on { opacity: 1; box-shadow: 0 0 8px currentColor; }
+.slots-stage .marquee.luck { color: var(--green); animation: luck-blink .24s steps(2) infinite; }
+.slots-stage .marquee.warn { color: var(--red); }
+@keyframes luck-blink { 50% { color: var(--gold-hi); } }
+
+.machine {
+  position: relative;
+  padding: calc(var(--slot-cell) * .14);
+  background: linear-gradient(var(--plum-hi), var(--plum));
+  border: calc(var(--slot-cell) * .04) solid var(--line); border-radius: calc(var(--slot-cell) * .2);
+  box-shadow: 0 calc(var(--slot-cell) * .08) 0 var(--line), inset 0 2px 0 rgba(255, 255, 255, .14), 0 20px 60px rgba(0, 0, 0, .5);
+}
+.machine::before {   /* Chromleiste */
+  content: ""; position: absolute; inset: calc(var(--slot-cell) * .05); border-radius: calc(var(--slot-cell) * .15);
+  box-shadow: inset 0 0 0 2px var(--gold-lo); pointer-events: none;
+}
+.slot {
+  position: relative; display: grid; grid-template-columns: repeat(5, var(--slot-cell));
+  gap: var(--slot-gap); padding: var(--slot-gap);
+  background: var(--void); border: calc(var(--slot-cell) * .04) solid var(--line); border-radius: calc(var(--slot-cell) * .12);
+  box-shadow: inset 0 calc(var(--slot-cell) * .14) calc(var(--slot-cell) * .2) rgba(0, 0, 0, .7);
+}
+.reel { position: relative; height: calc(3 * var(--slot-cell) + 2 * var(--slot-gap)); overflow: hidden; contain: paint; border-radius: calc(var(--slot-cell) * .08); }
+.reel::after {    /* Wölbung der Walze */
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(rgba(9, 6, 14, .55), transparent 22%, transparent 78%, rgba(9, 6, 14, .55));
+}
+.reel-strip { display: grid; gap: var(--slot-gap); will-change: transform; }
+.reel.spinning .reel-strip { filter: blur(calc(var(--slot-cell) * .025)) brightness(1.15); }
+.reel.stop .reel-strip { animation: reel-settle .26s var(--pop); }
+.reel.tease { box-shadow: inset 0 0 0 3px var(--gold); animation: tease-pulse .26s steps(2) infinite; }
+.reel .skin { width: var(--slot-cell); height: var(--slot-cell); }
+.reel .skin.hit {
+  z-index: 2;
+  box-shadow: inset 0 0 0 calc(var(--slot-cell) * .05) var(--acc), 0 0 calc(var(--slot-cell) * .2) var(--acc);
+}
+.reel .skin.dim { filter: saturate(.3) brightness(.5); transition: filter .2s; }
+.reel .skin.morph .sym { animation: sym-morph .6s steps(8); }
+.reel .skin.fire { animation: mult-fire .9s var(--pop); box-shadow: inset 0 0 0 calc(var(--slot-cell) * .05) var(--pink), 0 0 calc(var(--slot-cell) * .4) var(--pink); }
+.reel .skin.shake { animation: bust-shake .12s steps(2) 6; }
+
+.slot-lines { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; z-index: 3; }
+.pattern-line {
+  fill: none; stroke: var(--acc, var(--gold)); stroke-width: calc(var(--slot-cell) * .07);
+  stroke-linecap: round; stroke-linejoin: round;
+  stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw .6s var(--out) forwards;
+  filter: drop-shadow(0 0 6px var(--acc, var(--gold)));
+}
+.pattern-line.under { stroke: var(--line); stroke-width: calc(var(--slot-cell) * .12); filter: none; }
+.pattern-line.old { animation: none; stroke-dashoffset: 0; opacity: .35; transition: opacity .3s; }
+
+.slot-pops { position: absolute; inset: 0; pointer-events: none; z-index: 4; }
+.score-pop {
+  position: absolute; transform: translate(-50%, -50%); white-space: nowrap; text-align: center;
+  padding: .12em .32em .16em; border-radius: .3em; z-index: 3;
+  background: rgba(9, 6, 14, .82); box-shadow: 0 0 0 .05em var(--line), 0 .08em 0 var(--line);
+  font: calc(var(--slot-cell) * .36 * var(--s, 1))/1 var(--f-big); color: var(--acc, var(--gold));
+  -webkit-text-stroke: .06em var(--line); paint-order: stroke fill; text-shadow: 0 .07em 0 var(--line);
+  animation: score-rise 1.5s var(--out) forwards;
+}
+.score-pop.out { opacity: 0; transition: opacity .2s; }
+.score-pop small { display: block; font: 600 calc(var(--slot-cell) * .14)/1.1 var(--f-ui); -webkit-text-stroke: 0; color: var(--cream); }
+
+/* Zähler unter den Walzen */
+.slot-hud { display: flex; align-items: center; justify-content: center; gap: calc(var(--slot-cell) * .14); min-height: calc(var(--slot-cell) * .6); }
+.slot-hud .counter {
+  min-width: calc(var(--slot-cell) * 1.6); text-align: center;
+  font: calc(var(--slot-cell) * .52)/1 var(--f-big); font-variant-numeric: tabular-nums; color: var(--cream);
+  -webkit-text-stroke: .05em var(--line); paint-order: stroke fill; text-shadow: 0 .06em 0 var(--line);
+}
+.slot-hud .counter.zero { color: var(--mute); }
+.slot-hud .counter.tick { animation: counter-tick .14s var(--pop); }
+.slot-hud .counter[data-tier="3"], .slot-hud .counter[data-tier="4"] { color: var(--gold-hi); text-shadow: 0 .06em 0 var(--line), var(--glow-3); }
+/* Punkte × Faktor = Ergebnis, wie bei Balatro: zwei Kästen, die einzeln rucken */
+.slot-hud .sop { font: calc(var(--slot-cell) * .3)/1 var(--f-big); color: var(--mute); }
+.slot-hud .sbox {
+  display: grid; justify-items: center; min-width: calc(var(--slot-cell) * 1.05);
+  padding: calc(var(--slot-cell) * .05) calc(var(--slot-cell) * .14) calc(var(--slot-cell) * .07);
+  border-radius: calc(var(--slot-cell) * .1); border: 3px solid var(--line); box-shadow: 0 4px 0 var(--line);
+  color: #fff;
+}
+.slot-hud .sbox small { max-width: calc(var(--slot-cell) * 1.3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;  font: 700 calc(var(--slot-cell) * .11)/1 var(--f-ui); letter-spacing: .12em; text-transform: uppercase; opacity: .8; }
+.slot-hud .sbox b { font: calc(var(--slot-cell) * .36)/1 var(--f-big); font-variant-numeric: tabular-nums; -webkit-text-stroke: .05em var(--line); paint-order: stroke fill; }
+.slot-hud .sbox.chips { background: linear-gradient(#2f8cff, #1a5fd1); }
+.slot-hud .sbox.mult { background: linear-gradient(#ff4d5e, #c8243a); }
+.slot-hud .sbox.jolt { animation: box-jolt .22s var(--pop); }
+.slot-hud .sbox.slam { animation: box-slam .45s var(--pop); }
+@keyframes box-jolt { 0% { transform: scale(1.18) rotate(-4deg); } 60% { transform: scale(.96) rotate(1.5deg); } }
+@keyframes box-slam { 0% { transform: scale(1.7) rotate(8deg); filter: brightness(1.8); } 50% { transform: scale(.92) rotate(-3deg); } }
+.slot-hud.fuse .sbox { animation: box-fuse .5s var(--out); }
+.slot-hud.fuse .sbox.mult { animation-delay: .06s; }
+@keyframes box-fuse { 40% { transform: scale(1.14); filter: brightness(1.6); } 100% { transform: scale(1); } }
+.slot-hud.fuse .counter { animation: counter-land .6s var(--pop); }
+@keyframes counter-land { 0% { transform: scale(.4); opacity: .3; } 70% { transform: scale(1.15); } }
+.slot-hud.hot .counter { color: var(--gold-hi); text-shadow: 0 .06em 0 var(--line), 0 0 .3em #ff8a2a, 0 0 .7em #ff4d2a; animation: counter-land .6s var(--pop), hot-flicker .18s steps(2) .6s 8; }
+@keyframes hot-flicker { 50% { text-shadow: 0 .06em 0 var(--line), 0 0 .45em #ffb02a, 0 0 .9em #ff5a2a; } }
+
+/* Ruck der Felder beim Anzählen */
+.reel .skin.hit { animation: cell-jolt .3s var(--pop); }
+@keyframes cell-jolt { 0% { transform: scale(1.16) rotate(-5deg); } 55% { transform: scale(.97) rotate(2deg); } 100% { transform: scale(1.04); } }
+.cell-pop {
+  position: absolute; transform: translate(-50%, -50%); z-index: 4; pointer-events: none;
+  font: calc(var(--slot-cell) * .24)/1 var(--f-big); color: #fff;
+  padding: .1em .3em .14em; border-radius: .25em; background: #1a5fd1; border: 2px solid var(--line);
+  animation: cell-pop .7s var(--out) forwards;
+}
+@keyframes cell-pop { 0% { transform: translate(-50%, -30%) scale(.5); opacity: 0; } 20% { transform: translate(-50%, -60%) scale(1.1); opacity: 1; } 100% { transform: translate(-50%, -120%) scale(.9); opacity: 0; } }
+
+/* Große Einblendungen über dem Automaten */
+.slot-over { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; z-index: 5; }
+.tier-banner {
+  font: calc(var(--slot-cell) * 1.05)/.9 var(--f-big); letter-spacing: .06em; text-transform: uppercase;
+  color: var(--tier-c, var(--gold)); -webkit-text-stroke: .04em var(--line); paint-order: stroke fill;
+  text-shadow: 0 .05em 0 var(--line), var(--glow-3); animation: banner-slam .65s var(--pop) both;
+}
+.tier-banner.t1 { --tier-c: var(--tier-1); font-size: calc(var(--slot-cell) * .7); }
+.tier-banner.t2 { --tier-c: var(--tier-2); }
+.tier-banner.t3 { --tier-c: var(--tier-3); }
+.tier-banner.t4 { --tier-c: var(--tier-4); font-size: calc(var(--slot-cell) * 1.35); }
+.tier-banner.out, .again-stamp.out, .bust-stamp.out { animation: banner-out .35s ease-in forwards; }
+.again-stamp, .bust-stamp {
+  font: calc(var(--slot-cell) * .9)/.9 var(--f-big); text-transform: uppercase; text-align: center;
+  padding: .06em .3em .14em; border: .08em solid currentColor; border-radius: .14em; background: rgba(9, 6, 14, .82);
+  box-shadow: 0 0 0 .04em var(--line), 0 0 80px color-mix(in srgb, currentColor 45%, transparent);
+  transform: rotate(-8deg); animation: stamp .3s var(--pop) both;
+}
+.again-stamp { color: var(--blue); }
+.again-stamp small, .bust-stamp small { display: block; font: 600 calc(var(--slot-cell) * .16)/1.2 var(--f-ui); color: var(--cream); text-transform: none; }
+.bust-stamp { color: var(--red); }
+
+/* Zwischenstand nach einer Runde */
+.round-card {
+  min-width: calc(var(--slot-cell) * 4.4); max-width: 92%;
+  padding: calc(var(--slot-cell) * .16) calc(var(--slot-cell) * .24) calc(var(--slot-cell) * .2);
+  background: rgba(9, 6, 14, .9); border: 3px solid var(--line); border-radius: calc(var(--slot-cell) * .16);
+  box-shadow: 0 6px 0 var(--line), 0 0 0 3px var(--plum-hi) inset;
+  animation: calls-in .45s var(--pop) both; text-align: center;
+}
+.round-card h3 { margin: 0 0 .3em; font: calc(var(--slot-cell) * .3)/1 var(--f-big); color: var(--mute); text-transform: uppercase; letter-spacing: .1em; }
+.round-card .lead { margin: 0 0 .4em; font: calc(var(--slot-cell) * .5)/1 var(--f-big); color: var(--gold-hi); }
+.round-card ol { list-style: none; margin: 0; padding: 0; display: grid; gap: calc(var(--slot-cell) * .06); }
+.round-card li { display: grid; grid-template-columns: calc(var(--slot-cell) * .4) 1fr auto auto; align-items: center; gap: .5em; font-size: calc(var(--slot-cell) * .17); text-align: left; }
+.round-card .nm { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.round-card .plus { font-family: var(--f-big); color: var(--green); font-size: 1.3em; }
+.round-card .pts { font-family: var(--f-big); color: var(--gold-hi); font-size: 1.5em; min-width: 2.5em; text-align: right; }
+
+/* ---------- Keyframes ---------- */
+@keyframes reel-settle { 0% { transform: translateY(calc(var(--slot-cell) * .16)); } 100% { transform: none; } }
+@keyframes tease-pulse { 50% { box-shadow: inset 0 0 0 3px var(--pink), 0 0 30px var(--pink); } }
+@keyframes cell-hit { 0% { transform: scale(1); } 35% { transform: scale(1.14) rotate(-3deg); } 100% { transform: scale(1); } }
+@keyframes sym-morph { 0%, 100% { transform: scaleX(1); } 50% { transform: scaleX(0); } }
+@keyframes mult-fire { 0% { transform: scale(1); } 30% { transform: scale(1.3) rotate(8deg); } 100% { transform: scale(1); } }
+@keyframes bust-shake { 50% { transform: translateX(6%) rotate(4deg); } }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+@keyframes score-rise { 0% { transform: translate(-50%, -50%) scale(.4); opacity: 0; } 18% { transform: translate(-50%, -70%) scale(1.2); opacity: 1; }
+  75% { opacity: 1; } 100% { transform: translate(-50%, -170%) scale(1); opacity: 0; } }
+@keyframes counter-tick { 40% { transform: scale(1.14); } }
+@keyframes banner-slam { 0% { transform: scale(2.6) rotate(-4deg); opacity: 0; } 60% { transform: scale(.92); opacity: 1; } 100% { transform: scale(1); } }
+@keyframes banner-out { to { transform: scale(.7); opacity: 0; } }
+@keyframes stamp-in { from { transform: scale(2) rotate(-10deg); opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .reel.spinning .reel-strip { filter: none; }
+  .reel .skin.hit, .reel .skin.fire, .reel .skin.shake, .tier-banner, .score-pop, .reel.tease, .marquee.luck { animation: none; }
+  .pattern-line { stroke-dashoffset: 0; animation: none; }
+}
+.slot-hud .sbox small[class^="acc-"] { color: var(--acc); opacity: 1; }

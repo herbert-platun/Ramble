@@ -4,13 +4,13 @@
         <div class="qr" id="qr"></div>
         <div class="join-text">
           <p class="label">Handy raus</p>
-          <p class="join-lead">Scannen, Namen eintragen, Chips setzen</p>
+          <p class="join-lead">Scannen, Namen eintragen, mitspielen</p>
           <p class="code big ink" id="code"></p>
           <p class="url" id="joinUrl"></p>
         </div>
       </section>
       <section class="panel pot" aria-labelledby="potTitle">
-        <h2 id="potTitle">Im Topf <span class="count num ink" id="potCount"></span></h2>
+        <h2 id="potTitle"><span>Im Topf <span class="grp" id="potGroup"></span></span><span class="count num ink" id="potCount"></span></h2>
         <ul class="names" id="entrants"></ul>
         <form class="add" id="addForm" hidden>
           <input class="field" id="addName" maxlength="24" placeholder="Name ohne Handy" aria-label="Name eintragen" autocomplete="off">
@@ -37,9 +37,7 @@
       </section>
     </main>
     <aside class="col right">
-      <section class="panel jackpot sway" style="--d:-3s">
-        <p class="label">Jackpot</p><p class="jp big" id="jackpot">0</p><p class="jp-note">Wer richtig liegt, teilt ihn sich</p>
-      </section>
+      <section class="panel side sway" style="--d:-3s" id="side" aria-live="polite"></section>
       <section class="panel table" aria-labelledby="tableTitle">
         <h2 id="tableTitle">Am Tisch <span class="sum num" id="tableSum"></span></h2>
         <ol class="board" id="board"></ol>
@@ -51,8 +49,12 @@
       <div class="controls" id="controls" hidden>
         <div class="modes" role="radiogroup" aria-label="Art der Ziehung" id="modes">
           <button role="radio" data-mode="wheel" title="1"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="17" r="12"/><path d="M16 17 16 5M16 17 26.4 23M16 17 5.6 23"/><path class="f" d="M13 2h6l-3 5z"/></svg>Glücksrad</button>
-          <button role="radio" data-mode="roulette" title="2"><svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="12"/><circle cx="16" cy="16" r="6"/><circle class="f" cx="16" cy="7" r="2"/></svg>Roulette</button>
-          <button role="radio" data-mode="plinko" title="3"><svg viewBox="0 0 32 32" aria-hidden="true"><g class="f"><circle cx="10" cy="8" r="1.6"/><circle cx="22" cy="8" r="1.6"/><circle cx="16" cy="13" r="1.6"/><circle cx="4" cy="13" r="1.6"/><circle cx="28" cy="13" r="1.6"/><circle cx="10" cy="18" r="1.6"/><circle cx="22" cy="18" r="1.6"/></g><path d="M3 23v6h26v-6M11 23v6M21 23v6"/></svg>Plinko</button>
+          <button role="radio" data-mode="plinko" title="2"><svg viewBox="0 0 32 32" aria-hidden="true"><g class="f"><circle cx="10" cy="8" r="1.6"/><circle cx="22" cy="8" r="1.6"/><circle cx="16" cy="13" r="1.6"/><circle cx="4" cy="13" r="1.6"/><circle cx="28" cy="13" r="1.6"/><circle cx="10" cy="18" r="1.6"/><circle cx="22" cy="18" r="1.6"/></g><path d="M3 23v6h26v-6M11 23v6M21 23v6"/></svg>Plinko</button>
+          <button role="radio" data-mode="slots" title="3"><svg viewBox="0 0 32 32" aria-hidden="true"><rect x="2" y="7" width="23" height="19" rx="3"/><path d="M9.7 11v11M17.3 11v11"/><path d="M29 6v11h-4"/><circle class="f" cx="29" cy="5" r="2.4"/></svg>Slots</button>
+        </div>
+        <div class="seg rounds" role="radiogroup" aria-label="Runden je Session" id="rounds" hidden>
+          <span class="seg-label">Runden</span>
+          <button role="radio" data-rounds="1" title="Ein Spin">1</button><button role="radio" data-rounds="3">3</button><button role="radio" data-rounds="5">5</button><button role="radio" data-rounds="7">7</button>
         </div>
         <button class="btn red draw" id="drawBtn" title="Leertaste">Ziehen</button>
       </div>
@@ -61,12 +63,22 @@
       <div class="tools">
         <button class="tool" id="resetBtn" hidden>Alle zurück in den Topf</button>
         <button class="tool" id="bankBtn" hidden>Bank zurücksetzen</button>
+        <button class="tool" id="saveBtn" aria-pressed="false" hidden title="Gespeicherte Tische stehen auf der Startseite, alle anderen verfallen">Tisch speichern</button>
+        <button class="tool" id="groupBtn" hidden>Als Gruppe speichern</button>
         <button class="tool" id="musicBtn" aria-pressed="true" title="N">Musik</button>
         <button class="tool" id="soundBtn" aria-pressed="true" title="M">Ton</button>
         <button class="tool" id="fsBtn" title="F">Vollbild</button>
       </div>
     </footer>
   </div>
+  <dialog class="panel dlg" id="groupDlg">
+    <form method="dialog" id="groupForm">
+      <h2>Als Gruppe speichern</h2>
+      <p class="muted">Die Namen dieses Tischs bleiben als Gruppe erhalten. Beim nächsten Tisch wählst du sie auf der Startseite aus. Wer sich dann mit demselben Namen per Handy einträgt, landet automatisch auf seinem Platz und behält sein Slot-Symbol.</p>
+      <input class="field" id="groupName" maxlength="40" placeholder="z. B. Team Kaffee" required autocomplete="off">
+      <div class="dlg-row"><button class="btn dark" value="cancel" formnovalidate>Abbrechen</button><button class="btn" value="ok">Speichern</button></div>
+    </form>
+  </dialog>
   <div class="power" id="power">
     <div class="power-inner">
       <p class="power-code big">Tisch <span id="powerCode"></span></p>

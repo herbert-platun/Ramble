@@ -5,20 +5,22 @@
       <li><b>Starten:</b> <code>python3 auslosung.py</code>. Die Konsole zeigt die Adresse im WLAN.</li>
       <li><b>Tisch eröffnen:</b> Am Rechner mit dem großen Bildschirm die Startseite öffnen, Frage eintragen.</li>
       <li><b>Münze einwerfen:</b> einmal klicken, dann laufen Licht, Musik und Ton.</li>
-      <li><b>Mitspielen:</b> Alle scannen den QR-Code, tragen sich ein und setzen Chips. Wer kein Handy hat, wird am Bildschirm eingetragen.</li>
-      <li><b>Ziehen:</b> Leertaste. Sieben Sekunden letzte Einsätze, dann „Nichts geht mehr“, dann dreht es.</li>
+      <li><b>Mitspielen:</b> Alle scannen den QR-Code und tragen sich ein. Steht ein Name schon im Topf, übernimmt das Handy diesen Platz. Wer kein Handy hat, wird am Bildschirm eingetragen.</li>
+      <li><b>Ziehen:</b> Leertaste. Sieben Sekunden letzte Tipps oder Einsätze, dann „Keine Wetten mehr“, dann dreht es. Bei Slots wiederholt sich das je Runde.</li>
     </ol>
   </section>
   <section class="panel g-card">
-    <h2 class="big">Wetten in einem Satz</h2>
-    <p>Treffer bringt <span class="pill blue">Einsatz</span> × <span class="pill red">Namen im Topf</span> × <span class="pill pink">Serie</span>, verlorene Einsätze füllen den <span class="pill gold">Jackpot</span>, den sich die nächsten Treffer teilen. Wer pleite ist, bekommt 200 Chips. Die Ziehung selbst ist fair: Einsätze ändern nichts an den Chancen.</p>
+    <h2 class="big">Tipps und Einsätze</h2>
+    <p><b>Glücksrad und Plinko:</b> Jedes Handy tippt kostenlos auf einen Namen. Richtig getippt gibt <span class="pill gold">+200</span> Chips.</p>
+    <p><b>Slots:</b> Jeder Name bekommt ein Symbol mit eigener Farbe. Auf dem Handy setzt man Chips auf beliebig viele Symbole. Jedes Muster zahlt <span class="pill blue">Einsatz</span> × <span class="pill red">Punkte</span> × <span class="pill gold">Quote</span>, ein Faktor-Feld vervielfacht den Spin. Joker zählt für jedes Symbol, drei Nieten machen den Spin wertlos. Ein Spin oder 3, 5, 7 Runden: gezogen wird, wer am Ende die meisten Punkte hat, bei Gleichstand wird nachgedreht.</p>
+    <p>Wer pleite ist, bekommt 200 Chips. Die Ziehung ist fair: Tipps und Einsätze ändern nichts an den Chancen.</p>
   </section>
   <section class="panel g-card">
     <h2 class="big">Tasten am großen Bildschirm</h2>
     <dl class="keys">
       <dt><kbd>Leertaste</kbd></dt><dd>Ziehen</dd>
       <dt><kbd>Esc</kbd></dt><dd>Ergebnis ausblenden</dd>
-      <dt><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd></dt><dd>Glücksrad, Roulette, Plinko</dd>
+      <dt><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd></dt><dd>Glücksrad, Plinko, Slots</dd>
       <dt><kbd>F</kbd></dt><dd>Vollbild</dd>
       <dt><kbd>M</kbd> <kbd>N</kbd></dt><dd>Ton, Musik</dd>
     </dl>
@@ -27,7 +29,8 @@
     <h2 class="big">Verwaltung</h2>
     <dl class="keys wide">
       <dt>Übersicht</dt><dd>Größe und Zustand der Datenbank. <b>Sicherung</b> lädt eine vollständige Kopie herunter, auch während gespielt wird. <b>Prüfen</b> sucht nach Schäden, <b>Aufräumen</b> gibt freien Platz zurück. <b>Alte Tische löschen</b> entfernt alles, woran seit X Tagen nichts passiert ist.</dd>
-      <dt>Tische</dt><dd>Suchen, Frage umbenennen, Art der Ziehung, Chips einzelner Spieler korrigieren, Namen ändern oder entfernen, Bank oder Topf zurücksetzen, als JSON exportieren, Tisch löschen. Offene Bildschirme und Handys aktualisieren sich sofort.</dd>
+      <dt>Gruppen</dt><dd>Am großen Bildschirm unter „Als Gruppe speichern“. Ein neuer Tisch kann mit einer Gruppe starten, ihre Namen stehen dann schon im Topf, und wer sich per Handy mit gleichem Namen einträgt, landet auf seinem Platz. Löschen auf der Startseite oder hier in der Übersicht; Tische bleiben dabei erhalten.</dd>
+      <dt>Tische</dt><dd>Suchen (auch nach Gruppe), Frage umbenennen, Art der Ziehung und Rundenzahl, Chips einzelner Spieler korrigieren, Namen ändern oder entfernen, Bank oder Topf zurücksetzen, als JSON exportieren, Tisch löschen. Offene Bildschirme und Handys aktualisieren sich sofort.</dd>
       <dt>SQL</dt><dd>Eigene Abfragen auf die Datenbank, nur lesend und höchstens drei Sekunden. Strg + Enter führt aus.</dd>
     </dl>
     <p class="note">Löschen fragt immer zweimal. Während einer Ziehung sind Änderungen am Tisch gesperrt.</p>

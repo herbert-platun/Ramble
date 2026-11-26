@@ -22,7 +22,6 @@ body.play { min-height: 100dvh; }
 .me { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: flex-end; line-height: 1.15; }
 .me-name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
 .me-meta { font-size: 13px; color: var(--mute); }
-.me-meta .st { color: var(--line); background: var(--pink); border-radius: 5px; padding: 0 5px; font-family: var(--f-big); font-size: 15px; margin-left: 4px; }
 .snd { flex: none; width: 40px; height: 40px; display: grid; place-items: center; background: var(--plum); border: 3px solid var(--line); border-radius: 10px; box-shadow: 0 3px 0 var(--line); color: var(--mute); padding: 0; }
 .snd svg { width: 22px; height: 22px; fill: currentColor; stroke: currentColor; stroke-width: 0; }
 .snd svg .w { fill: none; stroke-width: 2; stroke-linecap: round; display: none; }
@@ -54,6 +53,27 @@ body.play { min-height: 100dvh; }
 .banner .lock { background: var(--ink); color: var(--red); }
 .banner .info { background: var(--plum); color: var(--mute); font-weight: 500; font-size: 15px; }
 .banner .info b { color: var(--cream); }
+/* Slots: Einsatzpause und laufende Runde */
+.banner .brk { background: var(--plum); color: var(--cream); display: block; text-align: left; padding: 12px 14px 12px; }
+.banner .brk-top { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.banner .brk .kick { font-size: 13px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--gold-hi); }
+.banner .brk .n { font-family: var(--f-big); font-size: 40px; line-height: .8; color: var(--gold-hi); }
+.banner .brk .mine { font-size: 14px; color: var(--mute); text-align: right; }
+.banner .brk-bar { height: 6px; border-radius: 99px; background: rgba(255, 255, 255, .12); margin: 8px 0 8px; overflow: hidden; }
+.banner .brk-bar i { display: block; height: 100%; background: var(--gold); transform-origin: left; transition: transform 1s linear; }
+.banner .brk-last { margin: 0 0 4px; font-size: 15px; }
+.banner .brk-last.up b { color: var(--gold-hi); }
+.banner .brk-last.down { color: var(--mute); }
+.banner .brk-todo { margin: 0; font-size: 15px; color: var(--mute); }
+.banner .brk-todo b, .banner .brk-todo.ok { color: var(--cream); }
+.banner .brk-steps { list-style: none; display: flex; gap: 6px; margin: 10px 0 0; padding: 0; }
+.banner .brk-steps li {
+  flex: 1; text-align: center; font-size: 12px; font-weight: 700; letter-spacing: .04em; padding: 5px 4px; border-radius: 8px;
+  background: rgba(255, 255, 255, .06); color: var(--mute);
+}
+.banner .brk-steps li.done { color: var(--cream); background: rgba(255, 255, 255, .1); }
+.banner .brk-steps li.now { background: var(--gold); color: var(--ink); }
+.banner .brk.run .brk-steps { margin-top: 8px; }
 
 .live {
   position: relative; aspect-ratio: 1 / 1; margin: 0 0 14px;
@@ -62,6 +82,26 @@ body.play { min-height: 100dvh; }
   overflow: hidden;
 }
 .live canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.live.wide { aspect-ratio: 6 / 5; }
+/* Slots: was diese Runde schon reingekommen ist (Konto zählt erst am Rundenende hoch) */
+/* Slots: dein Gewinn dieses Spins, live – unter dem Automaten, nie darüber */
+.winbar {
+  display: flex; align-items: center; gap: 10px; margin: -4px 0 14px; padding: 8px 12px;
+  border: 3px solid var(--line); border-radius: 14px; background: #1d1626; box-shadow: 0 4px 0 var(--line);
+}
+.winbar .lbl { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--mute); flex: 1; }
+.winbar .lbl small { display: block; font-size: 11px; font-weight: 600; letter-spacing: 0; text-transform: none; }
+.winbar .val { font-family: var(--f-big); font-size: 28px; line-height: 1; color: var(--mute); font-variant-numeric: tabular-nums; }
+.winbar.hit .val { color: var(--gold-hi); }
+.winbar .val.bump { animation: win-bump .3s var(--pop); }
+@keyframes win-bump { 0% { transform: scale(1.35); } }
+.winbar .x {
+  font-family: var(--f-big); font-size: 18px; padding: 2px 8px 4px; border-radius: 8px; border: 2px solid var(--line);
+  background: #ff4d5e; color: #fff; box-shadow: 0 3px 0 var(--line);
+}
+.winbar .x.slam { animation: x-slam .45s var(--pop); }
+@keyframes x-slam { 0% { transform: scale(2.2) rotate(10deg); filter: brightness(1.8); } 60% { transform: scale(.9) rotate(-3deg); } }
+.winbar.done { border-color: var(--gold); box-shadow: 0 4px 0 var(--line), 0 0 24px rgba(255, 194, 61, .35); }
 
 /* -- Ergebnis -------------------------------------------------------------------- */
 .verdict { padding: 16px 16px 18px; margin: 0 0 14px; text-align: center; animation: verdict-in .6s var(--pop) both; }
@@ -118,6 +158,41 @@ body.play { min-height: 100dvh; }
 .cards.locked .card:not([aria-checked="true"]) { opacity: .45; filter: saturate(.4); }
 .cards .note { grid-column: 1 / -1; color: var(--mute); margin: 0; }
 
+/* Slots: Symbolkarten in Akzentfarbe, Bild oben, Name darunter */
+.cards.symcards { grid-template-columns: repeat(3, 1fr); gap: 12px 8px; }
+.scard {
+  --acc: var(--mute);
+  align-items: center; text-align: center; justify-content: flex-start; gap: 4px;
+  min-height: 0; padding: 8px 6px 12px;
+  background: radial-gradient(circle at 50% 30%, color-mix(in srgb, var(--acc) 28%, transparent), transparent 70%), var(--plum);
+  box-shadow: 0 5px 0 var(--line), inset 0 0 0 3px color-mix(in srgb, var(--acc) 70%, var(--line));
+}
+.scard .sym { width: 56%; aspect-ratio: 1; height: auto; filter: drop-shadow(0 2px 0 rgba(0, 0, 0, .45)); }
+.scard .nm { font-size: 15px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.scard .nm small { display: none; }
+.scard .crowd { justify-content: center; font-size: 11.5px; }
+.scard[aria-checked="true"] {
+  background: var(--acc); color: var(--line); transform: translateY(-4px) rotate(-1.5deg);
+  box-shadow: 0 9px 0 var(--line), 0 0 26px color-mix(in srgb, var(--acc) 60%, transparent);
+}
+.scard[aria-checked="true"] .crowd { color: rgba(18, 10, 25, .7); }
+.cards.locked .scard:has(.mine) { opacity: 1; filter: none; }
+
+/* Muster und Auszahlung */
+.paytable { margin: 16px 0 0; padding: 12px 14px; }
+.paytable summary { font-weight: 700; cursor: pointer; color: var(--gold-hi); }
+.paytable table { width: 100%; border-collapse: collapse; margin: 10px 0 8px; font-size: 14px; }
+.paytable th { text-align: left; color: var(--mute); font-weight: 600; font-size: 12px; padding: 0 0 4px; }
+.paytable td { padding: 3px 0; border-top: 1px solid rgba(165, 148, 189, .15); }
+.paytable td:not(:first-child), .paytable th:not(:first-child) { text-align: right; font-family: var(--f-big); font-size: 18px; }
+.paytable th:not(:first-child) { font-family: var(--f-ui); font-size: 12px; }
+.pt-note { display: flex; align-items: center; gap: 10px; margin: 8px 0 0; font-size: 14px; line-height: 1.3; }
+.pt-note .skin { --slot-cell: 42px; width: 42px; height: 42px; flex: none; }
+.pt-note .skin .tag { display: none; }
+.pt-note .skin .sym { margin: 0; }
+.pt-note .skin.mult .x { inset: 0; }
+.pt-note.muted { color: var(--mute); }
+
 /* -- Wettschein unten ------------------------------------------------------------ */
 .slip {
   position: fixed; left: 8px; right: 8px; bottom: calc(8px + env(safe-area-inset-bottom)); z-index: 30;
@@ -156,3 +231,10 @@ body.play { min-height: 100dvh; }
 .slip .btn { font-size: 24px; padding: .25em .5em .32em; flex: none; }
 .slip .allin { --c: var(--gold); }
 .slip.locked .slip-chips { opacity: .4; pointer-events: none; }
+.slip.tip .pchip, .slip.tip .allin { display: none; }
+.slip.tip .slip-chips { justify-content: flex-end; }
+.slip.tip .slip-line { padding-bottom: 4px; }
+.slip-line .again {
+  flex: none; border: 3px solid var(--line); border-radius: 10px; background: var(--blue); color: var(--cream);
+  font: 600 15px/1 var(--f-ui); padding: 7px 10px 8px; box-shadow: 0 3px 0 var(--line);
+}

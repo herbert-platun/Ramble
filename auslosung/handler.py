@@ -4,21 +4,21 @@ from __future__ import annotations
 import json
 import queue
 import sys
-import threading
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlparse
 
+from . import __version__
 from .admin import admin_route
 from .app import App, Client
 from .game.draws import Draws
-from .game.rules import DrawError, now_ms
+from .game.rules import DrawError
 from .web import assets, pages
 
 
 class Handler(BaseHTTPRequestHandler):
     app: App
-    server_version = "Auslosung/4.0"
+    server_version = f"Auslosung/{__version__}"
 
     def log_message(self, fmt, *args):
         if self.command == "POST":
@@ -89,7 +89,7 @@ class Handler(BaseHTTPRequestHandler):
             if parts == ["favicon.ico"]:
                 return self.send_static("favicon.svg", {"v": 1})
             if parts == ["api", "draws"]:
-                return self.send_json({"draws": self.draws.recent()})
+                return self.send_json({"draws": self.draws.recent(), "groups": self.draws.groups()})
             if len(parts) == 4 and parts[:2] == ["api", "d"]:
                 draw = self.draw_or_404(parts[2])
                 if parts[3] == "state":
@@ -109,7 +109,10 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         with self.app.lock:
             self.app.clients.add(c)
+            running = draw["code"] in self.app.timers
         self.app.broadcast(draw["code"])
+        if not running:          # z. B. nach einem Neustart mitten in einer Session
+            self.app.schedule(draw["code"])
         try:
             self.wfile.write(b"retry: 1500\n\n")
             while True:
@@ -130,13 +133,13 @@ class Handler(BaseHTTPRequestHandler):
         if admin_route(self, "POST", parts, {}):
             return
         try:
-            n = int(self.headers.get("Content-Length") or 0)
-            if n > 10_000:
-                raise DrawError("Anfrage zu groß")
-            data = json.loads(self.rfile.read(n) or b"{}")
+            data = read_json(self, 10_000)
             if parts == ["api", "draws"]:
-                d = self.draws.create(data.get("title", ""))
+                d = self.draws.create(data.get("title", ""), data.get("group_id"))
                 return self.send_json({"code": d["code"], "host_key": d["host_key"]})
+            if parts == ["api", "groups", "delete"]:
+                self.draws.delete_group(data.get("id"))
+                return self.send_json({"ok": True})
             if len(parts) != 4 or parts[:2] != ["api", "d"]:
                 return self.send_error(HTTPStatus.NOT_FOUND)
             draw = self.draw_or_404(parts[2])
@@ -149,18 +152,21 @@ class Handler(BaseHTTPRequestHandler):
             self.send_json({"error": str(e)}, 403)
         except LookupError as e:
             self.send_json({"error": str(e)}, 404)
-        except (ValueError, json.JSONDecodeError):
+        except (ValueError, TypeError):
             self.send_json({"error": "Ungültige Anfrage"}, 400)
 
     def action(self, draw: dict, action: str, data: dict):
         d = self.draws
         if action == "join":
-            return {"token": d.join(draw, data.get("name", ""))["token"]}
-        if action == "bet":
+            e = d.join(draw, data.get("name", ""))
+            return {"token": e["token"], "claimed": bool(e.get("claimed"))}
+        if action in ("tip", "wager"):
             me = d.by_token(draw, data.get("token"))
             if not me:
                 raise PermissionError("Unbekannt – bitte neu eintragen")
-            return d.bet(draw, me, data.get("entrant_id"), data.get("stake"))
+            if action == "tip":
+                return d.tip(draw, me, data.get("entrant_id"))
+            return d.wager(draw, me, data.get("wagers"))
         if data.get("host_key") != draw["host_key"]:     # ab hier nur der Host
             raise PermissionError("Nur der Host darf das")
         if action == "add":
@@ -169,13 +175,15 @@ class Handler(BaseHTTPRequestHandler):
             d.remove(draw, data.get("entrant_id"))
         elif action == "mode":
             d.set_mode(draw, data.get("mode", ""))
+        elif action == "rounds":
+            d.set_rounds(draw, data.get("rounds"))
         elif action == "pick":
-            p = d.pick(d.get(draw["code"]))
-            # Bei „Nichts geht mehr“ ziehen und senden, nach dem Ende noch einmal
-            for at in (p["locks_at"] + 60, p["ends_at"] + 200):
-                timer = threading.Timer(max(0, at - now_ms()) / 1000, self.app.broadcast, args=(draw["code"],))
-                timer.daemon = True
-                timer.start()
+            d.pick(d.get(draw["code"]))
+            self.app.schedule(draw["code"])
+        elif action == "group":
+            return d.save_group(draw, data.get("name", ""))
+        elif action == "save":
+            d.set_saved(draw, bool(data.get("saved", True)))
         elif action == "reset":
             d.reset(draw)
         elif action == "bank":
@@ -184,10 +192,18 @@ class Handler(BaseHTTPRequestHandler):
             raise LookupError("Unbekannte Aktion")
 
 
+def read_json(handler: BaseHTTPRequestHandler, limit: int) -> dict:
+    """JSON-Objekt aus dem Rumpf der Anfrage. Alles andere ist eine ungültige Anfrage."""
+    n = int(handler.headers.get("Content-Length") or 0)
+    if not 0 <= n <= limit:
+        raise DrawError("Anfrage zu groß")
+    data = json.loads(handler.rfile.read(n) or b"{}")
+    if not isinstance(data, dict):
+        raise ValueError("JSON-Objekt erwartet")
+    return data
+
+
 class Server(ThreadingHTTPServer):
     daemon_threads = True
     allow_reuse_address = True
 
-
-# =============================================================================
-# 4  Selbsttest

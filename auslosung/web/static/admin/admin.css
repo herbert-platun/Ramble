@@ -98,3 +98,11 @@ kbd { font-family: var(--f-big); font-size: 18px; line-height: 1; display: inlin
 .flags td:first-child { padding-right: 14px; white-space: nowrap; }
 .flags tr:last-child td { border-bottom: 0; }
 @media (max-width: 900px) { .split { grid-template-columns: 1fr; } .adm-sign .logo { font-size: 46px; } }
+
+.grp-row { display: flex; align-items: center; gap: 12px; padding: 8px 4px; }
+.grp-row .t { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.grp-row .m { color: var(--mute); font-size: .9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.grp-row .btn { font-size: 1rem; }
+.grp-list { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 6px; }
+.grp-list .empty { color: var(--mute); }
+.grp-row { border-bottom: 1px solid rgba(165, 148, 189, .15); }

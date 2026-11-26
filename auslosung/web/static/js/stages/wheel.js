@@ -11,7 +11,7 @@ export class WheelStage extends Stage {
     this.R = Math.min(this.w * 0.44, this.h * 0.41);
     this.cx = this.w / 2;
     this.cy = this.h / 2 + this.R * 0.07;
-    this.img = this.view?.slots.length ? this.render() : null;
+    this.img = this.view?.slots.length && this.R > 12 ? this.render() : null;   // winzige Leinwand beim Umschalten
   }
 
   render() {

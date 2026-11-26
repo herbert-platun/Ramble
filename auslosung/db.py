@@ -14,16 +14,15 @@ from contextlib import contextmanager
 from pathlib import Path
 from typing import Any, Iterator
 
-MIGRATIONS_DIR = Path(__file__).resolve().parent / "migrations"
+from . import resources
 
-
-def load_migrations(directory: Path = MIGRATIONS_DIR) -> list[tuple[int, str]]:
-    """[(Nummer, SQL)] aus NNNN_name.sql, aufsteigend sortiert."""
+def load_migrations() -> list[tuple[int, str]]:
+    """[(Nummer, SQL)] aus migrations/NNNN_name.sql, aufsteigend sortiert."""
     found = []
-    for f in directory.glob("*.sql"):
-        m = re.match(r"(\d+)_", f.name)
+    for rel in resources.files("migrations"):
+        m = re.match(r"(\d+)_.*\.sql$", rel.rsplit("/", 1)[-1])
         if m:
-            found.append((int(m.group(1)), f.read_text(encoding="utf-8")))
+            found.append((int(m.group(1)), resources.text(rel)))
     return sorted(found)
 
 
@@ -104,7 +103,16 @@ class Database:
             if number <= current:
                 continue
             with self._write_lock:
-                self.conn.executescript(f"BEGIN;\n{sql}\nPRAGMA user_version = {number};\nCOMMIT;")
+                # Fremdschlüssel aus, damit Tabellen umgebaut werden können, ohne dass
+                # ON DELETE CASCADE beim Kopieren Zeilen mitnimmt; danach prüfen.
+                self.conn.execute("PRAGMA foreign_keys = OFF")
+                try:
+                    self.conn.executescript(f"BEGIN;\n{sql}\nPRAGMA user_version = {number};\nCOMMIT;")
+                    broken = self.conn.execute("PRAGMA foreign_key_check").fetchall()
+                finally:
+                    self.conn.execute("PRAGMA foreign_keys = ON")
+                if broken:
+                    raise RuntimeError(f"Migration {number}: Fremdschlüssel verletzt: {broken[:3]}")
             applied.append(number)
         return applied
 
@@ -129,11 +137,3 @@ class Tx:
         row = self.conn.execute(sql, params).fetchone()
         return None if row is None else next(iter(row.values()))
 
-
-# =============================================================================
-# 2  Spiel
-# =============================================================================
-# Ablauf einer Ziehung (Server-Millisekunden):
-#   pick()      Host drückt „Ziehen“. Topf wird eingefroren, Name steht noch NICHT fest.
-#   locks_at    „Nichts geht mehr“: settle() zieht mit `secrets` (jeder im Topf hat
-#               dieselbe Chance, Einsätze ändern daran nichts) und rechnet ab.

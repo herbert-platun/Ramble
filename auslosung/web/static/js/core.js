@@ -3,7 +3,7 @@
 // Grundlagen
 // =============================================================================
 // Gemeinsame Helfer für Lobby, großen Bildschirm und Handy.
-export const MODE_NAMES = { wheel: "Glücksrad", roulette: "Roulette", plinko: "Plinko" };
+export const MODE_NAMES = { wheel: "Glücksrad", plinko: "Plinko", slots: "Slots" };
 
 // Feldfarben, in dieser Reihenfolge reihum vergeben
 const SLOT_COLORS = [
@@ -91,19 +91,65 @@ export function fitCanvas(canvas, onResize) {
 }
 
 /** Zustand einer Ziehung aus Sicht der Uhr: null, "running" oder "done".
- *  "running" umfasst letzte Einsätze und „Nichts geht mehr“, siehe stagePhase. */
+ *  "running" umfasst letzte Einsätze und „Keine Wetten mehr“, siehe stagePhase. */
 export function pickPhase(pick) {
   if (!pick) return null;
   return serverNow() < pick.ends_at ? "running" : "done";
 }
 
-/** Feinere Phase: "calls" (letzte Einsätze), "lock", "spin", "done" oder null. */
+/** Slots: die Runde, die gerade läuft oder als Nächstes kommt (null außerhalb einer Session). */
+export function currentRound(pick, t = serverNow()) {
+  if (!pick?.rounds?.length) return null;
+  let r = pick.rounds[0];
+  for (const x of pick.rounds) if (x.calls_at <= t) r = x;
+  return r;
+}
+
+/** Zeitpunkte des laufenden Abschnitts: bei Slots die aktuelle Runde, sonst die Ziehung. */
+export function segment(pick) {
+  if (!pick) return null;
+  if (pick.mode !== "slots") return { n: 0, locks_at: pick.locks_at, started_at: pick.started_at, locked: pick.locked, calls_at: 0 };
+  const r = currentRound(pick);
+  return r && { n: r.n, locks_at: r.locks_at, started_at: r.started_at, locked: r.locked, calls_at: r.calls_at, ends_at: r.ends_at };
+}
+
+/** Feinere Phase: "calls" (letzte Einsätze), "lock", "spin", "done" oder null.
+ *  Bei Slots gilt das je Runde; zwischen zwei Runden läuft noch "spin". */
 export function stagePhase(pick) {
   if (!pick) return null;
   const t = serverNow();
-  if (t >= pick.ends_at) return "done";
-  if (t < pick.locks_at) return "calls";
-  if (t < pick.started_at || !pick.locked) return "lock";
+  if (t >= pick.ends_at && pick.locked) return "done";
+  const s = segment(pick);
+  if (!s) return "lock";
+  if (t < s.locks_at) return "calls";
+  if (t < s.started_at || !s.locked) return "lock";
   return "spin";
 }
 
+/** Phase plus Rundennummer: Wechsel davon lösen Licht, Ton und Einblendungen aus. */
+export function phaseKey(pick) {
+  const ph = stagePhase(pick);
+  return ph && `${pick.id}:${ph}:${segment(pick)?.n ?? 0}`;
+}
+
+// -- Slot-Symbole -----------------------------------------------------------------
+export const SPECIALS = { W: ["star", "Joker", "wild"], N: ["snakeeyes", "Niete", "bust"] };
+
+/** HTML eines Symbols mit Namensschild. v: Name-ID (Zahl) oder Sonderzelle ("W", "N", "x3"). */
+export function skinHtml(v, skins, names, extra = "") {
+  if (typeof v === "string" && v[0] === "x") {
+    return `<div class="skin special mult ${extra}"><svg class="sym"><use href="#sym-mult"/></svg><span class="x">×${v.slice(1)}</span><span class="tag">Faktor</span></div>`;
+  }
+  if (SPECIALS[v]) {
+    const [sym, label, cls] = SPECIALS[v];
+    return `<div class="skin special ${cls} ${extra}"><svg class="sym"><use href="#sym-${sym}"/></svg><span class="tag">${label}</span></div>`;
+  }
+  const [sym, acc] = skins[String(v)] || ["chip", 5];
+  return `<div class="skin acc-${acc} ${extra}" data-id="${v}"><svg class="sym"><use href="#sym-${sym}"/></svg><span class="tag">${esc(names[String(v)] ?? "?")}</span></div>`;
+}
+
+/** Kleines Symbol ohne Schild, z. B. vor einem Namen in einer Liste. */
+export function badgeHtml(skin) {
+  if (!skin) return "";
+  return `<span class="badge acc-${skin[1]}" aria-hidden="true"><svg class="sym"><use href="#sym-${skin[0]}"/></svg></span>`;
+}
