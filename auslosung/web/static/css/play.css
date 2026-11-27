@@ -242,7 +242,17 @@ body.play { min-height: 100dvh; }
 /* ==========================================================================
    Desktop / Tablet quer: Bühne links, Auswahl rechts, Wettschein rechts unten
    ========================================================================== */
+/* Handy: Wrapper lösen sich auf, Reihenfolge wie gehabt */
+.play .main { display: flex; flex-direction: column; }
+.col-stage, .col-pick { display: contents; }
+.banner { order: 0; } .verdict { order: 1; } .live { order: 2; } .winbar { order: 3; }
+.cards { order: 4; } .paytable { order: 5; }
+
 @media (min-width: 900px) {
+  .col-stage, .col-pick { display: block; }
+  .banner, .verdict, .live, .winbar, .cards, .paytable { order: 0; }
+  .live { max-width: calc((100dvh - 200px) * 1); }
+  .live.wide { max-width: calc((100dvh - 200px) * 1.2); }
   .play .app { max-width: 1180px; padding: 20px 32px 40px; }
   .hud { top: 12px; padding: 10px 14px 11px 16px; }
   .draw-title { margin: 22px 4px 20px; font-size: clamp(44px, 4.6vw, 64px); }
