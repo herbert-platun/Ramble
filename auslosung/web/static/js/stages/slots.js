@@ -7,7 +7,7 @@
 // Serverzeit; Effekte und Töne gibt es nur für Ereignisse, die gerade jetzt
 // passieren. Wer neu lädt, steigt im richtigen Zustand ein, ohne Feuerwerk.
 import { sound } from "../audio.js";
-import { esc, serverNow, skinHtml } from "../core.js";
+import { badgeHtml, esc, ranked, serverNow, skinHtml, sum } from "../core.js";
 import { countTo, fmt, reduced } from "../fx.js";
 import { slotSfx } from "../slot-sfx.js";
 import { Stage } from "./stage.js";
@@ -83,6 +83,9 @@ export class SlotStage extends Stage {
       this.eventsKey = key;
       this.events = pick ? this.buildEvents(pick) : [];
       if (!samePick) this.reset();
+      // Alles wird von vorn nachgespielt: Punkte neu zählen, sonst zählen frühere Runden mehrfach
+      this.session = {};
+      this.roundPts = {};
       // Bis jetzt Vergangenes still nachholen, ab dem letzten Bild live weiter
       const until = samePick ? this.lastFrame || 0 : Infinity;
       this.done = 0;
@@ -270,13 +273,15 @@ export class SlotStage extends Stage {
       }
       case "again": {
         const why = e.spin.again === "tie" ? "Gleichstand an der Spitze" : "Noch niemand vorn";
-        this.overlay(`<div class="again-stamp">Nochmal!<small>${why}</small></div>`);
+        this.overlay(`<div class="again-stamp">Nochmal!<small>${why} · zählt nur für die Punkte</small></div>`);
         if (sfx) slotSfx.again();
         if (live) this.onEvent("again", e, live);
         return;
       }
       case "summary": {
-        if (e.final) this.clearOverlay();
+        // Letzte Runde: Endstand über alle Runden, bevor der Name kommt. Gezogen wird, wer insgesamt vorn liegt,
+        // nicht wer den letzten Spin gewinnt.
+        if (e.final) { if (fx) this.overlay(this.finalCard()); else this.clearOverlay(); }
         // Nur live: beim Nachspielen (neue Runde, Neuladen) läge die Karte sonst unter Pause und Stempel
         else if (!this.compact && fx) this.overlay(this.roundCard(e.round));
         if (sfx && !e.final) slotSfx.roundEnd();
@@ -378,7 +383,7 @@ export class SlotStage extends Stage {
 
   tally(e, live, fx, sfx) {
     const s = e.spin;
-    const total = Object.values(s.pts).reduce((a, b) => a + b, 0);
+    const total = sum(s.pts);
     for (const [id, v] of Object.entries(s.pts)) {
       this.session[id] = (this.session[id] || 0) + v;
       this.roundPts[id] = (this.roundPts[id] || 0) + v;
@@ -422,16 +427,26 @@ export class SlotStage extends Stage {
   }
 
   roundCard(round) {
-    const pts = Object.entries(this.roundPts).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]);
+    const pts = ranked(this.roundPts);
     const top = Object.entries(this.session).sort((a, b) => b[1] - a[1]).slice(0, 4);
     const lead = pts[0] && (!pts[1] || pts[1][1] < pts[0][1]) ? this.view.names[pts[0][0]] : null;
     const row = ([id, v]) => {
       const sk = this.skins[id];
-      return `<li><span class="badge acc-${sk?.[1] ?? 5}"><svg class="sym"><use href="#sym-${sk?.[0] ?? "chip"}"/></svg></span>
+      return `<li>${badgeHtml(sk || ["chip", 5])}
         <span class="nm">${esc(this.view.names[id] ?? "?")}</span><span class="plus">${this.roundPts[id] ? "+" + fmt(this.roundPts[id]) : ""}</span><span class="pts">${fmt(v)}</span></li>`;
     };
     return `<div class="round-card"><h3>Runde ${round.n} vorbei</h3>
       <p class="lead">${lead ? `${esc(lead)} holt die Runde` : "Kein Rundensieger"}</p>
+      <ol>${top.map(row).join("")}</ol></div>`;
+  }
+
+  finalCard() {
+    const n = this.view.pick?.layout.rounds || 1;
+    const top = ranked(this.session).slice(0, 4);
+    const row = ([id, v], i) => `<li class="${i ? "" : "top"}">${badgeHtml(this.skins[id] || ["chip", 5])}
+      <span class="nm">${esc(this.view.names[id] ?? "?")}</span><span class="plus">${i ? "" : "★"}</span><span class="pts">${fmt(v)}</span></li>`;
+    return `<div class="round-card final"><h3>Endstand · ${n === 1 ? "ein Spin" : `alle ${n} Runden`}</h3>
+      <p class="lead">Meiste Punkte gewinnt</p>
       <ol>${top.map(row).join("")}</ol></div>`;
   }
 

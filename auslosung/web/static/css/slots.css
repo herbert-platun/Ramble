@@ -24,13 +24,28 @@
   --glow-2: 0 0 14px color-mix(in srgb, var(--gold) 75%, transparent);
   --glow-3: 0 0 22px var(--pink), 0 0 6px var(--gold-hi);
 }
+/* Grundfarbe ohne Gewicht, damit die Akzentklassen unten immer gewinnen */
+:where(.skin, .badge, .scard) { --acc: var(--mute); }
 .acc-0 { --acc: var(--acc-0); } .acc-1 { --acc: var(--acc-1); } .acc-2 { --acc: var(--acc-2); } .acc-3 { --acc: var(--acc-3); }
 .acc-4 { --acc: var(--acc-4); } .acc-5 { --acc: var(--acc-5); } .acc-6 { --acc: var(--acc-6); } .acc-7 { --acc: var(--acc-7); }
 .sym { display: block; overflow: visible; }
+/* Wiederholtes Bild (ab dem neunten Namen): das Symbol selbst nimmt die Akzentfarbe an,
+   mit dunkler und heller Abstufung, damit Form und Glanz erhalten bleiben. */
+.tint {
+  --tint: var(--acc);
+  --tint-deep: color-mix(in srgb, var(--tint) 55%, #120a19);
+  --tint-hi: color-mix(in srgb, var(--tint) 45%, #fff);
+  --sym-red: var(--tint);  --sym-red-deep: var(--tint-deep);
+  --sym-gold: var(--tint); --sym-gold-lo: var(--tint-deep); --sym-gold-hi: var(--tint-hi);
+  --sym-green: var(--tint-hi); --sym-felt: var(--tint-deep);
+  --sym-blue: var(--tint); --sym-blue-deep: var(--tint-deep);
+  --sym-pink: var(--tint); --sym-cream: var(--tint-hi);
+}
+.tint-0 { --tint: var(--acc-0); } .tint-1 { --tint: var(--acc-1); } .tint-2 { --tint: var(--acc-2); } .tint-3 { --tint: var(--acc-3); }
+.tint-4 { --tint: var(--acc-4); } .tint-5 { --tint: var(--acc-5); } .tint-6 { --tint: var(--acc-6); } .tint-7 { --tint: var(--acc-7); }
 
 /* -- Ein Symbol mit Namensschild (Walze, Handy, Listen) ------------------------- */
 .skin {
-  --acc: var(--mute);
   position: relative; display: grid; place-items: center;
   border-radius: calc(var(--slot-cell) * .1);
   background:
@@ -56,7 +71,6 @@
 }
 /* Kleines Symbol mit Akzentring für Listen (Bildschirm und Handy) */
 .badge {
-  --acc: var(--mute);
   display: inline-grid; place-items: center; justify-content: center; align-items: center; flex: none;
   width: 1.9em; height: 1.9em; border-radius: .45em;
   background: radial-gradient(circle at 50% 40%, color-mix(in srgb, var(--acc) 35%, transparent), transparent 75%), var(--ink);
@@ -229,6 +243,8 @@
 .round-card li { display: grid; grid-template-columns: calc(var(--slot-cell) * .4) 1fr auto auto; align-items: center; gap: .5em; font-size: calc(var(--slot-cell) * .17); text-align: left; }
 .round-card .nm { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .round-card .plus { font-family: var(--f-big); color: var(--green); font-size: 1.3em; }
+.round-card.final li.top { color: var(--gold-hi); }
+.round-card.final li.top .plus { color: var(--gold); }
 .round-card .pts { font-family: var(--f-big); color: var(--gold-hi); font-size: 1.5em; min-width: 2.5em; text-align: right; }
 
 /* ---------- Keyframes ---------- */

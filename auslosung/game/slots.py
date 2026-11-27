@@ -16,6 +16,8 @@ Wetten: Einsatz auf einen Namen. Jedes Muster dieses Namens zahlt
 Einsatz × Musterwert × Faktor × Quote. Die Quote gleicht die Tischgröße aus
 (mit vielen Namen trifft jeder seltener), damit eine Wette im Mittel etwa
 den Einsatz zurückbringt: viele kleine Treffer, ab und zu ein großer.
+Ausgezahlt wird nur der reguläre Spin einer Runde; Nachdrehen bei Gleichstand
+entscheidet allein über die Punkte.
 
 Alles hier ist eine reine Funktion des Zufallsgenerators `rng`: im Spiel
 `secrets.SystemRandom()`, in Tests und bei der Kalibrierung ein fester Seed.
@@ -346,7 +348,7 @@ ROLL, ROLL_TIER = 900, 450            # Hochzählen der Punkte
 TALLY, TALLY_TIER, BIG_HOLD = 1500, 650, 1600
 AGAIN = 2100
 LOT = 3300
-ROUND_END, FINAL_END = 2400, 1800     # danach folgt die Pause mit Rückblick
+ROUND_END, FINAL_END = 2400, 3400     # danach folgt die Pause mit Rückblick
 
 
 def timeline(result: dict, final: bool) -> int:

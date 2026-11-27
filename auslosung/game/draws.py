@@ -20,7 +20,7 @@ import secrets
 from ..db import Database
 from . import slots
 from .plinko import plinko_duration, plinko_path, plinko_shape
-from .rules import (BAILOUT, CALLS, CODE_ALPHABET, DURATION, LOCK, MODES, SLOT_BREAK, SLOT_CALLS, START_CHIPS, TIP_BONUS,
+from .rules import (CALLS, CODE_ALPHABET, DURATION, LOCK, MODES, SLOT_BREAK, SLOT_CALLS, START_CHIPS, TIP_BONUS,
                     DrawError, clean_name, now_ms)
 
 FAR = 6 * 3600 * 1000       # vorläufiges Ende einer Slot-Session, bis die letzte Runde feststeht
@@ -32,6 +32,30 @@ def clean_group(name: str) -> str:
     if len(name) < 2:
         raise DrawError("Die Gruppe braucht einen Namen")
     return name
+
+
+def session_points(results: list[dict]) -> dict[int, int]:
+    """Punkte je Name über alle gedrehten Runden einer Session."""
+    out: dict[int, int] = {}
+    for res in results:
+        for i, v in res["pts"].items():
+            out[int(i)] = out.get(int(i), 0) + v
+    return out
+
+
+def session_balance(books: list[dict]) -> dict:
+    """Chip-Bilanz einer Session je Wetter aus den Auszahlungen aller Runden.
+
+    {"net": {id: gewonnen − gesetzt}, "staked": {id: gesetzt}, "won": {id: gewonnen}}
+    """
+    staked: dict[int, int] = {}
+    won: dict[int, int] = {}
+    for book in books:
+        for b, x in book.items():
+            b = int(b)
+            staked[b] = staked.get(b, 0) + sum(x["stakes"].values())
+            won[b] = won.get(b, 0) + x["win"]
+    return {"net": {b: won[b] - staked[b] for b in staked}, "staked": staked, "won": won}
 
 
 class Draws:
@@ -58,6 +82,7 @@ class Draws:
                     tx.execute("INSERT INTO entrants(draw_id, name, token, created_at, chips, member_id)"
                                " VALUES (?,?,NULL,?,?,?)", did, m["name"], t, START_CHIPS, m["id"])
                 tx.execute("UPDATE groups SET used_at = ? WHERE id = ?", t, group["id"])
+                self._store_skins(tx, did)
         return self.get(code)
 
     def get(self, code: str) -> dict | None:
@@ -175,6 +200,7 @@ class Draws:
             eid = tx.insert("INSERT INTO entrants(draw_id, name, token, created_at, chips, member_id) VALUES (?,?,?,?,?,?)",
                             draw["id"], name, None if by_host else secrets.token_urlsafe(24), now_ms(), START_CHIPS,
                             member or None)
+            self._store_skins(tx, draw["id"])
             return tx.one("SELECT * FROM entrants WHERE id = ?", eid)
 
     def by_token(self, draw: dict, token: str | None) -> dict | None:
@@ -186,6 +212,7 @@ class Draws:
         self._not_drawing(draw)
         eid = int(entrant_id)
         with self.db.transaction() as tx:
+            self._store_skins(tx, draw["id"])      # alle anderen behalten ihr Symbol
             # Wer auf diesen Namen gesetzt hat, bekommt den Einsatz zurück
             for w in tx.all("SELECT w.* FROM wagers w JOIN entrants e ON e.id = w.entrant_id"
                             " WHERE e.draw_id = ? AND (w.on_id = ? OR w.entrant_id = ?)", draw["id"], eid, eid):
@@ -193,25 +220,47 @@ class Draws:
             tx.execute("DELETE FROM entrants WHERE id = ? AND draw_id = ?", eid, draw["id"])
 
     def _entrants(self, q, draw: dict) -> list[dict]:
+        return self._entrants_of(q, draw["id"])
+
+    @staticmethod
+    def _entrants_of(q, draw_id: int) -> list[dict]:
+        # Gruppenmitglieder tragen ihr Symbol über Tische hinweg, sonst gilt das am Eintrag gespeicherte
         return q.all("SELECT e.id, e.name, e.token IS NOT NULL AS phone, e.tip_id, e.chips, e.member_id,"
-                     " m.symbol, m.accent FROM entrants e LEFT JOIN members m ON m.id = e.member_id"
-                     " WHERE e.draw_id = ? ORDER BY e.id", draw["id"])
+                     " COALESCE(m.symbol, e.symbol) AS symbol, COALESCE(m.accent, e.accent) AS accent,"
+                     " e.symbol AS own_symbol"
+                     " FROM entrants e LEFT JOIN members m ON m.id = e.member_id"
+                     " WHERE e.draw_id = ? ORDER BY e.id", draw_id)
+
+    def _store_skins(self, tx, draw_id: int) -> None:
+        """Bild und Farbe für jeden Eintrag festhalten, der noch keine hat. Bestehende bleiben."""
+        entrants = self._entrants_of(tx, draw_id)
+        skins = slots.assign_skins(entrants)
+        for e in entrants:
+            if not e["own_symbol"]:
+                tx.execute("UPDATE entrants SET symbol = ?, accent = ? WHERE id = ?", *skins[e["id"]], e["id"])
 
     def entrants(self, draw: dict) -> list[dict]:
         return self._entrants(self.db, draw)
 
     def wagers(self, draw: dict) -> dict[int, dict[int, int]]:
         """Offene Slot-Einsätze {wetter_id: {name_id: chips}}."""
+        return self._wagers(self.db, draw["id"])
+
+    @staticmethod
+    def _wagers(q, draw_id: int) -> dict[int, dict[int, int]]:
         out: dict[int, dict[int, int]] = {}
-        for w in self.db.all("SELECT w.* FROM wagers w JOIN entrants e ON e.id = w.entrant_id WHERE e.draw_id = ?",
-                             draw["id"]):
+        for w in q.all("SELECT w.* FROM wagers w JOIN entrants e ON e.id = w.entrant_id WHERE e.draw_id = ?", draw_id):
             out.setdefault(w["entrant_id"], {})[w["on_id"]] = w["stake"]
         return out
 
     def picked_ids(self, draw: dict) -> set[int]:
-        return {r["winner_id"] for r in self.db.all(
-            "SELECT winner_id FROM picks WHERE draw_id = ? AND cleared = 0 AND locked = 1"
-            " AND winner_id IS NOT NULL", draw["id"])}
+        return self._picked(self.db, draw["id"])
+
+    @staticmethod
+    def _picked(q, draw_id: int) -> set[int]:
+        """Wer schon gezogen ist und bis „Alle zurück in den Topf“ draußen bleibt."""
+        return {r["winner_id"] for r in q.all("SELECT winner_id FROM picks WHERE draw_id = ? AND cleared = 0"
+                                              " AND locked = 1 AND winner_id IS NOT NULL", draw_id)}
 
     # -- Tipps und Einsätze -------------------------------------------------
     def _window(self, tx, draw: dict) -> set[int]:
@@ -228,9 +277,7 @@ class Draws:
             if not open_:
                 raise DrawError("Nichts geht mehr")
             return set(json.loads(pick["layout"])["slots"])
-        picked = {r["winner_id"] for r in tx.all(
-            "SELECT winner_id FROM picks WHERE draw_id = ? AND cleared = 0 AND locked = 1", draw["id"])}
-        return {r["id"] for r in tx.all("SELECT id FROM entrants WHERE draw_id = ?", draw["id"])} - picked
+        return {r["id"] for r in tx.all("SELECT id FROM entrants WHERE draw_id = ?", draw["id"])} - self._picked(tx, draw["id"])
 
     def tip(self, draw: dict, me: dict, entrant_id) -> dict:
         """Glücksrad und Plinko: kostenloser Tipp. Richtig getippt bringt TIP_BONUS Chips."""
@@ -315,8 +362,7 @@ class Draws:
             if last and last["ends_at"] > t:
                 raise DrawError("Es wird gerade gezogen")
             draw = tx.one("SELECT * FROM draws WHERE id = ?", draw["id"])
-            picked = {r["winner_id"] for r in tx.all(
-                "SELECT winner_id FROM picks WHERE draw_id = ? AND cleared = 0 AND locked = 1", draw["id"])}
+            picked = self._picked(tx, draw["id"])
             everyone = self._entrants(tx, draw)
             pool = [e for e in everyone if e["id"] not in picked]
             if len(pool) < 2:
@@ -332,8 +378,8 @@ class Draws:
                     raise DrawError(f"Slots gehen mit höchstens {slots.MAX_NAMES} Namen")
                 skins = slots.assign_skins(everyone)
                 for e in everyone:          # Gruppenmitglieder behalten ihr Bild für das nächste Mal
-                    if e["member_id"] and not e["symbol"]:
-                        tx.execute("UPDATE members SET symbol = ?, accent = ? WHERE id = ?",
+                    if e["member_id"]:
+                        tx.execute("UPDATE members SET symbol = ?, accent = ? WHERE id = ? AND symbol IS NULL",
                                    *skins[e["id"]], e["member_id"])
                 layout.update(skins={e["id"]: skins[e["id"]] for e in pool}, rounds=draw["rounds"],
                               calls=calls, q=slots.quote(len(pool)))
@@ -385,10 +431,8 @@ class Draws:
         return True
 
     def _settle_slots(self, tx, p: dict) -> bool:
-        """Dreht alle Runden, deren locks_at erreicht ist, und legt die nächste an."""
+        """Dreht alle Runden, deren locks_at erreicht ist, und legt jeweils die nächste an."""
         layout = json.loads(p["layout"])
-        ids, n_rounds, calls = layout["slots"], layout["rounds"], layout["calls"]
-        brk = SLOT_BREAK if layout["calls"] else 0   # ohne Handys geht es gleich weiter
         rng = secrets.SystemRandom()
         done = False
         while True:
@@ -396,42 +440,42 @@ class Draws:
             if r["locked"] or r["locks_at"] > now_ms():
                 return done
             done = True
-            totals: dict[int, int] = {}
-            for old in tx.all("SELECT result FROM rounds WHERE pick_id = ? AND locked = 1", p["id"]):
-                for i, v in json.loads(old["result"])["pts"].items():
-                    totals[int(i)] = totals.get(int(i), 0) + v
-            final = r["n"] >= n_rounds
-            res = slots.play_round(rng, ids, totals, final=final)
-            dur = slots.timeline(res, final)
-            payouts = {}
-            stakes: dict[int, dict[int, int]] = {}
-            for w in tx.all("SELECT w.* FROM wagers w JOIN entrants e ON e.id = w.entrant_id WHERE e.draw_id = ?",
-                            p["draw_id"]):
-                stakes.setdefault(w["entrant_id"], {})[w["on_id"]] = w["stake"]
-            for b, st in stakes.items():
-                wins = [slots.spin_payout(st, s, layout["q"]) for s in res["spins"]]
-                chips = tx.value("SELECT chips FROM entrants WHERE id = ?", b) + sum(wins)
-                bail = BAILOUT if chips <= 0 else 0
-                tx.execute("UPDATE entrants SET chips = ? WHERE id = ?", chips + bail, b)
-                payouts[b] = {"stakes": st, "wins": wins, "win": sum(wins), "bail": bail}
-            tx.execute("DELETE FROM wagers WHERE entrant_id IN (SELECT id FROM entrants WHERE draw_id = ?)", p["draw_id"])
-            ends = r["started_at"] + dur
+            rounds = [json.loads(x["result"]) for x in tx.all("SELECT result FROM rounds WHERE pick_id = ? AND locked = 1"
+                                                               " ORDER BY n", p["id"])]
+            final = r["n"] >= layout["rounds"]
+            res = slots.play_round(rng, layout["slots"], session_points(rounds), final=final)
+            ends = r["started_at"] + slots.timeline(res, final)
+            payouts = self._pay_round(tx, p["draw_id"], res, layout["q"])
             tx.execute("UPDATE rounds SET locked = 1, result = ?, payouts = ?, ends_at = ? WHERE id = ?",
                        json.dumps(res), json.dumps(payouts), ends, r["id"])
             if final:
-                for i, v in res["pts"].items():
-                    totals[i] = totals.get(i, 0) + v
-                net: dict[int, int] = {}
-                for old in tx.all("SELECT payouts FROM rounds WHERE pick_id = ?", p["id"]):
-                    for b, x in json.loads(old["payouts"]).items():
-                        net[int(b)] = net.get(int(b), 0) + x["win"] - sum(x["stakes"].values())
-                winner_id = res["leader"]
-                tx.execute("UPDATE picks SET winner_id = ?, winner = ?, slot = ?, locked = 1, ends_at = ?, payouts = ?"
-                           " WHERE id = ?", winner_id, layout["names"][str(winner_id)], ids.index(winner_id), ends,
-                           json.dumps({"totals": totals, "net": net}), p["id"])
+                self._finish_session(tx, p, layout, rounds + [res], ends)
                 return True
+            brk = SLOT_BREAK if layout["calls"] else 0      # ohne Handys geht es gleich weiter
             tx.execute("INSERT INTO rounds(pick_id, n, calls_at, locks_at, started_at, ends_at) VALUES (?,?,?,?,?,?)",
                        p["id"], r["n"] + 1, ends, ends + brk, ends + brk + LOCK, ends + brk + LOCK)
+
+    def _pay_round(self, tx, draw_id: int, res: dict, q: float) -> dict[int, dict]:
+        """Zahlt alle offenen Einsätze einer gedrehten Runde aus. {wetter_id: {stakes, wins, win}}
+
+        Nur der reguläre Spin zahlt. Nachdrehen bei Gleichstand entscheidet allein über die Punkte,
+        sonst brächte eine Wette in der letzten Runde mehr als RTP (bis über 120 %).
+        """
+        payouts = {}
+        for b, st in self._wagers(tx, draw_id).items():
+            wins = [slots.spin_payout(st, s, q) if k == 0 else 0 for k, s in enumerate(res["spins"])]
+            tx.execute("UPDATE entrants SET chips = chips + ? WHERE id = ?", sum(wins), b)
+            payouts[b] = {"stakes": st, "wins": wins, "win": sum(wins)}
+        tx.execute("DELETE FROM wagers WHERE entrant_id IN (SELECT id FROM entrants WHERE draw_id = ?)", draw_id)
+        return payouts
+
+    def _finish_session(self, tx, p: dict, layout: dict, results: list[dict], ends: int) -> None:
+        """Letzte Runde gedreht: Gewinner eintragen und die Bilanz der Session festhalten."""
+        winner_id = results[-1]["leader"]
+        books = [json.loads(x["payouts"]) for x in tx.all("SELECT payouts FROM rounds WHERE pick_id = ?", p["id"])]
+        tx.execute("UPDATE picks SET winner_id = ?, winner = ?, slot = ?, locked = 1, ends_at = ?, payouts = ? WHERE id = ?",
+                   winner_id, layout["names"][str(winner_id)], layout["slots"].index(winner_id), ends,
+                   json.dumps({"totals": session_points(results)} | session_balance(books)), p["id"])
 
     def wakeups(self, draw: dict) -> list[int]:
         """Kommende Zeitpunkte, zu denen sich der Zustand ändert (für die Timer des Servers)."""

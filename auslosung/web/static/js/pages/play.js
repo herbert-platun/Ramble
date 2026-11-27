@@ -6,7 +6,8 @@
 import { STAGES } from "../stages/index.js";
 import { sound } from "../audio.js";
 import { slotSfx } from "../slot-sfx.js";
-import { api, esc, live, phaseKey, segment, serverNow, skinHtml, stagePhase, store, syncClock, toast } from "../core.js";
+import { api, chipRanking, esc, live, phaseKey, ranked, segment, serverNow, signed, skinClass, skinHtml, stagePhase, store, sum,
+  syncClock, toast } from "../core.js";
 import { Background, bump, center, countTo, fmt, particles, pop, shake, sleep } from "../fx.js";
 
 // =============================================================================
@@ -30,7 +31,6 @@ export function playPage() {
   const buzz = (p) => { try { navigator.vibrate?.(p); } catch {} };
   const fresh = (p) => p && serverNow() - p.ends_at < 10 * 60_000;
   const dec = (x) => String(x).replace(".", ",");
-  const sum = (o) => Object.values(o || {}).reduce((a, b) => a + b, 0);
 
   async function boot() {
     const s = await api(`/api/d/${code}/state${token ? "?token=" + encodeURIComponent(token) : ""}`);
@@ -87,6 +87,7 @@ export function playPage() {
     renderLive();
     renderBanner();
     renderPaytable();
+    renderLeaders();
   }
 
   /** Gesetzt wird nach der laufenden Ziehung, sonst nach der Art, die der Tisch gerade eingestellt hat. */
@@ -184,10 +185,10 @@ export function playPage() {
       const x = prev.payouts?.[String(state.me.id)];
       if (!x) last = `<p class="brk-last">Runde ${prev.n} hast du ausgesetzt.</p>`;
       else {
-        const staked = Object.values(x.stakes).reduce((a, b) => a + b, 0), net = x.win - staked;
+        const staked = sum(x.stakes), net = x.win - staked;
         last = `<p class="brk-last ${net > 0 ? "up" : "down"}">Runde ${prev.n}: ${x.win
           ? `<b>+${fmt(x.win)}</b> Chips gewonnen${net < 0 ? ` (Einsatz ${fmt(staked)})` : ""}`
-          : `kein Treffer, <b>−${fmt(staked)}</b>`}${x.bail ? ` · Bank hilft mit +${fmt(x.bail)}` : ""}</p>`;
+          : `kein Treffer, <b>−${fmt(staked)}</b>`}</p>`;
       }
     }
     const n = Object.keys(myW).length;
@@ -201,7 +202,7 @@ export function playPage() {
   function renderHud() {
     const t = total(), el = $("chips");
     if (shownTotal !== null && t !== shownTotal) {
-      // Konto hat sich von außen geändert (Gewinn, Bank, Rettung): hochzählen
+      // Konto hat sich von außen geändert (Gewinn, Bank zurückgesetzt): hochzählen
       counting = true;
       const up = t > shownTotal;
       countTo(el, Math.max(0, shownTotal - sum(myW)), free(), 900,
@@ -211,7 +212,7 @@ export function playPage() {
       if (up) clearGain();
     } else if (!counting) el.textContent = fmt(free());
     shownTotal = t;
-    const players = state.entrants.filter((e) => e.phone).sort((a, b) => (b.chips + sum(b.wagers)) - (a.chips + sum(a.wagers)));
+    const players = chipRanking(state.entrants);
     const rank = players.findIndex((e) => e.id === state.me.id) + 1;
     $("rank").textContent = players.length > 1 ? `Platz ${rank} von ${players.length}` : "Allein am Tisch";
   }
@@ -228,7 +229,7 @@ export function playPage() {
       if (sl) {
         const mine = myW[String(e.id)] || 0;
         const others = (e.backed || 0) - (state.me.wagers?.[String(e.id)] || 0);
-        return `<button class="card scard acc-${e.skin?.[1] ?? 5}" role="radio" data-id="${e.id}" aria-checked="${e.id === sel}" ${open ? "" : "disabled"} style="--i:${i}">
+        return `<button class="card scard ${skinClass(e.skin)}" role="radio" data-id="${e.id}" aria-checked="${e.id === sel}" ${open ? "" : "disabled"} style="--i:${i}">
           ${mine ? `<span class="mine">${fmt(mine)}</span>` : ""}
           <svg class="sym"><use href="#sym-${e.skin?.[0] ?? "chip"}"/></svg>
           <span class="nm">${esc(e.name)}${e.id === state.me.id ? ` <small>(du)</small>` : ""}</span>
@@ -271,6 +272,7 @@ export function playPage() {
       const n = Object.keys(myW).length, q = state.rules.pay?.q;
       const name = sel && (state.entrants.find((e) => e.id === sel)?.name ?? state.pick?.layout.names[String(sel)]);
       if (!open) html = `<span class="on">${n ? `${fmt(sum(myW))} auf ${n === 1 ? "ein Symbol" : `${n} Symbole`}` : "Einsätze sind gesperrt"}</span>`;
+      else if (!total()) html = `<span class="on">Keine Chips mehr. Neue gibt es, wenn der Host die Bank zurücksetzt.</span>`;
       else if (!n && repeatable()) html = `<span class="on">Symbol antippen oder</span><button class="again" data-repeat>Wie eben · ${fmt(sum(lastW))}</button>`;
       else if (!sel) html = `<span class="on">${n ? `${fmt(sum(myW))} auf ${n === 1 ? "ein Symbol" : `${n} Symbole`} · ` : ""}Symbol antippen, dann Chips drauf</span>`;
       else {
@@ -289,6 +291,24 @@ export function playPage() {
     if (!lastW || sum(lastW) > free()) return false;
     const ids = new Set(pool().map((e) => String(e.id)));
     return Object.keys(lastW).every((k) => ids.has(k));
+  }
+
+  /** Bestenliste: wer am Tisch die meisten Chips hat (Einsätze zählen mit). Top 5, dazu der eigene Platz. */
+  function renderLeaders() {
+    const players = chipRanking(state.entrants);
+    const box = $("leaders");
+    box.hidden = players.length < 2;
+    if (box.hidden) return;
+    const mine = players.findIndex((e) => e.id === state.me.id);
+    const rows = players.slice(0, 5).map((e, i) => [e, i]);
+    if (mine >= 5) rows.push(null, [players[mine], mine]);
+    const html = rows.map((x) => {
+      if (!x) return `<li class="gap" aria-hidden="true">…</li>`;
+      const [e, i] = x;
+      return `<li class="${i < 3 ? `m${i + 1}` : ""}${e.id === state.me.id ? " me" : ""}"><span class="r">${i + 1}</span>`
+        + `<span class="nm">${esc(e.name)}${e.id === state.me.id ? " <small>(du)</small>" : ""}</span><span class="c">${fmt(e.total)}</span></li>`;
+    }).join("");
+    if ($("leadersList")._h !== html) { $("leadersList").innerHTML = html; $("leadersList")._h = html; }
   }
 
   function renderPaytable() {
@@ -346,7 +366,7 @@ export function playPage() {
     if (type === "spin") { spinBase = 0; spinX = 1; if (mine && Object.keys(mine.stakes).length) winbar(false); }
     if ((type === "spin" && paying) || (type === "tally" && !paying)) { paying = type === "tally"; renderBanner(); }
     if (!mine) return;
-    if (type === "pattern" && mine.stakes[String(e.p.id)]) {
+    if (type === "pattern" && !e.i && mine.stakes[String(e.p.id)]) {   // Nachdreh-Spins zahlen nichts aus
       // Jedes Muster deines Symbols: Einsatz × Punkte × Quote, der Faktor kommt danach obendrauf
       spinBase += mine.stakes[String(e.p.id)] * e.p.v * (state.pick?.layout?.q || 1);
       winbar(true);
@@ -390,14 +410,21 @@ export function playPage() {
     const isMe = p.winner_id === state.me.id;
     let body = "", cls = "";
     if (p.mode === "slots") {
-      const net = p.payouts?.net?.[String(state.me.id)];
-      const pts = p.payouts?.totals?.[String(state.me.id)] || 0;
+      const me = String(state.me.id), net = p.payouts?.net?.[me];
+      const pts = p.payouts?.totals?.[me] || 0;
       if (net !== undefined) {
         cls = net > 0 ? " hit" : " miss";
+        // Bilanz der Session: was gesetzt wurde, was zurückkam, was bleibt
+        const staked = p.payouts.staked?.[me], won = p.payouts.won?.[me];
         body = `<p class="head">${net > 0 ? "Im Plus!" : net < 0 ? "Diesmal nicht" : "Plus minus null"}</p>
-          <p class="amt" id="vAmt">${net > 0 ? "+" : net < 0 ? "−" : ""}${fmt(Math.abs(net))}</p><p class="sub">Chips aus dieser Session</p>`;
+          <p class="amt" id="vAmt">${signed(net, fmt)}</p><p class="sub">Chip-Bilanz dieser Session</p>`
+          + (staked !== undefined ? `<p class="sub">Gesetzt ${fmt(staked)} · zurück ${fmt(won)}</p>` : "");
       }
       if (pts) body += `<p class="sub">Dein Symbol holte ${fmt(pts)} ${pts === 1 ? "Punkt" : "Punkte"}.</p>`;
+      // Endstand: gezogen ist, wer über alle Runden die meisten Punkte hat
+      const top = ranked(p.payouts?.totals).slice(0, 3);
+      if (top.length) body += `<ol class="v-stand"><li class="h">Punkte über ${p.layout.rounds === 1 ? "den Spin" : `alle ${p.layout.rounds} Runden`}</li>`
+        + top.map(([id, v]) => `<li class="${+id === p.winner_id ? "w" : ""}"><span>${esc(p.layout.names[id] ?? "?")}</span><b>${fmt(v)}</b></li>`).join("") + `</ol>`;
     } else {
       const on = p.tips?.[String(state.me.id)];
       if (on) {

@@ -132,8 +132,44 @@ export function phaseKey(pick) {
   return ph && `${pick.id}:${ph}:${segment(pick)?.n ?? 0}`;
 }
 
+// -- Punkte und Chips --------------------------------------------------------------
+/** Summe aller Werte eines Objekts, z. B. Einsätze {name_id: chips}. */
+export const sum = (o) => Object.values(o || {}).reduce((a, b) => a + b, 0);
+
+/** [[id, wert], …] absteigend, nur Werte über 0 (Punktestände). */
+export const ranked = (o) => Object.entries(o || {}).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]);
+
+/** Punkte je Name über gedrehte Slot-Runden (wie session_points im Server). */
+export function sessionPoints(rounds) {
+  const out = {};
+  for (const r of rounds) for (const [id, v] of Object.entries(r.result?.pts || {})) out[id] = (out[id] || 0) + v;
+  return out;
+}
+
+/** Bestenliste: Spieler mit Handy nach Chips, gesetzte Einsätze zählen mit. */
+export const chipRanking = (entrants) => entrants.filter((e) => e.phone)
+  .map((e) => ({ ...e, total: e.chips + sum(e.wagers) }))
+  .sort((a, b) => b.total - a.total || a.id - b.id);
+
+/** Vorzeichen für Chip-Bilanzen: +120, −80, ±0 */
+export const signed = (v, fmt) => `${v > 0 ? "+" : v < 0 ? "−" : "±"}${fmt(Math.abs(v))}`;
+
 // -- Slot-Symbole -----------------------------------------------------------------
 export const SPECIALS = { W: ["star", "Joker", "wild"], N: ["snakeeyes", "Niete", "bust"] };
+
+// Farbe, die jedes Bild in der ersten Runde des Vorrats bekommt (wie BASE_ACCENT in game/slots.py).
+// Ab dem neunten Namen wiederholen sich die Bilder in anderer Farbe: dann färbt sich das Bild selbst mit.
+const NATIVE_ACCENT = { cherry: 2, lemon: 3, bell: 7, horseshoe: 0, bar: 5, chip: 1, diamond: 6, seven: 4 };
+// Eigene Grundfarbe des Bilds (Akzentnummer). Fällt die Umfärbung darauf, sähe es aus wie das Original.
+const BODY_COLOR = { cherry: 0, lemon: 1, bell: 1, horseshoe: 1, bar: 5, chip: 4, diamond: 3, seven: 0 };
+
+/** CSS-Klassen für Bild und Farbe eines Namens: "acc-3" oder "acc-3 tint tint-3". */
+export function skinClass(skin) {
+  const [sym, acc] = skin || ["chip", 5];
+  if (!(sym in NATIVE_ACCENT) || NATIVE_ACCENT[sym] === acc) return `acc-${acc}`;
+  const tint = BODY_COLOR[sym] === acc ? (acc === 7 ? 3 : 7) : acc;
+  return `acc-${acc} tint tint-${tint}`;
+}
 
 /** HTML eines Symbols mit Namensschild. v: Name-ID (Zahl) oder Sonderzelle ("W", "N", "x3"). */
 export function skinHtml(v, skins, names, extra = "") {
@@ -144,12 +180,12 @@ export function skinHtml(v, skins, names, extra = "") {
     const [sym, label, cls] = SPECIALS[v];
     return `<div class="skin special ${cls} ${extra}"><svg class="sym"><use href="#sym-${sym}"/></svg><span class="tag">${label}</span></div>`;
   }
-  const [sym, acc] = skins[String(v)] || ["chip", 5];
-  return `<div class="skin acc-${acc} ${extra}" data-id="${v}"><svg class="sym"><use href="#sym-${sym}"/></svg><span class="tag">${esc(names[String(v)] ?? "?")}</span></div>`;
+  const skin = skins[String(v)] || ["chip", 5];
+  return `<div class="skin ${skinClass(skin)} ${extra}" data-id="${v}"><svg class="sym"><use href="#sym-${skin[0]}"/></svg><span class="tag">${esc(names[String(v)] ?? "?")}</span></div>`;
 }
 
 /** Kleines Symbol ohne Schild, z. B. vor einem Namen in einer Liste. */
 export function badgeHtml(skin) {
   if (!skin) return "";
-  return `<span class="badge acc-${skin[1]}" aria-hidden="true"><svg class="sym"><use href="#sym-${skin[0]}"/></svg></span>`;
+  return `<span class="badge ${skinClass(skin)}" aria-hidden="true"><svg class="sym"><use href="#sym-${skin[0]}"/></svg></span>`;
 }

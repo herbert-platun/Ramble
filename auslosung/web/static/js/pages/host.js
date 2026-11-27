@@ -2,7 +2,8 @@
 import { STAGES } from "../stages/index.js";
 import { sound } from "../audio.js";
 import { slotSfx } from "../slot-sfx.js";
-import { MODE_NAMES, api, badgeHtml, esc, live, phaseKey, pickPhase, segment, serverNow, stagePhase, store, syncClock, toast } from "../core.js";
+import { MODE_NAMES, api, badgeHtml, chipRanking, esc, live, phaseKey, pickPhase, ranked, segment, serverNow, sessionPoints, signed, stagePhase, store,
+  sum, syncClock, toast } from "../core.js";
 import { Background, bump, center, countTo, fmt, letters, particles, pop, shake, sleep } from "../fx.js";
 import { Lights } from "../lights.js";
 import { buildSlots } from "../stages/stage.js";
@@ -130,7 +131,7 @@ export function hostPage() {
     if (type === "spin") livePay = { base: new Map(), x: 1, slam: false };
     if (!livePay) return;
     livePay.slam = false;
-    if (type === "pattern") {
+    if (type === "pattern" && !e.i) {      // Nachdreh-Spins zahlen nichts aus
       let st = 0;
       for (const x of Object.values(e.round?.payouts || {})) st += x.stakes?.[String(e.p.id)] || 0;
       if (st) livePay.base.set(e.p.id, (livePay.base.get(e.p.id) || 0) + st * e.p.v * (state.pick?.layout?.q || 1));
@@ -272,14 +273,12 @@ export function hostPage() {
   function breakHtml(p, seg) {
     const n = seg.n, of = p.layout.rounds, names = p.layout.names, skins = p.layout.skins || {};
     const prev = roundsDone(p, n), last = prev[prev.length - 1];
-    const badge = (id) => { const sk = skins[id]; return `<span class="badge acc-${sk?.[1] ?? 5}"><svg class="sym"><use href="#sym-${sk?.[0] ?? "chip"}"/></svg></span>`; };
-    const totals = {};
-    for (const r of prev) for (const [id, v] of Object.entries(r.result.pts || {})) totals[id] = (totals[id] || 0) + v;
-    const stand = Object.entries(totals).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]).slice(0, 5);
+    const badge = (id) => badgeHtml(skins[id] || ["chip", 5]);
+    const stand = ranked(sessionPoints(prev)).slice(0, 5);
     const max = stand[0]?.[1] || 1;
     let recap;
     if (last) {
-      const pts = Object.entries(last.result.pts || {}).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]).slice(0, 3);
+      const pts = ranked(last.result.pts).slice(0, 3);
       recap = `<h3>Runde ${last.n}</h3>${pts.length
         ? `<ol>${pts.map(([id, v]) => `<li>${badge(id)}<span class="nm">${esc(names[id] ?? "?")}</span><span class="plus">+${fmt(v)}</span></li>`).join("")}</ol>`
         : `<p class="none">Kein Muster gefallen</p>`}`;
@@ -307,7 +306,7 @@ export function hostPage() {
     const el = document.getElementById("breakBets");
     if (!el || !state) return;
     const who = state.entrants.filter((e) => Object.keys(e.wagers || {}).length);
-    const chips = who.reduce((s, e) => s + Object.values(e.wagers).reduce((a, b) => a + b, 0), 0);
+    const chips = who.reduce((s, e) => s + sum(e.wagers), 0);
     const phones = state.entrants.filter((e) => e.phone).length;
     const html = who.length
       ? `<b>${who.length}</b> von ${phones} gesetzt · <b>${fmt(chips)}</b> Chips im Spiel`
@@ -348,22 +347,27 @@ export function hostPage() {
   const skinOf = (id) => state.pick?.layout.skins?.[String(id)] ?? entrant(id)?.skin;
   const list = (names, max = 6) => names.slice(0, max).map(esc).join(", ") + (names.length > max ? ` und ${names.length - max} weitere` : "");
 
-  /** Zeilen fürs Ergebnis: [{el, value, kind}] in Show-Reihenfolge. */
+  /** Zeilen fürs Ergebnis: [{el, value, kind, col}] in Show-Reihenfolge. col: Spalte (Slots: Punkte | Bilanz). */
   function resultRows(p) {
     const rows = [];
+    let col = null;
     const add = (html, cls, value = 0, kind = "") => {
       const el = document.createElement("div");
       el.className = cls; el.innerHTML = html;
-      rows.push({ el, value, kind });
+      rows.push({ el, value, kind, col });
     };
     if (p.mode === "slots") {
-      const totals = Object.entries(p.payouts?.totals || {}).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]);
+      col = 0;
+      const totals = ranked(p.payouts?.totals);
       add(`Punkte über ${p.layout.rounds === 1 ? "den Spin" : `${p.layout.rounds} Runden`}`, "pay-head");
       totals.slice(0, 3).forEach(([id, v]) => add(`${badgeHtml(skinOf(id))}<span class="who">${esc(nameOf(id))}</span><span class="box pts">${fmt(v)}</span>`, "pay line", v, "pts"));
+      // Bilanz je Spieler: gewonnen − gesetzt über alle Runden. Beste und schlechteste zeigen, nicht nur Gewinner.
       const net = Object.entries(p.payouts?.net || {}).sort((a, b) => b[1] - a[1]);
       if (net.length) {
-        add("Chips aus der Session", "pay-head");
-        net.slice(0, 4).forEach(([id, v]) => add(`<span></span><span class="who">${esc(nameOf(id))}</span><span class="box ${v > 0 ? "win" : "lost"}">${v > 0 ? "+" : v < 0 ? "−" : "±"}${fmt(Math.abs(v))}</span>`,
+        col = 1;
+        add("Chip-Bilanz der Session", "pay-head");
+        const shown = net.length > 4 ? [...net.slice(0, 3), net[net.length - 1]] : net;
+        shown.forEach(([id, v]) => add(`<span></span><span class="who">${esc(nameOf(id))}</span><span class="box ${v > 0 ? "win" : "lost"}">${signed(v, fmt)}</span>`,
           "pay line", v, v > 0 ? "win" : "lost"));
       }
       return rows;
@@ -384,7 +388,15 @@ export function hostPage() {
     return n ? `${n} ${n === 1 ? "Tipp" : "Tipps"} abgegeben` : "";
   }
 
+  /** Ergebniszeile einsetzen, bei Slots in ihre Spalte. */
+  function placeRow(box, r) {
+    if (r.col == null) { box.append(r.el); return; }
+    while (box.children.length <= r.col) box.append(Object.assign(document.createElement("div"), { className: "pay-col" }));
+    box.children[r.col].append(r.el);
+  }
+
   function showResult(p, animate) {
+    stage?.clearOverlay?.();          // Endstand-Karte der Bühne liegt sonst unter dem Ergebnis
     $("result").hidden = false;
     const nm = $("resultName");
     nm.style.fontSize = `${Math.max(4, Math.min(9, 9 * 9 / Math.max(9, p.winner.length)))}rem`;
@@ -393,7 +405,7 @@ export function hostPage() {
     box.innerHTML = "";
     $("resultFoot").innerHTML = "";
     if (animate) return;
-    resultRows(p).forEach((r) => box.append(r.el));
+    resultRows(p).forEach((r) => placeRow(box, r));
     $("resultFoot").innerHTML = resultFoot(p);
   }
 
@@ -416,7 +428,7 @@ export function hostPage() {
     let step = 0;
     for (const r of resultRows(p)) {
       if (p.id !== state.pick?.id) break;
-      box.append(r.el);
+      placeRow(box, r);
       if (r.kind === "win") {
         const win = r.el.querySelector(".win");
         await countTo(win, 0, r.value, 520, { format: (v) => "+" + fmt(v), onStep: (_, u) => { if (u > 0 && u < 1) { const k = Math.min(10, step + Math.floor(u * 4)); if (soft) slotSfx.tick(k); else sound.score(k); } } });
@@ -459,7 +471,7 @@ export function hostPage() {
     const p = showingPick();
     if (isSlots()) {
       const live = p?.mode === "slots" && stage?.standings;
-      const pts = live ? Object.entries(stage.standings()).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]) : [];
+      const pts = live ? ranked(stage.standings()) : [];
       standVersion = stage?.version ?? -1;
       if (live) {
         const r = segment(p);
@@ -484,7 +496,7 @@ export function hostPage() {
 
   // ---------------------------------------------------------------------------
   // Tisch, Ticker, Bank
-  const staked = (e) => Object.values(e.wagers || {}).reduce((a, b) => a + b, 0);
+  const staked = (e) => sum(e.wagers);
 
   function currentBets() {
     const p = showingPick();
@@ -548,7 +560,7 @@ export function hostPage() {
         const keys = new Set([...Object.keys(now.w), ...Object.keys(before.w)]);
         const changed = [...keys].filter((k) => (now.w[k] || 0) !== (before.w[k] || 0));
         if (changed.length) {
-          const total = Object.values(now.w).reduce((a, b) => a + b, 0);
+          const total = sum(now.w);
           const names = Object.keys(now.w);
           line = !total ? `<b>${esc(who)}</b> nimmt die Einsätze zurück`
             : names.length === 1 ? `<b>${esc(who)}</b> setzt <span class="n">${fmt(total)}</span> auf <b>${esc(nameOf(names[0]))}</b>`
@@ -572,15 +584,13 @@ export function hostPage() {
   }
 
   function renderRanks() {
-    const players = state.entrants.filter((e) => e.phone)
-      .map((e) => ({ ...e, total: e.chips + staked(e) }))
-      .sort((a, b) => b.total - a.total || a.id - b.id);
+    const players = chipRanking(state.entrants);
     const list = $("ranks");
     if (!players.length) { list.innerHTML = `<li class="empty">Noch niemand mit Handy dabei.</li>`; shownChips.clear(); list._sig = ""; return; }
     const top = players.slice(0, 6);
     const sig = top.map((e) => `${e.id}:${e.name}`).join("|");
     if (list._sig !== sig) {
-      list.innerHTML = top.map((e, i) => `<li data-id="${e.id}"><span class="r">${i + 1}</span>
+      list.innerHTML = top.map((e, i) => `<li data-id="${e.id}" class="${i < 3 ? `m${i + 1}` : ""}"><span class="r">${i + 1}</span>
         <span class="nm">${esc(e.name)}</span><span class="c">${fmt(shownChips.get(e.id) ?? e.total)}</span></li>`).join("");
       list._sig = sig;
     }

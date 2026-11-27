@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 
 from .game.draws import Draws
 from .game import slots
-from .game.rules import BAILOUT, START_CHIPS, TIP_BONUS, now_ms
+from .game.rules import START_CHIPS, TIP_BONUS, now_ms
 
 if TYPE_CHECKING:
     from .admin import Admin
@@ -81,7 +81,7 @@ class App:
                     for b, x in r["payouts"].items():
                         e = by_id.get(int(b))
                         if e:
-                            e["chips"] -= x["win"] + x["bail"]
+                            e["chips"] -= x["win"]
                             wagers[e["id"]] = {int(k): v for k, v in x["stakes"].items()}
         elif pick and pick["locked"] and t < pick["ends_at"]:
             for b, on in pick["tips"].items():
@@ -103,7 +103,7 @@ class App:
             pick = self._public_pick(pick, t)
         picked = d.picked_ids(draw)
         pool = [e["id"] for e in entrants if e["id"] not in picked]
-        rules = {"start": START_CHIPS, "bailout": BAILOUT, "tip": TIP_BONUS}
+        rules = {"start": START_CHIPS, "tip": TIP_BONUS}
         if draw["mode"] == "slots" and len(pool) >= 2:
             n = len(pick["layout"]["slots"]) if pick and pick["mode"] == "slots" and t < pick["ends_at"] else len(pool)
             rules["pay"] = slots.paytable(min(n, slots.MAX_NAMES))

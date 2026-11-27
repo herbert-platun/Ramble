@@ -12,7 +12,6 @@ LOCK = 1700         # „Nichts geht mehr“ bis zum Start der Animation
 SLOT_CALLS = 10000  # Slots: Einsätze vor der ersten Runde
 SLOT_BREAK = 14000  # Slots: Pause zwischen zwei Runden, mit Rückblick und Zwischenstand
 START_CHIPS = 1000
-BAILOUT = 200       # wer pleite ist, bekommt das von der Bank
 TIP_BONUS = 200     # Glücksrad und Plinko: richtiger Tipp, kostet nichts
 
 
