@@ -271,11 +271,11 @@ body.play { min-height: 100dvh; }
 .play .main { display: flex; flex-direction: column; }
 .col-stage, .col-pick { display: contents; }
 .banner { order: 0; } .verdict { order: 1; } .live { order: 2; } .winbar { order: 3; }
-.cards { order: 4; } .paytable { order: 5; }
+.cards { order: 4; } .leaders { order: 5; } .paytable { order: 6; }
 
 @media (min-width: 900px) {
   .col-stage, .col-pick { display: block; }
-  .banner, .verdict, .live, .winbar, .cards, .paytable { order: 0; }
+  .banner, .verdict, .live, .winbar, .cards, .leaders, .paytable { order: 0; }
   .live { max-width: calc((100dvh - 200px) * 1); }
   .live.wide { max-width: calc((100dvh - 200px) * 1.2); }
   .play .app { max-width: 1180px; padding: 20px 32px 40px; }
@@ -294,6 +294,16 @@ body.play { min-height: 100dvh; }
   .banner .b { font-size: 17px; }
   .banner .info { font-size: 16px; }
   .verdict .nm { font-size: clamp(48px, 5vw, 80px); }
+  /* Bestenliste als flache Leiste über den Karten, damit sie ohne Scrollen sichtbar ist */
+  .leaders { margin: 0 0 14px; padding: 10px 12px; display: flex; align-items: center; gap: 14px; }
+  .leaders h2 { margin: 0; flex: none; flex-direction: column; align-items: flex-start; gap: 3px; font-size: 15px; }
+  .lb { flex: 1; flex-direction: row; flex-wrap: wrap; gap: 6px; min-width: 0; }
+  .lb li { grid-template-columns: auto auto auto; gap: 7px; padding: 4px 9px 4px 5px; background: rgba(255, 255, 255, .04); }
+  .lb .nm { max-width: 9em; font-size: 14px; }
+  .lb .c { font-size: 18px; }
+  .lb li.m1 .r, .lb li.m2 .r, .lb li.m3 .r { width: 22px; height: 22px; line-height: 22px; font-size: 14px; }
+  .lb .r { font-size: 16px; min-width: 22px; }
+  .lb li.gap { align-self: center; padding: 0 2px; }
   /* Wettschein: fest unter der Auswahlspalte statt über die ganze Breite zentriert */
   .slip {
     left: auto; right: max(16px, calc((100vw - 1180px) / 2 + 32px));
