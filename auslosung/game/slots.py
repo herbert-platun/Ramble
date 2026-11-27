@@ -16,6 +16,8 @@ Wetten: Einsatz auf einen Namen. Jedes Muster dieses Namens zahlt
 Einsatz × Musterwert × Faktor × Quote. Die Quote gleicht die Tischgröße aus
 (mit vielen Namen trifft jeder seltener), damit eine Wette im Mittel etwa
 den Einsatz zurückbringt: viele kleine Treffer, ab und zu ein großer.
+Ausgezahlt wird nur der reguläre Spin einer Runde; Nachdrehen bei Gleichstand
+entscheidet allein über die Punkte.
 
 Alles hier ist eine reine Funktion des Zufallsgenerators `rng`: im Spiel
 `secrets.SystemRandom()`, in Tests und bei der Kalibrierung ein fester Seed.

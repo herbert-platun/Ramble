@@ -367,7 +367,7 @@ export function playPage() {
     if (type === "spin") { spinBase = 0; spinX = 1; if (mine && Object.keys(mine.stakes).length) winbar(false); }
     if ((type === "spin" && paying) || (type === "tally" && !paying)) { paying = type === "tally"; renderBanner(); }
     if (!mine) return;
-    if (type === "pattern" && mine.stakes[String(e.p.id)]) {
+    if (type === "pattern" && !e.i && mine.stakes[String(e.p.id)]) {   // Nachdreh-Spins zahlen nichts aus
       // Jedes Muster deines Symbols: Einsatz × Punkte × Quote, der Faktor kommt danach obendrauf
       spinBase += mine.stakes[String(e.p.id)] * e.p.v * (state.pick?.layout?.q || 1);
       winbar(true);

@@ -58,6 +58,7 @@ class Draws:
                     tx.execute("INSERT INTO entrants(draw_id, name, token, created_at, chips, member_id)"
                                " VALUES (?,?,NULL,?,?,?)", did, m["name"], t, START_CHIPS, m["id"])
                 tx.execute("UPDATE groups SET used_at = ? WHERE id = ?", t, group["id"])
+                self._store_skins(tx, did)
         return self.get(code)
 
     def get(self, code: str) -> dict | None:
@@ -175,6 +176,7 @@ class Draws:
             eid = tx.insert("INSERT INTO entrants(draw_id, name, token, created_at, chips, member_id) VALUES (?,?,?,?,?,?)",
                             draw["id"], name, None if by_host else secrets.token_urlsafe(24), now_ms(), START_CHIPS,
                             member or None)
+            self._store_skins(tx, draw["id"])
             return tx.one("SELECT * FROM entrants WHERE id = ?", eid)
 
     def by_token(self, draw: dict, token: str | None) -> dict | None:
@@ -186,6 +188,7 @@ class Draws:
         self._not_drawing(draw)
         eid = int(entrant_id)
         with self.db.transaction() as tx:
+            self._store_skins(tx, draw["id"])      # alle anderen behalten ihr Symbol
             # Wer auf diesen Namen gesetzt hat, bekommt den Einsatz zurück
             for w in tx.all("SELECT w.* FROM wagers w JOIN entrants e ON e.id = w.entrant_id"
                             " WHERE e.draw_id = ? AND (w.on_id = ? OR w.entrant_id = ?)", draw["id"], eid, eid):
@@ -193,9 +196,24 @@ class Draws:
             tx.execute("DELETE FROM entrants WHERE id = ? AND draw_id = ?", eid, draw["id"])
 
     def _entrants(self, q, draw: dict) -> list[dict]:
+        return self._entrants_of(q, draw["id"])
+
+    @staticmethod
+    def _entrants_of(q, draw_id: int) -> list[dict]:
+        # Gruppenmitglieder tragen ihr Symbol über Tische hinweg, sonst gilt das am Eintrag gespeicherte
         return q.all("SELECT e.id, e.name, e.token IS NOT NULL AS phone, e.tip_id, e.chips, e.member_id,"
-                     " m.symbol, m.accent FROM entrants e LEFT JOIN members m ON m.id = e.member_id"
-                     " WHERE e.draw_id = ? ORDER BY e.id", draw["id"])
+                     " COALESCE(m.symbol, e.symbol) AS symbol, COALESCE(m.accent, e.accent) AS accent,"
+                     " e.symbol AS own_symbol"
+                     " FROM entrants e LEFT JOIN members m ON m.id = e.member_id"
+                     " WHERE e.draw_id = ? ORDER BY e.id", draw_id)
+
+    def _store_skins(self, tx, draw_id: int) -> None:
+        """Bild und Farbe für jeden Eintrag festhalten, der noch keine hat. Bestehende bleiben."""
+        entrants = self._entrants_of(tx, draw_id)
+        skins = slots.assign_skins(entrants)
+        for e in entrants:
+            if not e["own_symbol"]:
+                tx.execute("UPDATE entrants SET symbol = ?, accent = ? WHERE id = ?", *skins[e["id"]], e["id"])
 
     def entrants(self, draw: dict) -> list[dict]:
         return self._entrants(self.db, draw)
@@ -332,8 +350,8 @@ class Draws:
                     raise DrawError(f"Slots gehen mit höchstens {slots.MAX_NAMES} Namen")
                 skins = slots.assign_skins(everyone)
                 for e in everyone:          # Gruppenmitglieder behalten ihr Bild für das nächste Mal
-                    if e["member_id"] and not e["symbol"]:
-                        tx.execute("UPDATE members SET symbol = ?, accent = ? WHERE id = ?",
+                    if e["member_id"]:
+                        tx.execute("UPDATE members SET symbol = ?, accent = ? WHERE id = ? AND symbol IS NULL",
                                    *skins[e["id"]], e["member_id"])
                 layout.update(skins={e["id"]: skins[e["id"]] for e in pool}, rounds=draw["rounds"],
                               calls=calls, q=slots.quote(len(pool)))
@@ -409,7 +427,9 @@ class Draws:
                             p["draw_id"]):
                 stakes.setdefault(w["entrant_id"], {})[w["on_id"]] = w["stake"]
             for b, st in stakes.items():
-                wins = [slots.spin_payout(st, s, layout["q"]) for s in res["spins"]]
+                # Nur der reguläre Spin zahlt. Nachdrehen bei Gleichstand entscheidet allein über die Punkte,
+                # sonst brächte eine Wette in der letzten Runde mehr als RTP (bis über 120 %).
+                wins = [slots.spin_payout(st, s, layout["q"]) if k == 0 else 0 for k, s in enumerate(res["spins"])]
                 chips = tx.value("SELECT chips FROM entrants WHERE id = ?", b) + sum(wins)
                 bail = BAILOUT if chips <= 0 else 0
                 tx.execute("UPDATE entrants SET chips = ? WHERE id = ?", chips + bail, b)

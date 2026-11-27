@@ -130,7 +130,7 @@ export function hostPage() {
     if (type === "spin") livePay = { base: new Map(), x: 1, slam: false };
     if (!livePay) return;
     livePay.slam = false;
-    if (type === "pattern") {
+    if (type === "pattern" && !e.i) {      // Nachdreh-Spins zahlen nichts aus
       let st = 0;
       for (const x of Object.values(e.round?.payouts || {})) st += x.stakes?.[String(e.p.id)] || 0;
       if (st) livePay.base.set(e.p.id, (livePay.base.get(e.p.id) || 0) + st * e.p.v * (state.pick?.layout?.q || 1));

@@ -273,7 +273,7 @@ export class SlotStage extends Stage {
       }
       case "again": {
         const why = e.spin.again === "tie" ? "Gleichstand an der Spitze" : "Noch niemand vorn";
-        this.overlay(`<div class="again-stamp">Nochmal!<small>${why}</small></div>`);
+        this.overlay(`<div class="again-stamp">Nochmal!<small>${why} · zählt nur für die Punkte</small></div>`);
         if (sfx) slotSfx.again();
         if (live) this.onEvent("again", e, live);
         return;

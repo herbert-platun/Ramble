@@ -216,6 +216,22 @@ class GameTest(unittest.TestCase):
         self.assertIn(str(a["id"]), p["payouts"]["net"])
         self.assertEqual(self.db.value("SELECT COUNT(*) FROM wagers"), 0)
 
+    def test_tiebreak_spins_pay_nothing(self):
+        d, a, b, c = self.slots_table(rounds=1)
+        seen = 0
+        for _ in range(60):
+            self.s.pick(d)
+            self.s.wager(d, a, {b["id"]: 10, c["id"]: 10})
+            p = run_session(self.s, self.db, d)
+            r = p["rounds"][-1]
+            wins = r["payouts"][str(a["id"])]["wins"]
+            self.assertEqual(len(wins), len(r["result"]["spins"]))
+            self.assertTrue(all(w == 0 for w in wins[1:]))
+            seen += len(wins) > 1
+            finish(self.db)
+            self.s.reset(d)
+        self.assertGreater(seen, 0)
+
     def test_slots_fair(self):
         d, *_ = self.slots_table(names=("A1", "B2", "C3"), rounds=1)
         c = Counter()
@@ -225,6 +241,17 @@ class GameTest(unittest.TestCase):
             finish(self.db)
             self.s.reset(d)
         self.assertTrue(all(140 < v < 260 for v in c.values()), c)
+
+    def test_skins_stay_when_someone_leaves(self):
+        d = self.s.create("x")
+        es = [self.s.join(d, n, by_host=True) for n in ("Anna", "Ben", "Cleo", "Dana")]
+        before = self.s.skins(d)
+        self.s.remove(d, es[0]["id"])
+        self.s.join(d, "Emil", by_host=True)
+        after = self.s.skins(d)
+        for e in es[1:]:
+            self.assertEqual(before[e["id"]], after[e["id"]])
+        self.assertEqual(len({tuple(v) for v in after.values()}), 4)
 
     # -- Gruppen ---------------------------------------------------------------------
     def test_groups_roundtrip(self):
