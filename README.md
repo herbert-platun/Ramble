@@ -5,25 +5,17 @@
 Zufallsziehung im Casino-Stil: Alle scannen den QR-Code am großen Bildschirm, tragen sich ein,
 und dann wird gezogen: per **Glücksrad**, **Plinko** oder **Slots**. Python 3.10+, keine Abhängigkeiten.
 
-![Slots am großen Bildschirm: Walzen mit Mustern, links der Topf, rechts Einsätze und Bestenliste](docs/bilder/bildschirm-slots.webp)
+![Slots am großen Bildschirm: Gewinn-Spin, links der Topf, rechts Stand, Einsätze und Bestenliste](docs/bilder/slots.webp)
 
 <table>
   <tr>
-    <td width="50%"><img src="docs/bilder/bildschirm-ergebnis.webp" alt="Ergebnis nach drei Runden: Punkte und Chip-Bilanz"></td>
-    <td width="50%"><img src="docs/bilder/bildschirm-gluecksrad.webp" alt="Glücksrad mit acht Namen"></td>
-  </tr>
-  <tr>
-    <td align="center"><sub>Gezogen wird, wer über alle Runden die meisten Punkte hat</sub></td>
-    <td align="center"><sub>Glücksrad: kostenlos tippen, richtig getippt gibt Chips</sub></td>
+    <td width="66%">
+      <img src="docs/bilder/gluecksrad.webp" alt="Glücksrad mit Tipps vom Handy"><br>
+      <img src="docs/bilder/plinko.webp" alt="Plinko: die Kugel fällt in ein Namensfach">
+    </td>
+    <td width="34%"><img src="docs/bilder/handy.webp" alt="Handy: Chips auf Symbole setzen"></td>
   </tr>
 </table>
-
-<p align="center">
-  <img src="docs/bilder/handy-setzen.webp" width="260" alt="Handy: Chips auf Symbole setzen">
-  &nbsp;&nbsp;
-  <img src="docs/bilder/handy-ergebnis.webp" width="260" alt="Handy: Ergebnis mit Chip-Bilanz der Session">
-  <br><sub>Am Handy: Chips auf Symbole setzen, danach die eigene Bilanz</sub>
-</p>
 
 ## Starten
 
