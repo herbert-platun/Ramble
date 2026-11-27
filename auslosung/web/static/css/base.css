@@ -49,6 +49,7 @@ body {
 }
 button, input, select { font: inherit; color: inherit; }
 button { cursor: pointer; }
+button, input, summary { touch-action: manipulation; }   /* schnelles Tippen zoomt nicht */
 :focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
 ::selection { background: var(--gold); color: var(--line); }
 
@@ -65,14 +66,14 @@ body::before {
 }
 #fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 80; }
 
-.crt { position: fixed; inset: 0; pointer-events: none; z-index: 90; }
+.crt { position: fixed; inset: 0; pointer-events: none; z-index: 90; overflow: hidden; }
 .crt::before {        /* Zeilen und Lochmaske */
-  content: ""; position: absolute; inset: 0;
+  content: ""; position: absolute; inset: -30px 0 0;
   background:
     repeating-linear-gradient(0deg, rgba(0, 0, 0, .22) 0 1px, transparent 1px 3px),
     repeating-linear-gradient(90deg, rgba(255, 40, 40, .035) 0 1px, rgba(40, 255, 90, .035) 1px 2px, rgba(60, 90, 255, .035) 2px 3px);
-  mix-blend-mode: multiply;
   animation: roll 9s linear infinite;
+  will-change: transform;
 }
 .crt::after {         /* Vignette, Wölbung, Flimmern */
   content: ""; position: absolute; inset: 0;
@@ -81,17 +82,18 @@ body::before {
     radial-gradient(ellipse 70% 40% at 50% 0%, rgba(255, 220, 180, .05), transparent 70%);
   box-shadow: inset 0 0 120px rgba(0, 0, 0, .6);
   animation: flicker 4.2s steps(1) infinite;
+  will-change: opacity;
 }
-@keyframes roll { to { background-position: 0 30px, 0 0; } }
+@keyframes roll { to { transform: translateY(30px); } }
 @keyframes flicker {
   0%, 100% { opacity: 1; } 41% { opacity: .93; } 42% { opacity: 1; } 77% { opacity: .96; } 78% { opacity: 1; }
 }
 /* Körnung: Rauschkachel als SVG, bewegt sich in Sprüngen */
 .grain {
-  position: fixed; inset: -50%; pointer-events: none; z-index: 89; opacity: .13;
+  position: fixed; inset: -10%; pointer-events: none; z-index: 89; opacity: .06;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1.4 -.35'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   animation: grain .5s steps(4) infinite;
-  mix-blend-mode: overlay;
+  will-change: transform;
 }
 @keyframes grain {
   0% { transform: translate(0, 0); } 25% { transform: translate(-7%, 4%); }

@@ -173,8 +173,10 @@ class Particles {
   frame(now) {
     const dt = Math.min(0.05, (now - this.last) / 1000) * 60; this.last = now;
     const { ctx } = this;
+    if (!this.list.length && !this.drawn) return;     // leere Leinwand nicht jedes Bild neu anfassen
     ctx.clearRect(0, 0, innerWidth, innerHeight);
-    if (!this.list.length) return;
+    this.drawn = this.list.length > 0;
+    if (!this.drawn) return;
     this.list = this.list.filter((p) => (p.life += dt / 60) < p.max && p.y < innerHeight + 40);
     for (const p of this.list) {
       const drag = p.kind === "spark" ? 0.9 : 0.975;

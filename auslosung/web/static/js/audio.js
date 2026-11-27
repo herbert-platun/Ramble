@@ -662,7 +662,7 @@ export const sound = new Chip();
 // -----------------------------------------------------------------------------
 // Knöpfe atmen im Takt der Schläge, die gerade wirklich zu hören sind: ruhig in
 // der Lobby, fester im Countdown, schnell beim Drehen, Lub-Dub beim Herzschlag.
-// Zwei CSS-Variablen auf <html>: --pulse (0..1, springt beim Schlag hoch und
+// Zwei CSS-Variablen am Knopf: --pulse (0..1, springt beim Schlag hoch und
 // klingt ab) und --swing (−1..1, pendelt von Schlag zu Schlag hin und her).
 // Ohne hörbare Musik (Handy stumm, Musik aus) atmen sie ganz leicht im Lobby-Tempo.
 
@@ -690,8 +690,9 @@ Chip.prototype.groove = function () {
 
 (function beatLoop() {
   if (reduced) return;
-  const root = document.documentElement.style;
-  let shownP = -1, shownS = -1;
+  // Nur an die Knöpfe schreiben: eine Variable auf <html> ließe den Browser jedes Bild alle Stile neu rechnen
+  const PULSING = ':is(.btn, .tool, .modes button, .pchip, .tabs a, .snd, .seg button, .card[aria-checked="true"]):not([disabled])';
+  let targets = [], found = -Infinity;
   const idle = 60 / 112;
   const frame = (ms) => {
     requestAnimationFrame(frame);
@@ -701,8 +702,11 @@ Chip.prototype.groove = function () {
       g = { pulse: 0.3 * Math.exp(-f * 5), swing: (n % 2 ? 1 : -1) * Math.cos(Math.PI * f) };
     }
     const p = Math.round(g.pulse * 100) / 100, sw = Math.round(g.swing * 50) / 50;
-    if (p !== shownP) { root.setProperty("--pulse", p); shownP = p; }
-    if (sw !== shownS) { root.setProperty("--swing", sw); shownS = sw; }
+    if (ms - found > 200) { found = ms; targets = document.querySelectorAll(PULSING); }
+    for (const { style } of targets) {
+      if (style.getPropertyValue("--pulse") !== String(p)) style.setProperty("--pulse", p);
+      if (style.getPropertyValue("--swing") !== String(sw)) style.setProperty("--swing", sw);
+    }
   };
   requestAnimationFrame(frame);
 })();
