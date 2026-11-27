@@ -279,7 +279,9 @@ export class SlotStage extends Stage {
         return;
       }
       case "summary": {
-        if (e.final) this.clearOverlay();
+        // Letzte Runde: Endstand über alle Runden, bevor der Name kommt. Gezogen wird, wer insgesamt vorn liegt,
+        // nicht wer den letzten Spin gewinnt.
+        if (e.final) { if (fx) this.overlay(this.finalCard()); else this.clearOverlay(); }
         // Nur live: beim Nachspielen (neue Runde, Neuladen) läge die Karte sonst unter Pause und Stempel
         else if (!this.compact && fx) this.overlay(this.roundCard(e.round));
         if (sfx && !e.final) slotSfx.roundEnd();
@@ -435,6 +437,16 @@ export class SlotStage extends Stage {
     };
     return `<div class="round-card"><h3>Runde ${round.n} vorbei</h3>
       <p class="lead">${lead ? `${esc(lead)} holt die Runde` : "Kein Rundensieger"}</p>
+      <ol>${top.map(row).join("")}</ol></div>`;
+  }
+
+  finalCard() {
+    const n = this.view.pick?.layout.rounds || 1;
+    const top = Object.entries(this.session).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]).slice(0, 4);
+    const row = ([id, v], i) => `<li class="${i ? "" : "top"}">${badgeHtml(this.skins[id] || ["chip", 5])}
+      <span class="nm">${esc(this.view.names[id] ?? "?")}</span><span class="plus">${i ? "" : "★"}</span><span class="pts">${fmt(v)}</span></li>`;
+    return `<div class="round-card final"><h3>Endstand · ${n === 1 ? "ein Spin" : `alle ${n} Runden`}</h3>
+      <p class="lead">Meiste Punkte gewinnt</p>
       <ol>${top.map(row).join("")}</ol></div>`;
   }
 

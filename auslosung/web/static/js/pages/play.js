@@ -419,6 +419,10 @@ export function playPage() {
           <p class="amt" id="vAmt">${net > 0 ? "+" : net < 0 ? "−" : ""}${fmt(Math.abs(net))}</p><p class="sub">Chips aus dieser Session</p>`;
       }
       if (pts) body += `<p class="sub">Dein Symbol holte ${fmt(pts)} ${pts === 1 ? "Punkt" : "Punkte"}.</p>`;
+      // Endstand: gezogen ist, wer über alle Runden die meisten Punkte hat
+      const top = Object.entries(p.payouts?.totals || {}).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]).slice(0, 3);
+      if (top.length) body += `<ol class="v-stand"><li class="h">Punkte über ${p.layout.rounds === 1 ? "den Spin" : `alle ${p.layout.rounds} Runden`}</li>`
+        + top.map(([id, v]) => `<li class="${+id === p.winner_id ? "w" : ""}"><span>${esc(p.layout.names[id] ?? "?")}</span><b>${fmt(v)}</b></li>`).join("") + `</ol>`;
     } else {
       const on = p.tips?.[String(state.me.id)];
       if (on) {

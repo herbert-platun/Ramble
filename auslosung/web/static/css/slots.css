@@ -243,6 +243,8 @@
 .round-card li { display: grid; grid-template-columns: calc(var(--slot-cell) * .4) 1fr auto auto; align-items: center; gap: .5em; font-size: calc(var(--slot-cell) * .17); text-align: left; }
 .round-card .nm { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .round-card .plus { font-family: var(--f-big); color: var(--green); font-size: 1.3em; }
+.round-card.final li.top { color: var(--gold-hi); }
+.round-card.final li.top .plus { color: var(--gold); }
 .round-card .pts { font-family: var(--f-big); color: var(--gold-hi); font-size: 1.5em; min-width: 2.5em; text-align: right; }
 
 /* ---------- Keyframes ---------- */

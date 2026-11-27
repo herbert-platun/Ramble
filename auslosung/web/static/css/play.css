@@ -112,6 +112,11 @@ body.play { min-height: 100dvh; }
 .verdict .head { font-family: var(--f-big); font-size: 44px; line-height: 1; margin-top: 6px; }
 .verdict .amt { font-family: var(--f-big); font-size: 64px; line-height: 1; }
 .verdict .sub { color: var(--mute); margin-top: 6px; font-size: 15px; }
+.v-stand { list-style: none; margin: 12px auto 0; padding: 0; max-width: 260px; text-align: left; }
+.v-stand li { display: flex; justify-content: space-between; gap: 10px; padding: 2px 0; }
+.v-stand li.h { color: var(--mute); font-size: 12px; text-transform: uppercase; letter-spacing: .08em; justify-content: center; }
+.v-stand b { font-family: var(--f-big); font-size: 20px; font-weight: 400; }
+.v-stand li.w { color: var(--gold-hi); }
 .verdict.hit { --panel-bg: #3d3110; }
 .verdict.hit .head { color: var(--green); }
 .verdict.hit .amt { color: var(--gold-hi); }

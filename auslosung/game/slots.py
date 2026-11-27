@@ -346,7 +346,7 @@ ROLL, ROLL_TIER = 900, 450            # Hochzählen der Punkte
 TALLY, TALLY_TIER, BIG_HOLD = 1500, 650, 1600
 AGAIN = 2100
 LOT = 3300
-ROUND_END, FINAL_END = 2400, 1800     # danach folgt die Pause mit Rückblick
+ROUND_END, FINAL_END = 2400, 3400     # danach folgt die Pause mit Rückblick
 
 
 def timeline(result: dict, final: bool) -> int:
