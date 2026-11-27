@@ -27,6 +27,14 @@ class WebTest(unittest.TestCase):
             self.assertIn(b'id="sym-cherry"', pages.page(kind))
         self.assertIn(b"css/slots.css", pages.page("lobby"))
 
+    def test_play_has_desktop_layout(self):
+        html = pages.page("play")
+        for hook in (b'class="col-stage"', b'class="col-pick"', b'id="banner"', b'id="cards"'):
+            self.assertIn(hook, html)
+        css = assets.read("css/play.css")[0]
+        self.assertIn(b"@media (min-width: 900px)", css)
+        self.assertIn(b".col-stage", css)
+
 
 class ApiTest(unittest.TestCase):
     """Echter Server auf einem freien Port: Fehler müssen als JSON zurückkommen, nie als Abbruch."""
