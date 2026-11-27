@@ -246,7 +246,7 @@ slot      = slots.index(winner_id)
     <div class="body">
     <p>Abgerechnet wird sofort, die Anzeige soll das Ergebnis aber erst zum Ende der Animation zeigen. Deshalb rechnet <code>public()</code> den Zustand für jede Auslieferung zurück, solange <code>t &lt; ends_at</code>:</p>
 <pre>für jede abgerechnete, noch laufende Runde:
-    chips[b] −= gewinn[b] + nachschuss[b]
+    chips[b] −= gewinn[b]
     wetten[b] = einsätze_vor_der_runde[b]</pre>
     <p>Bis zum Ergebnis enthält die Ziehung im Layout nur die Namen, aber nicht den Weg der Plinko-Kugel und nicht den Gewinner.</p>
     </div>
@@ -413,7 +413,7 @@ auszahlung = round(Σ einsatz[name] · punkte[name] · quote)</pre>
 <pre>verfügbar = chips + Σ bisherige einsätze
 prüfe Σ neue einsätze ≤ verfügbar
 alte einsätze löschen, neue einfügen, chips = verfügbar − Σ neu     (eine Transaktion)</pre>
-    <p>Entfernt der Host einen Namen oder wechselt er den Modus, werden die betroffenen Einsätze zurückerstattet. Wer nach einer Runde bei 0 steht, bekommt 200 Chips nachgeschossen.</p>
+    <p>Entfernt der Host einen Namen oder wechselt er den Modus, werden die betroffenen Einsätze zurückerstattet. Es gibt keinen Nachschuss: Wer bei 0 Chips steht, setzt aus, bis der Host die Bank zurücksetzt. Nachdrehen bei Gleichstand zahlt keine Einsätze aus, es entscheidet nur über die Punkte.</p>
     </div>
   </div>
 

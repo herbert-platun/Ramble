@@ -132,6 +132,28 @@ export function phaseKey(pick) {
   return ph && `${pick.id}:${ph}:${segment(pick)?.n ?? 0}`;
 }
 
+// -- Punkte und Chips --------------------------------------------------------------
+/** Summe aller Werte eines Objekts, z. B. Einsätze {name_id: chips}. */
+export const sum = (o) => Object.values(o || {}).reduce((a, b) => a + b, 0);
+
+/** [[id, wert], …] absteigend, nur Werte über 0 (Punktestände). */
+export const ranked = (o) => Object.entries(o || {}).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]);
+
+/** Punkte je Name über gedrehte Slot-Runden (wie session_points im Server). */
+export function sessionPoints(rounds) {
+  const out = {};
+  for (const r of rounds) for (const [id, v] of Object.entries(r.result?.pts || {})) out[id] = (out[id] || 0) + v;
+  return out;
+}
+
+/** Bestenliste: Spieler mit Handy nach Chips, gesetzte Einsätze zählen mit. */
+export const chipRanking = (entrants) => entrants.filter((e) => e.phone)
+  .map((e) => ({ ...e, total: e.chips + sum(e.wagers) }))
+  .sort((a, b) => b.total - a.total || a.id - b.id);
+
+/** Vorzeichen für Chip-Bilanzen: +120, −80, ±0 */
+export const signed = (v, fmt) => `${v > 0 ? "+" : v < 0 ? "−" : "±"}${fmt(Math.abs(v))}`;
+
 // -- Slot-Symbole -----------------------------------------------------------------
 export const SPECIALS = { W: ["star", "Joker", "wild"], N: ["snakeeyes", "Niete", "bust"] };
 

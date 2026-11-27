@@ -228,6 +228,9 @@ body.host { height: 100vh; overflow: hidden; }
 .pay.line .badge { font-size: .95rem; }
 .pay .pts { background: var(--red); min-width: 4.6rem; }
 .pay .lost { background: var(--ink); color: var(--mute); min-width: 6rem; }
+/* Slots: Punkte und Chip-Bilanz nebeneinander */
+.payouts:has(.pay-col) { flex-direction: row; align-items: flex-start; justify-content: center; gap: 4.5rem; max-height: none; }
+.pay-col { display: flex; flex-direction: column; gap: .55rem; min-width: 18rem; }
 .pay-head { font-family: var(--f-ui); font-weight: 600; font-size: 1rem; color: var(--mute); text-transform: uppercase; letter-spacing: .14em; margin: .4rem 0 -.1rem; animation: pay-in .45s var(--pop) both; }
 .pay.miss { grid-template-columns: 1fr auto; color: var(--mute); font-size: 1.7rem; }
 .pay.miss .who { color: var(--mute); }

@@ -203,7 +203,7 @@ class GameTest(unittest.TestCase):
         r1 = p["rounds"][0]
         self.assertTrue(r1["locked"] and r1["result"]["spins"])
         pay = r1["payouts"][str(a["id"])]
-        self.assertEqual(self.chips(a), START_CHIPS - 100 + pay["win"] + pay["bail"])
+        self.assertEqual(self.chips(a), START_CHIPS - 100 + pay["win"])
         with self.assertRaises(DrawError):            # Runde 2 ist noch nicht offen
             self.s.wager(d, a, {c["id"]: 10})
         open_round(self.db)
@@ -215,6 +215,31 @@ class GameTest(unittest.TestCase):
         self.assertEqual(sum(1 for v in totals.values() if v == totals[p["winner_id"]]), 1)
         self.assertIn(str(a["id"]), p["payouts"]["net"])
         self.assertEqual(self.db.value("SELECT COUNT(*) FROM wagers"), 0)
+
+    def test_session_balance_matches_account(self):
+        d, a, b, c = self.slots_table(rounds=3)
+        broke = False
+        for _ in range(25):
+            start = self.chips(a)
+            self.s.pick(d)
+            for _ in range(3):
+                left = self.chips(a)
+                if left:
+                    self.s.wager(d, a, {b["id"]: left})        # alles auf ein Symbol
+                p = lock_now(self.s, self.db, d)
+                open_round(self.db)
+            self.assertTrue(p["locked"])
+            bal = p["payouts"]
+            me = str(a["id"])
+            if me in bal["net"]:
+                self.assertEqual(bal["net"][me], bal["won"][me] - bal["staked"][me])
+                self.assertEqual(self.chips(a) - start, bal["net"][me])   # Bilanz = Kontobewegung, kein Nachschuss
+            broke |= self.chips(a) == 0
+            finish(self.db)
+            self.s.reset(d)
+        self.assertTrue(broke)                          # wer alles verliert, bleibt bei 0
+        with self.assertRaises(DrawError):
+            self.s.wager(d, a, {b["id"]: 1})
 
     def test_tiebreak_spins_pay_nothing(self):
         d, a, b, c = self.slots_table(rounds=1)

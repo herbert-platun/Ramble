@@ -7,7 +7,7 @@
 // Serverzeit; Effekte und Töne gibt es nur für Ereignisse, die gerade jetzt
 // passieren. Wer neu lädt, steigt im richtigen Zustand ein, ohne Feuerwerk.
 import { sound } from "../audio.js";
-import { badgeHtml, esc, serverNow, skinHtml } from "../core.js";
+import { badgeHtml, esc, ranked, serverNow, skinHtml, sum } from "../core.js";
 import { countTo, fmt, reduced } from "../fx.js";
 import { slotSfx } from "../slot-sfx.js";
 import { Stage } from "./stage.js";
@@ -383,7 +383,7 @@ export class SlotStage extends Stage {
 
   tally(e, live, fx, sfx) {
     const s = e.spin;
-    const total = Object.values(s.pts).reduce((a, b) => a + b, 0);
+    const total = sum(s.pts);
     for (const [id, v] of Object.entries(s.pts)) {
       this.session[id] = (this.session[id] || 0) + v;
       this.roundPts[id] = (this.roundPts[id] || 0) + v;
@@ -427,7 +427,7 @@ export class SlotStage extends Stage {
   }
 
   roundCard(round) {
-    const pts = Object.entries(this.roundPts).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]);
+    const pts = ranked(this.roundPts);
     const top = Object.entries(this.session).sort((a, b) => b[1] - a[1]).slice(0, 4);
     const lead = pts[0] && (!pts[1] || pts[1][1] < pts[0][1]) ? this.view.names[pts[0][0]] : null;
     const row = ([id, v]) => {
@@ -442,7 +442,7 @@ export class SlotStage extends Stage {
 
   finalCard() {
     const n = this.view.pick?.layout.rounds || 1;
-    const top = Object.entries(this.session).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]).slice(0, 4);
+    const top = ranked(this.session).slice(0, 4);
     const row = ([id, v], i) => `<li class="${i ? "" : "top"}">${badgeHtml(this.skins[id] || ["chip", 5])}
       <span class="nm">${esc(this.view.names[id] ?? "?")}</span><span class="plus">${i ? "" : "★"}</span><span class="pts">${fmt(v)}</span></li>`;
     return `<div class="round-card final"><h3>Endstand · ${n === 1 ? "ein Spin" : `alle ${n} Runden`}</h3>
