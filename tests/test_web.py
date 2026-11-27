@@ -1,3 +1,4 @@
+import http.client
 import json
 import threading
 import unittest
@@ -79,3 +80,21 @@ class ApiTest(unittest.TestCase):
             self.assertIn("error", data)
         self.assertEqual(self.post(f"/api/d/{code}/pick", {"host_key": "falsch"})[0], 403)
         self.assertEqual(self.post("/api/d/ZZZZ/join", {"name": "Anna"})[0], 404)
+
+    def test_keep_alive(self):
+        """Eine Verbindung trägt mehrere Anfragen; ein ungelesener Rumpf schließt sie."""
+        conn = http.client.HTTPConnection(*self.httpd.server_address, timeout=5)
+        self.addCleanup(conn.close)
+
+        def request(method, path, body=None):
+            conn.request(method, path, body)
+            r = conn.getresponse()
+            r.read()
+            return r.status, r.getheader("Connection")
+
+        self.assertEqual(request("POST", "/api/draws", b'{"title": "x"}'), (200, None))
+        sock = conn.sock
+        self.assertEqual(request("GET", "/api/draws"), (200, None))
+        self.assertIs(conn.sock, sock)
+        self.assertEqual(request("POST", "/api/draws", b"x" * 20_000), (400, "close"))
+        self.assertEqual(request("GET", "/api/draws"), (200, None))

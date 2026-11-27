@@ -55,6 +55,32 @@ export function live(url, onState, onStatus = () => {}) {
   open();
 }
 
+/** Liste auf neues HTML bringen, ohne bestehende Einträge (data-key) zu ersetzen:
+ *  nur so laufen Übergänge, Druck- und Aufzuck-Animationen beim Aktualisieren weiter. */
+export function patch(box, html) {
+  const t = document.createElement("template");
+  t.innerHTML = html;
+  const old = new Map([...box.children].map((el) => [el.dataset.key, el]));
+  const next = [...t.content.children];
+  next.forEach((n, i) => {
+    const cur = old.get(n.dataset.key);
+    const el = cur?.nodeName === n.nodeName ? morph(cur, n) : n;
+    if (box.children[i] !== el) box.insertBefore(el, box.children[i] ?? null);
+  });
+  while (box.children.length > next.length) box.lastElementChild.remove();
+}
+
+function morph(a, b) {
+  if (a.nodeType !== 1) { if (a.data !== b.data) a.data = b.data; return a; }
+  if (a.classList.contains("bump")) b.classList.add("bump");
+  for (const k of a.getAttributeNames()) if (!b.hasAttribute(k)) a.removeAttribute(k);
+  for (const k of b.getAttributeNames()) if (a.getAttribute(k) !== b.getAttribute(k)) a.setAttribute(k, b.getAttribute(k));
+  const x = [...a.childNodes], y = [...b.childNodes];
+  if (x.length === y.length && x.every((n, i) => n.nodeName === y[i].nodeName)) x.forEach((n, i) => morph(n, y[i]));
+  else a.replaceChildren(...y);
+  return a;
+}
+
 export function toast(msg, ms = 2800) {
   let el = document.querySelector(".toast");
   if (!el) {

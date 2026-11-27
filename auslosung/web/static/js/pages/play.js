@@ -6,7 +6,7 @@
 import { STAGES } from "../stages/index.js";
 import { sound } from "../audio.js";
 import { slotSfx } from "../slot-sfx.js";
-import { api, chipRanking, esc, live, phaseKey, ranked, segment, serverNow, signed, skinClass, skinHtml, stagePhase, store, sum,
+import { api, chipRanking, esc, live, patch, phaseKey, ranked, segment, serverNow, signed, skinClass, skinHtml, stagePhase, store, sum,
   syncClock, toast } from "../core.js";
 import { Background, bump, center, countTo, fmt, particles, pop, shake, sleep } from "../fx.js";
 
@@ -18,7 +18,7 @@ export function playPage() {
   const code = location.pathname.split("/").pop().toUpperCase();
   const KEY = "tok:" + code;
   let token = store.get(KEY), state, stage, stageMode, stageKey, phase = null, phaseId = null;
-  let myOn = null, myW = {}, lastW = null, sel = null, pending = 0, sendTimer = null;
+  let myOn = null, myW = {}, lastW = null, sel = null, pending = false, dirty = false, sending = false;
   let shownTotal = null, verdictFor = null, lastSecond = null;
   let gain = 0, gainRound = null, paying = false;           // Slots: in dieser Runde schon gesehene Gewinne
   let spinBase = 0, spinX = 1;                              // laufender Spin: Gewinn vor Faktor, Faktor
@@ -125,6 +125,7 @@ export function playPage() {
       renderCards(); renderSlip(); renderLive(); renderBanner();
     }
     if (now === "calls") {
+      drainBar();
       const left = Math.ceil((segment(p).locks_at - serverNow()) / 1000);
       if (left !== lastSecond) {
         lastSecond = left;
@@ -169,7 +170,15 @@ export function playPage() {
     } else {
       html = `<div class="b info"><span>Tipp <b>kostenlos</b> auf einen Namen. Liegst du richtig, gibt es <b>+${fmt(state.rules.tip)}</b> Chips.</span></div>`;
     }
-    if ($("banner")._h !== html) { $("banner").innerHTML = html; $("banner")._h = html; }
+    if ($("banner")._h !== html) { $("banner").innerHTML = html; $("banner")._h = html; drainBar(); }
+  }
+
+  /** Zeitbalken der Einsatzpause, jedes Bild nachgeführt. */
+  function drainBar() {
+    const bar = $("banner").querySelector(".brk-bar i"), seg = segment(state.pick);
+    if (!bar || !seg) return;
+    const frac = Math.max(0, Math.min(1, (seg.locks_at - serverNow()) / Math.max(1, seg.locks_at - seg.calls_at)));
+    bar.style.transform = `scaleX(${frac.toFixed(4)})`;
   }
 
   const STEPS = ["Setzen", "Walzen", "Auszahlung"];
@@ -178,7 +187,6 @@ export function playPage() {
   /** Slots, Einsätze offen: Runde, Zeit, was die letzte Runde dir gebracht hat, was jetzt zu tun ist. */
   function breakBanner(p, seg) {
     const left = Math.max(0, Math.ceil((seg.locks_at - serverNow()) / 1000));
-    const frac = Math.max(0, Math.min(1, (seg.locks_at - serverNow()) / Math.max(1, seg.locks_at - seg.calls_at)));
     const prev = p.rounds.find((r) => r.n === seg.n - 1 && r.locked);
     let last = "";
     if (prev) {
@@ -195,7 +203,7 @@ export function playPage() {
     const todo = n ? `<p class="brk-todo ok">Gesetzt: <b>${fmt(sum(myW))}</b> auf ${n === 1 ? "ein Symbol" : `${n} Symbole`}. Du kannst noch ändern.</p>`
       : `<p class="brk-todo">Symbol antippen, dann Chips drauflegen${lastW && repeatable() ? " oder unten <b>Wie eben</b>" : ""}.</p>`;
     return `<div class="b brk"><div class="brk-top"><span class="kick">${p.layout.rounds > 1 ? `Runde ${seg.n} von ${p.layout.rounds}` : "Ein Spin"} · Einsätze offen</span><span class="n">${left}</span></div>
-      <div class="brk-bar"><i style="transform:scaleX(${frac.toFixed(3)})"></i></div>${last}${todo}${stepsHtml(0)}</div>`;
+      <div class="brk-bar"><i></i></div>${last}${todo}${stepsHtml(0)}</div>`;
   }
 
   let counting = false;
@@ -229,8 +237,8 @@ export function playPage() {
       if (sl) {
         const mine = myW[String(e.id)] || 0;
         const others = (e.backed || 0) - (state.me.wagers?.[String(e.id)] || 0);
-        return `<button class="card scard ${skinClass(e.skin)}" role="radio" data-id="${e.id}" aria-checked="${e.id === sel}" ${open ? "" : "disabled"} style="--i:${i}">
-          ${mine ? `<span class="mine">${fmt(mine)}</span>` : ""}
+        return `<button class="card scard ${skinClass(e.skin)}" role="radio" data-key="s${e.id}" data-id="${e.id}" aria-checked="${e.id === sel}" ${open ? "" : "disabled"} style="--i:${i}">
+          <span class="mine" ${mine ? "" : "hidden"}>${mine ? fmt(mine) : ""}</span>
           <svg class="sym"><use href="#sym-${e.skin?.[0] ?? "chip"}"/></svg>
           <span class="nm">${esc(e.name)}${e.id === state.me.id ? ` <small>(du)</small>` : ""}</span>
           <span class="crowd"><span>${others > 0 ? `andere ${fmt(others)}` : "noch frei"}</span></span>
@@ -238,18 +246,14 @@ export function playPage() {
         </button>`;
       }
       const others = (e.backers || 0) - (e.id === state.me.on ? 1 : 0);
-      return `<button class="card" role="radio" data-id="${e.id}" aria-checked="${e.id === myOn}" ${open ? "" : "disabled"} style="--i:${i}">
-        ${e.id === myOn ? `<span class="mine">Tipp</span>` : ""}
+      return `<button class="card" role="radio" data-key="t${e.id}" data-id="${e.id}" aria-checked="${e.id === myOn}" ${open ? "" : "disabled"} style="--i:${i}">
+        <span class="mine" ${e.id === myOn ? "" : "hidden"}>Tipp</span>
         <span class="nm">${esc(e.name)}${e.id === state.me.id ? ` <small>(du)</small>` : ""}</span>
         <span class="crowd"><span>${others > 0 ? `${others} ${others === 1 ? "anderer Tipp" : "andere Tipps"}` : e.id === myOn ? "nur du" : "noch frei"}</span></span>
         <span class="heat"><i style="width:${((e.backers || 0) / max) * 100}%"></i></span>
       </button>`;
     }).join("") : `<p class="note">Noch ist der Topf leer.</p>`;
-    if (c._h !== html) {
-      const first = !c._h;
-      c.innerHTML = html; c._h = html;
-      if (!first) c.querySelectorAll(".card").forEach((b) => { b.style.animation = "none"; });
-    }
+    if (c._h !== html) { patch(c, html); c._h = html; }
     c.classList.toggle("locked", !open);
   }
 
@@ -303,12 +307,12 @@ export function playPage() {
     const rows = players.slice(0, 5).map((e, i) => [e, i]);
     if (mine >= 5) rows.push(null, [players[mine], mine]);
     const html = rows.map((x) => {
-      if (!x) return `<li class="gap" aria-hidden="true">…</li>`;
+      if (!x) return `<li data-key="gap" class="gap" aria-hidden="true">…</li>`;
       const [e, i] = x;
-      return `<li class="${i < 3 ? `m${i + 1}` : ""}${e.id === state.me.id ? " me" : ""}"><span class="r">${i + 1}</span>`
+      return `<li data-key="${e.id}" class="${i < 3 ? `m${i + 1}` : ""}${e.id === state.me.id ? " me" : ""}"><span class="r">${i + 1}</span>`
         + `<span class="nm">${esc(e.name)}${e.id === state.me.id ? " <small>(du)</small>" : ""}</span><span class="c">${fmt(e.total)}</span></li>`;
     }).join("");
-    if ($("leadersList")._h !== html) { $("leadersList").innerHTML = html; $("leadersList")._h = html; }
+    if ($("leadersList")._h !== html) { patch($("leadersList"), html); $("leadersList")._h = html; }
   }
 
   function renderPaytable() {
@@ -471,11 +475,11 @@ export function playPage() {
   }
 
   // ---------------------------------------------------------------------------
-  // Tippen und Setzen: sofort zeigen, kurz gebündelt senden
+  // Tippen und Setzen: sofort zeigen und sofort senden. Immer nur eine Anfrage unterwegs;
+  // was währenddessen dazukommt, geht gebündelt mit der nächsten raus.
   function queue() {
-    pending++;
-    clearTimeout(sendTimer);
-    sendTimer = setTimeout(send, 240);
+    pending = dirty = true;
+    if (!sending) send();
   }
 
   function tip(on) {
@@ -509,18 +513,20 @@ export function playPage() {
   }
 
   async function send() {
-    sendTimer = null;
-    try {
-      if (slots()) await api(`/api/d/${code}/wager`, { token, wagers: myW });
-      else await api(`/api/d/${code}/tip`, { token, entrant_id: myOn });
-    } catch (err) {
-      toast(err.message); buzz([40, 40, 40]); shake.add(0.25);
-      pending = 0;
-      try { render(await api(`/api/d/${code}/state?token=${encodeURIComponent(token)}`)); } catch {}
-      return;
+    sending = true;
+    while (dirty) {
+      dirty = false;
+      try {
+        if (slots()) await api(`/api/d/${code}/wager`, { token, wagers: myW });
+        else await api(`/api/d/${code}/tip`, { token, entrant_id: myOn });
+      } catch (err) {
+        toast(err.message); buzz([40, 40, 40]); shake.add(0.25);
+        if (dirty) continue;
+        pending = false;
+        try { render(await api(`/api/d/${code}/state?token=${encodeURIComponent(token)}`)); } catch {}
+      }
     }
-    // Während der Anfrage schon wieder getippt: der nächste Versand ist geplant, lokalen Stand behalten
-    if (!sendTimer) pending = 0;
+    sending = pending = false;
   }
 
   function setupInput() {

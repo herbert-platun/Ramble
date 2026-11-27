@@ -60,7 +60,7 @@ body.play { min-height: 100dvh; }
 .banner .brk .n { font-family: var(--f-big); font-size: 40px; line-height: .8; color: var(--gold-hi); }
 .banner .brk .mine { font-size: 14px; color: var(--mute); text-align: right; }
 .banner .brk-bar { height: 6px; border-radius: 99px; background: rgba(255, 255, 255, .12); margin: 8px 0 8px; overflow: hidden; }
-.banner .brk-bar i { display: block; height: 100%; background: var(--gold); transform-origin: left; transition: transform 1s linear; }
+.banner .brk-bar i { display: block; height: 100%; background: var(--gold); transform-origin: left; }
 .banner .brk-last { margin: 0 0 4px; font-size: 15px; }
 .banner .brk-last.up b { color: var(--gold-hi); }
 .banner .brk-last.down { color: var(--mute); }
@@ -180,7 +180,7 @@ body.play { min-height: 100dvh; }
   box-shadow: 0 9px 0 var(--line), 0 0 26px color-mix(in srgb, var(--acc) 60%, transparent);
 }
 .scard[aria-checked="true"] .crowd { color: rgba(18, 10, 25, .7); }
-.cards.locked .scard:has(.mine) { opacity: 1; filter: none; }
+.cards.locked .scard:has(.mine:not([hidden])) { opacity: 1; filter: none; }
 
 /* Bestenliste: meiste Chips am Tisch */
 .leaders { margin: 16px 0 0; padding: 12px 14px; }

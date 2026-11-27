@@ -19,6 +19,19 @@ from .web import assets, pages
 class Handler(BaseHTTPRequestHandler):
     app: App
     server_version = f"Auslosung/{__version__}"
+    # Verbindung offen halten, sonst kostet jeder Klick einen neuen Verbindungsaufbau
+    protocol_version = "HTTP/1.1"
+    disable_nagle_algorithm = True      # Kopf und Rumpf nicht auf die Bestätigung warten lassen
+    timeout = 60                        # ungenutzte Verbindungen wieder schließen
+
+    def handle_one_request(self):
+        self.command = None             # sonst wird das Schließen nach einem POST als Fehler protokolliert
+        super().handle_one_request()
+
+    def end_headers(self):
+        if self.close_connection:
+            self.send_header("Connection", "close")
+        super().end_headers()
 
     def log_message(self, fmt, *args):
         if self.command == "POST":
@@ -103,6 +116,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def stream(self, draw: dict, token: str | None):
         c = Client(draw["code"], token, self.base_url())
+        self.close_connection = True        # ein Stream hat kein Ende, an dem es weitergehen könnte
         self.send_response(200)
         self.send_header("Content-Type", "text/event-stream")
         self.send_header("Cache-Control", "no-store")
@@ -126,9 +140,11 @@ class Handler(BaseHTTPRequestHandler):
         finally:
             with self.app.lock:
                 self.app.clients.discard(c)
-            self.close_connection = True
 
     def do_POST(self):
+        keep = not self.close_connection
+        self.close_connection = True        # erst wieder offen, wenn der Rumpf gelesen ist (read_json)
+        self.keep = keep
         parts = [p for p in urlparse(self.path).path.split("/") if p]
         if admin_route(self, "POST", parts, {}):
             return
@@ -197,7 +213,9 @@ def read_json(handler: BaseHTTPRequestHandler, limit: int) -> dict:
     n = int(handler.headers.get("Content-Length") or 0)
     if not 0 <= n <= limit:
         raise DrawError("Anfrage zu groß")
-    data = json.loads(handler.rfile.read(n) or b"{}")
+    raw = handler.rfile.read(n)
+    handler.close_connection = not handler.keep
+    data = json.loads(raw or b"{}")
     if not isinstance(data, dict):
         raise ValueError("JSON-Objekt erwartet")
     return data

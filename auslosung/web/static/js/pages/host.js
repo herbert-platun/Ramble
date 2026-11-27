@@ -2,7 +2,7 @@
 import { STAGES } from "../stages/index.js";
 import { sound } from "../audio.js";
 import { slotSfx } from "../slot-sfx.js";
-import { MODE_NAMES, api, badgeHtml, chipRanking, esc, live, phaseKey, pickPhase, ranked, segment, serverNow, sessionPoints, signed, stagePhase, store,
+import { MODE_NAMES, api, badgeHtml, chipRanking, esc, live, patch, phaseKey, pickPhase, ranked, segment, serverNow, sessionPoints, signed, stagePhase, store,
   sum, syncClock, toast } from "../core.js";
 import { Background, bump, center, countTo, fmt, letters, particles, pop, shake, sleep } from "../fx.js";
 import { Lights } from "../lights.js";
@@ -185,13 +185,13 @@ export function hostPage() {
     }
     const seg = segment(p);
     if (now === "calls") {
+      $("phase").querySelector(".break-ring")?.style.setProperty("--p",
+        Math.max(0, (seg.locks_at - serverNow()) / Math.max(1, seg.locks_at - seg.calls_at)).toFixed(3));
       const left = Math.ceil((seg.locks_at - serverNow()) / 1000);
       if (left !== lastSecond) {
         lastSecond = left;
         const n = $("phase").querySelector(".calls-n");
         if (n) { n.textContent = left; bump(n); }
-        const ring = $("phase").querySelector(".break-ring");
-        if (ring) ring.style.setProperty("--p", Math.max(0, (seg.locks_at - serverNow()) / Math.max(1, seg.locks_at - seg.calls_at)).toFixed(3));
         shake.add(left <= 3 ? 0.2 : 0.08);
       }
     }
@@ -530,15 +530,15 @@ export function hostPage() {
     const html = rows.length ? rows.slice(0, 7).map((r, i) => {
       const pay = live?.base.get(r.on);
       const amt = pay ? `<span class="amt pay">${live.x > 1 ? `<i class="x${live.slam ? " slam" : ""}">×${live.x}</i>` : ""}+${fmt(Math.round(pay * live.x))}</span>` : `<span class="amt">${slots ? fmt(r.total) : r.n}</span>`;
-      return `<li data-on="${r.on}" class="${(done && r.hit) || pay ? "win" : ""}">
+      return `<li data-key="${r.on}" data-on="${r.on}" class="${(done && r.hit) || pay ? "win" : ""}">
         <span class="bar" style="width:${((slots ? r.total : r.n) / max) * 100}%"></span>
         <span class="nm">${slots ? badgeHtml(skinOf(r.on)) : ""}${esc(nameOf(r.on))}</span>${amt}
         <span class="meta">${i === 0 && rows.length > 1 && !live?.base.size ? `<span class="fav">Favorit · </span>` : ""}${slots ? `${r.n} ${r.n === 1 ? "Einsatz" : "Einsätze"} · ` : ""}${esc(r.who.slice(0, 3).join(", "))}${r.who.length > 3 ? " …" : ""}</span></li>`;
     }).join("")
-      : `<li class="empty">${state.entrants.some((e) => e.phone)
+      : `<li data-key="empty" class="empty">${state.entrants.some((e) => e.phone)
         ? (slots ? "Noch keine Einsätze. Auf dem Handy Chips auf Symbole setzen." : "Noch keine Tipps. Wer kommt dran?")
         : `Wer mit dem Handy mitmacht, bekommt ${fmt(state.rules.start)} Chips.`}</li>`;
-    if ($("board")._h !== html) { $("board").innerHTML = html; $("board")._h = html; }
+    if ($("board")._h !== html) { patch($("board"), html); $("board")._h = html; }
   }
 
   /** Neue oder geänderte Tipps und Einsätze: Ticker, Chipgeräusch, schwebende Zahl. */
@@ -683,6 +683,12 @@ export function hostPage() {
   }
 
   // ---------------------------------------------------------------------------
+  /** Auswahl sofort umschalten, nicht erst auf den Server warten. Lehnt er ab, zurück. */
+  async function choose(button, action, body) {
+    for (const b of button.parentElement.querySelectorAll("button")) b.setAttribute("aria-checked", b === button);
+    if (!await host(action, body)) renderControls();
+  }
+
   async function host(action, body = {}) {
     try { return await api(`/api/d/${code}/${action}`, { ...body, host_key: hostKey }); }
     catch (e) { toast(e.message); sound.press(-12); return null; }
@@ -759,11 +765,11 @@ export function hostPage() {
     $("addForm").hidden = false;
     $("modes").onclick = (e) => {
       const b = e.target.closest("[data-mode]");
-      if (b && !b.disabled && b.dataset.mode !== state.draw.mode) { dismiss(); host("mode", { mode: b.dataset.mode }); }
+      if (b && !b.disabled && b.dataset.mode !== state.draw.mode) { dismiss(); choose(b, "mode", { mode: b.dataset.mode }); }
     };
     $("rounds").onclick = (e) => {
       const b = e.target.closest("[data-rounds]");
-      if (b && !b.disabled && +b.dataset.rounds !== state.draw.rounds) host("rounds", { rounds: +b.dataset.rounds });
+      if (b && !b.disabled && +b.dataset.rounds !== state.draw.rounds) choose(b, "rounds", { rounds: +b.dataset.rounds });
     };
     $("drawBtn").onclick = draw;
     $("resetBtn").onclick = () => { dismiss(); host("reset"); };
@@ -792,7 +798,8 @@ export function hostPage() {
       e.preventDefault();
       const name = $("addName").value.trim();
       if (!name) return;
-      if (await host("add", { name })) $("addName").value = "";
+      $("addName").value = "";          // gleich frei für den nächsten Namen
+      if (!await host("add", { name }) && !$("addName").value) $("addName").value = name;
     };
   }
 
