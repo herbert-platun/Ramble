@@ -7,7 +7,7 @@
 // Serverzeit; Effekte und Töne gibt es nur für Ereignisse, die gerade jetzt
 // passieren. Wer neu lädt, steigt im richtigen Zustand ein, ohne Feuerwerk.
 import { sound } from "../audio.js";
-import { esc, serverNow, skinHtml } from "../core.js";
+import { badgeHtml, esc, serverNow, skinHtml } from "../core.js";
 import { countTo, fmt, reduced } from "../fx.js";
 import { slotSfx } from "../slot-sfx.js";
 import { Stage } from "./stage.js";
@@ -83,6 +83,9 @@ export class SlotStage extends Stage {
       this.eventsKey = key;
       this.events = pick ? this.buildEvents(pick) : [];
       if (!samePick) this.reset();
+      // Alles wird von vorn nachgespielt: Punkte neu zählen, sonst zählen frühere Runden mehrfach
+      this.session = {};
+      this.roundPts = {};
       // Bis jetzt Vergangenes still nachholen, ab dem letzten Bild live weiter
       const until = samePick ? this.lastFrame || 0 : Infinity;
       this.done = 0;
@@ -427,7 +430,7 @@ export class SlotStage extends Stage {
     const lead = pts[0] && (!pts[1] || pts[1][1] < pts[0][1]) ? this.view.names[pts[0][0]] : null;
     const row = ([id, v]) => {
       const sk = this.skins[id];
-      return `<li><span class="badge acc-${sk?.[1] ?? 5}"><svg class="sym"><use href="#sym-${sk?.[0] ?? "chip"}"/></svg></span>
+      return `<li>${badgeHtml(sk || ["chip", 5])}
         <span class="nm">${esc(this.view.names[id] ?? "?")}</span><span class="plus">${this.roundPts[id] ? "+" + fmt(this.roundPts[id]) : ""}</span><span class="pts">${fmt(v)}</span></li>`;
     };
     return `<div class="round-card"><h3>Runde ${round.n} vorbei</h3>

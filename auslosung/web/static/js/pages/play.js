@@ -6,7 +6,7 @@
 import { STAGES } from "../stages/index.js";
 import { sound } from "../audio.js";
 import { slotSfx } from "../slot-sfx.js";
-import { api, esc, live, phaseKey, segment, serverNow, skinHtml, stagePhase, store, syncClock, toast } from "../core.js";
+import { api, esc, live, phaseKey, segment, serverNow, skinClass, skinHtml, stagePhase, store, syncClock, toast } from "../core.js";
 import { Background, bump, center, countTo, fmt, particles, pop, shake, sleep } from "../fx.js";
 
 // =============================================================================
@@ -87,6 +87,7 @@ export function playPage() {
     renderLive();
     renderBanner();
     renderPaytable();
+    renderLeaders();
   }
 
   /** Gesetzt wird nach der laufenden Ziehung, sonst nach der Art, die der Tisch gerade eingestellt hat. */
@@ -228,7 +229,7 @@ export function playPage() {
       if (sl) {
         const mine = myW[String(e.id)] || 0;
         const others = (e.backed || 0) - (state.me.wagers?.[String(e.id)] || 0);
-        return `<button class="card scard acc-${e.skin?.[1] ?? 5}" role="radio" data-id="${e.id}" aria-checked="${e.id === sel}" ${open ? "" : "disabled"} style="--i:${i}">
+        return `<button class="card scard ${skinClass(e.skin)}" role="radio" data-id="${e.id}" aria-checked="${e.id === sel}" ${open ? "" : "disabled"} style="--i:${i}">
           ${mine ? `<span class="mine">${fmt(mine)}</span>` : ""}
           <svg class="sym"><use href="#sym-${e.skin?.[0] ?? "chip"}"/></svg>
           <span class="nm">${esc(e.name)}${e.id === state.me.id ? ` <small>(du)</small>` : ""}</span>
@@ -289,6 +290,26 @@ export function playPage() {
     if (!lastW || sum(lastW) > free()) return false;
     const ids = new Set(pool().map((e) => String(e.id)));
     return Object.keys(lastW).every((k) => ids.has(k));
+  }
+
+  /** Bestenliste: wer am Tisch die meisten Chips hat (Einsätze zählen mit). Top 5, dazu der eigene Platz. */
+  function renderLeaders() {
+    const players = state.entrants.filter((e) => e.phone)
+      .map((e) => ({ ...e, total: e.chips + sum(e.wagers) }))
+      .sort((a, b) => b.total - a.total || a.id - b.id);
+    const box = $("leaders");
+    box.hidden = players.length < 2;
+    if (box.hidden) return;
+    const mine = players.findIndex((e) => e.id === state.me.id);
+    const rows = players.slice(0, 5).map((e, i) => [e, i]);
+    if (mine >= 5) rows.push(null, [players[mine], mine]);
+    const html = rows.map((x) => {
+      if (!x) return `<li class="gap" aria-hidden="true">…</li>`;
+      const [e, i] = x;
+      return `<li class="${i < 3 ? `m${i + 1}` : ""}${e.id === state.me.id ? " me" : ""}"><span class="r">${i + 1}</span>`
+        + `<span class="nm">${esc(e.name)}${e.id === state.me.id ? " <small>(du)</small>" : ""}</span><span class="c">${fmt(e.total)}</span></li>`;
+    }).join("");
+    if ($("leadersList")._h !== html) { $("leadersList").innerHTML = html; $("leadersList")._h = html; }
   }
 
   function renderPaytable() {

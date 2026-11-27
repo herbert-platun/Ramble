@@ -135,6 +135,20 @@ export function phaseKey(pick) {
 // -- Slot-Symbole -----------------------------------------------------------------
 export const SPECIALS = { W: ["star", "Joker", "wild"], N: ["snakeeyes", "Niete", "bust"] };
 
+// Farbe, die jedes Bild in der ersten Runde des Vorrats bekommt (wie BASE_ACCENT in game/slots.py).
+// Ab dem neunten Namen wiederholen sich die Bilder in anderer Farbe: dann färbt sich das Bild selbst mit.
+const NATIVE_ACCENT = { cherry: 2, lemon: 3, bell: 7, horseshoe: 0, bar: 5, chip: 1, diamond: 6, seven: 4 };
+// Eigene Grundfarbe des Bilds (Akzentnummer). Fällt die Umfärbung darauf, sähe es aus wie das Original.
+const BODY_COLOR = { cherry: 0, lemon: 1, bell: 1, horseshoe: 1, bar: 5, chip: 4, diamond: 3, seven: 0 };
+
+/** CSS-Klassen für Bild und Farbe eines Namens: "acc-3" oder "acc-3 tint tint-3". */
+export function skinClass(skin) {
+  const [sym, acc] = skin || ["chip", 5];
+  if (!(sym in NATIVE_ACCENT) || NATIVE_ACCENT[sym] === acc) return `acc-${acc}`;
+  const tint = BODY_COLOR[sym] === acc ? (acc === 7 ? 3 : 7) : acc;
+  return `acc-${acc} tint tint-${tint}`;
+}
+
 /** HTML eines Symbols mit Namensschild. v: Name-ID (Zahl) oder Sonderzelle ("W", "N", "x3"). */
 export function skinHtml(v, skins, names, extra = "") {
   if (typeof v === "string" && v[0] === "x") {
@@ -144,12 +158,12 @@ export function skinHtml(v, skins, names, extra = "") {
     const [sym, label, cls] = SPECIALS[v];
     return `<div class="skin special ${cls} ${extra}"><svg class="sym"><use href="#sym-${sym}"/></svg><span class="tag">${label}</span></div>`;
   }
-  const [sym, acc] = skins[String(v)] || ["chip", 5];
-  return `<div class="skin acc-${acc} ${extra}" data-id="${v}"><svg class="sym"><use href="#sym-${sym}"/></svg><span class="tag">${esc(names[String(v)] ?? "?")}</span></div>`;
+  const skin = skins[String(v)] || ["chip", 5];
+  return `<div class="skin ${skinClass(skin)} ${extra}" data-id="${v}"><svg class="sym"><use href="#sym-${skin[0]}"/></svg><span class="tag">${esc(names[String(v)] ?? "?")}</span></div>`;
 }
 
 /** Kleines Symbol ohne Schild, z. B. vor einem Namen in einer Liste. */
 export function badgeHtml(skin) {
   if (!skin) return "";
-  return `<span class="badge acc-${skin[1]}" aria-hidden="true"><svg class="sym"><use href="#sym-${skin[0]}"/></svg></span>`;
+  return `<span class="badge ${skinClass(skin)}" aria-hidden="true"><svg class="sym"><use href="#sym-${skin[0]}"/></svg></span>`;
 }

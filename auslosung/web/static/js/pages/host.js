@@ -272,7 +272,7 @@ export function hostPage() {
   function breakHtml(p, seg) {
     const n = seg.n, of = p.layout.rounds, names = p.layout.names, skins = p.layout.skins || {};
     const prev = roundsDone(p, n), last = prev[prev.length - 1];
-    const badge = (id) => { const sk = skins[id]; return `<span class="badge acc-${sk?.[1] ?? 5}"><svg class="sym"><use href="#sym-${sk?.[0] ?? "chip"}"/></svg></span>`; };
+    const badge = (id) => badgeHtml(skins[id] || ["chip", 5]);
     const totals = {};
     for (const r of prev) for (const [id, v] of Object.entries(r.result.pts || {})) totals[id] = (totals[id] || 0) + v;
     const stand = Object.entries(totals).filter(([, v]) => v > 0).sort((a, b) => b[1] - a[1]).slice(0, 5);
@@ -580,7 +580,7 @@ export function hostPage() {
     const top = players.slice(0, 6);
     const sig = top.map((e) => `${e.id}:${e.name}`).join("|");
     if (list._sig !== sig) {
-      list.innerHTML = top.map((e, i) => `<li data-id="${e.id}"><span class="r">${i + 1}</span>
+      list.innerHTML = top.map((e, i) => `<li data-id="${e.id}" class="${i < 3 ? `m${i + 1}` : ""}"><span class="r">${i + 1}</span>
         <span class="nm">${esc(e.name)}</span><span class="c">${fmt(shownChips.get(e.id) ?? e.total)}</span></li>`).join("");
       list._sig = sig;
     }
